@@ -11,7 +11,7 @@ import {
 
 import { motion } from "framer-motion";
 
-const API = "http://localhost:5000/api";
+import API from "../utils/api";
 
 const Orders = () => {
   const navigate = useNavigate();

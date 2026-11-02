@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 
 import {
@@ -12,8 +12,10 @@ import {
 } from "lucide-react";
 
 import { useCart } from "../context/CartContext";
+import { useAuth } from "../context/AuthContext";
+import { getItemPrice, toOrderItems } from "../utils/cart";
 
-const API = "http://localhost:5000/api";
+import API from "../utils/api";
 
 const Checkout = () => {
   const { state } = useLocation();
@@ -22,10 +24,64 @@ const Checkout = () => {
 
   const { clearCart } = useCart();
 
-  const getUser = () =>
-    JSON.parse(localStorage.getItem("user"));
+  const { user } = useAuth();
 
-  if (!state || !state.items) {
+  // Hooks must run before any early return
+  const items = state?.items || [];
+
+  const [promo, setPromo] = useState("");
+
+  const [appliedPromo, setAppliedPromo] =
+    useState("");
+
+  const [quote, setQuote] = useState(null);
+
+  const [paymentMethod, setPaymentMethod] =
+    useState("card");
+
+  const [loading, setLoading] =
+    useState(false);
+
+  const [error, setError] = useState("");
+
+  const [address, setAddress] = useState({
+    name: "",
+    phone: "",
+    address: "",
+  });
+
+  const authHeader = {
+    headers: {
+      Authorization: `Bearer ${user?.token}`,
+    },
+  };
+
+  // ASK THE SERVER FOR THE REAL TOTAL
+  const fetchQuote = (promoCode) =>
+    axios.post(
+      `${API}/orders/quote`,
+      {
+        items: toOrderItems(items),
+        promoCode,
+      },
+      authHeader
+    );
+
+  useEffect(() => {
+    if (!items.length || !user) return;
+
+    fetchQuote(appliedPromo)
+      .then(({ data }) => setQuote(data))
+      .catch((err) =>
+        setError(
+          err.response?.data?.message ||
+          "Could not calculate total"
+        )
+      );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state, user, appliedPromo]);
+
+  if (!items.length) {
     return (
       <div className="min-h-screen bg-[#f7f7f8] flex items-center justify-center px-4">
         <div className="bg-white border border-gray-100 rounded-2xl p-8 shadow-sm text-center max-w-md w-full">
@@ -48,57 +104,45 @@ const Checkout = () => {
     );
   }
 
-  const items = state.items;
-
-  const [promo, setPromo] = useState("");
-
-  const [discount, setDiscount] = useState(0);
-
-  const [paymentMethod, setPaymentMethod] =
-    useState("card");
-
-  const [loading, setLoading] =
-    useState(false);
-
-  const [error, setError] = useState("");
-
-  const [address, setAddress] = useState({
-    name: "",
-    phone: "",
-    address: "",
-  });
-
-  // TOTAL
-  const totalAmount = items.reduce(
+  // TOTAL (local estimate until the server quote arrives)
+  const estimate = items.reduce(
     (acc, item) =>
       acc +
-      (item.total ||
-        item.price ||
-        item.rent ||
-        0) *
+      getItemPrice(item) *
       (item.quantity || 1),
     0
   );
 
-  const finalAmount = Math.max(
-    totalAmount - discount,
-    0
-  );
+  const discount = quote?.discount || 0;
 
-  // APPLY PROMO
-  const applyPromo = () => {
-    if (promo === "REWEAR100") {
-      setDiscount(100);
-    } else {
-      setDiscount(0);
-      alert("Invalid Promo Code");
+  const finalAmount =
+    quote?.total ?? estimate;
+
+  // APPLY PROMO (validated by the server)
+  const applyPromo = async () => {
+    const code = promo.trim().toUpperCase();
+
+    try {
+      const { data } = await fetchQuote(code);
+
+      if (!data.promoValid) {
+        alert("Invalid Promo Code");
+        setAppliedPromo("");
+        return;
+      }
+
+      setAppliedPromo(code);
+      setQuote(data);
+    } catch (err) {
+      setError(
+        err.response?.data?.message ||
+        "Could not apply promo code"
+      );
     }
   };
 
   // PAYMENT
   const handlePayment = async () => {
-    const user = getUser();
-
     if (!user) {
       alert("Please login first");
 
@@ -125,19 +169,16 @@ const Checkout = () => {
     try {
       setLoading(true);
 
+      // No total sent: the server prices the order itself
       await axios.post(
         `${API}/orders`,
         {
-          items,
-          total: finalAmount,
+          items: toOrderItems(items),
+          promoCode: appliedPromo,
           paymentMethod,
           address,
         },
-        {
-          headers: {
-            Authorization: `Bearer ${user.token}`,
-          },
-        }
+        authHeader
       );
 
       clearCart();
@@ -257,9 +298,7 @@ const Checkout = () => {
 
                         <div className="text-xl font-semibold text-[#2b2545]">
                           ₹{" "}
-                          {(item.total ||
-                            item.price ||
-                            item.rent) *
+                          {getItemPrice(item) *
                             (item.quantity || 1)}
                         </div>
 
@@ -469,9 +508,7 @@ const Checkout = () => {
 
                     <span className="font-medium text-gray-900">
                       ₹{" "}
-                      {(item.total ||
-                        item.price ||
-                        item.rent) *
+                      {getItemPrice(item) *
                         (item.quantity || 1)}
                     </span>
 

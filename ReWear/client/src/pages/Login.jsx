@@ -15,8 +15,7 @@ import {
 
 import { useAuth } from "../context/AuthContext";
 
-const API =
-  "http://localhost:5000/api";
+import API from "../utils/api";
 
 const Login = () => {
   const navigate =

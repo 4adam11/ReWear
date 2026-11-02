@@ -2,21 +2,50 @@ import express from "express";
 import bcrypt from "bcryptjs";
 import User from "../models/User.js";
 import generateToken from "../utils/generateToken.js";
+import rateLimit from "../middleware/rateLimit.js";
 
 const router = express.Router();
 
-// ================= REGISTER =================
-router.post("/register", async (req, res) => {
-  try {
-    console.log("REGISTER BODY:", req.body);
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  message: "Too many attempts, please try again later"
+});
 
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+// Case-insensitive match so existing mixed-case emails still work
+const findByEmail = (email) =>
+  User.findOne({ email }).collation({ locale: "en", strength: 2 });
+
+const isString = (v) => typeof v === "string";
+
+// ================= REGISTER =================
+router.post("/register", authLimiter, async (req, res) => {
+  try {
     const { name, email, password } = req.body;
 
-    if (!name || !email || !password) {
+    // Reject objects like { "$ne": null } before they reach a query
+    if (!isString(name) || !isString(email) || !isString(password)) {
       return res.status(400).json({ message: "All fields required" });
     }
 
-    const existingUser = await User.findOne({ email });
+    const cleanName = name.trim();
+    const cleanEmail = email.trim().toLowerCase();
+
+    if (!cleanName || !cleanEmail || !password) {
+      return res.status(400).json({ message: "All fields required" });
+    }
+
+    if (!EMAIL_RE.test(cleanEmail)) {
+      return res.status(400).json({ message: "Invalid email" });
+    }
+
+    if (password.length < 8) {
+      return res.status(400).json({ message: "Password must be at least 8 characters" });
+    }
+
+    const existingUser = await findByEmail(cleanEmail);
 
     if (existingUser) {
       return res.status(400).json({ message: "User already exists" });
@@ -25,8 +54,8 @@ router.post("/register", async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const user = await User.create({
-      name,
-      email,
+      name: cleanName,
+      email: cleanEmail,
       password: hashedPassword
     });
 
@@ -38,32 +67,25 @@ router.post("/register", async (req, res) => {
     });
 
   } catch (err) {
-    console.error("REGISTER ERROR:", err);
-    res.status(500).json({
-      message: err.message || "Server error"
-    });
+    console.error("REGISTER ERROR:", err.message);
+    res.status(500).json({ message: "Server error" });
   }
 });
 
 
 // ================= LOGIN =================
-router.post("/login", async (req, res) => {
+router.post("/login", authLimiter, async (req, res) => {
   try {
-    console.log("LOGIN BODY:", req.body);
-
     const { email, password } = req.body;
 
-    if (!email || !password) {
+    if (!isString(email) || !isString(password) || !email || !password) {
       return res.status(400).json({ message: "Email & Password required" });
     }
 
-    const user = await User.findOne({ email });
+    const user = await findByEmail(email.trim().toLowerCase());
 
-    if (!user) {
-      return res.status(400).json({ message: "User not found" });
-    }
-
-    const match = await bcrypt.compare(password, user.password);
+    // Same message for unknown email and wrong password (no user enumeration)
+    const match = user && await bcrypt.compare(password, user.password);
 
     if (!match) {
       return res.status(400).json({ message: "Invalid credentials" });
@@ -77,10 +99,8 @@ router.post("/login", async (req, res) => {
     });
 
   } catch (err) {
-    console.error("LOGIN ERROR:", err);
-    res.status(500).json({
-      message: err.message || "Server error"
-    });
+    console.error("LOGIN ERROR:", err.message);
+    res.status(500).json({ message: "Server error" });
   }
 });
 

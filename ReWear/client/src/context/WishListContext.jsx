@@ -5,63 +5,63 @@ import {
   useEffect,
 } from "react";
 
+import { useAuth } from "./AuthContext";
+
 const WishlistContext =
   createContext();
+
+const readWishlist = (userId) => {
+  if (!userId) return [];
+
+  try {
+    return (
+      JSON.parse(
+        localStorage.getItem(
+          `wishlist_${userId}`
+        )
+      ) || []
+    );
+  } catch {
+    return [];
+  }
+};
 
 export const WishlistProvider = ({
   children,
 }) => {
+  const { user } = useAuth();
+
+  const userId = user?._id;
+
   const [wishlist, setWishlist] =
-    useState([]);
+    useState(() => readWishlist(userId));
 
-  // GET USER
-  const getUser = () =>
-    JSON.parse(
-      localStorage.getItem("user")
-    );
+  const [owner, setOwner] =
+    useState(userId);
 
-  // LOAD
-  useEffect(() => {
-    const user = getUser();
-
-    // NO USER = CLEAR
-    if (!user) {
-      setWishlist([]);
-
-      return;
-    }
-
-    const stored =
-      JSON.parse(
-        localStorage.getItem(
-          `wishlist_${user._id}`
-        )
-      ) || [];
-
-    setWishlist(stored);
-  }, []);
+  // RELOAD WHEN THE LOGGED-IN USER CHANGES
+  // (so one user's list never shows up or gets saved for another)
+  if (owner !== userId) {
+    setOwner(userId);
+    setWishlist(readWishlist(userId));
+  }
 
   // SAVE
   useEffect(() => {
-    const user = getUser();
-
-    // NO USER
-    if (!user) return;
+    if (!userId) return;
 
     localStorage.setItem(
-      `wishlist_${user._id}`,
+      `wishlist_${userId}`,
       JSON.stringify(wishlist)
     );
-  }, [wishlist]);
+  }, [userId, wishlist]);
 
   // TOGGLE
   const toggleWishlist = (
     product
   ) => {
-    const user = getUser();
-
     // BLOCK IF LOGGED OUT
-    if (!user) {
+    if (!userId) {
       alert(
         "Please login to use wishlist"
       );
@@ -96,11 +96,9 @@ export const WishlistProvider = ({
   const clearWishlist = () => {
     setWishlist([]);
 
-    const user = getUser();
-
-    if (user) {
+    if (userId) {
       localStorage.removeItem(
-        `wishlist_${user._id}`
+        `wishlist_${userId}`
       );
     }
   };

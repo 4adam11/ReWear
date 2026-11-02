@@ -14,7 +14,7 @@ import {
 
 import { motion } from "framer-motion";
 
-const API = "http://localhost:5000/api";
+import API from "../utils/api";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -23,6 +23,9 @@ const Dashboard = () => {
     useState([]);
 
   const [orders, setOrders] =
+    useState([]);
+
+  const [sales, setSales] =
     useState([]);
 
   const [loading, setLoading] =
@@ -59,6 +62,7 @@ const Dashboard = () => {
         const [
           productRes,
           orderRes,
+          salesRes,
         ] = await Promise.all([
           axios.get(
             `${API}/products`,
@@ -67,6 +71,11 @@ const Dashboard = () => {
 
           axios.get(
             `${API}/orders`,
+            config
+          ),
+
+          axios.get(
+            `${API}/orders/sales`,
             config
           ),
         ]);
@@ -107,6 +116,7 @@ const Dashboard = () => {
 
         setProducts(myProducts);
         setOrders(myOrders);
+        setSales(salesRes.data);
       } catch (err) {
         console.error(
           "Dashboard error:",
@@ -226,10 +236,12 @@ const Dashboard = () => {
   const totalOrders =
     orders.length;
 
+  // Money from other people buying/renting your listings
+  // (not what you spent on your own orders)
   const totalEarnings =
-    orders.reduce((acc, o) => {
+    sales.reduce((acc, s) => {
       return (
-        acc + (o.total || 0)
+        acc + (s.earnings || 0)
       );
     }, 0);
 

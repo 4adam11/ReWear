@@ -19,7 +19,7 @@ import { motion } from "framer-motion";
 import "react-date-range/dist/styles.css";
 import "react-date-range/dist/theme/default.css";
 
-const API = "http://localhost:5000/api";
+import API from "../utils/api";
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -61,6 +61,14 @@ const ProductDetail = () => {
           );
 
         setProduct(data);
+
+        // Start on an option this listing actually offers
+        setMode(
+          data.mode === "sell" ||
+            data.mode === "sale"
+            ? "sale"
+            : "rent"
+        );
 
         setActiveImage(
           data.images?.[0] || ""
@@ -143,6 +151,25 @@ const ProductDetail = () => {
     mode === "rent"
       ? totalRent
       : product.price;
+
+  const canBuy =
+    ["sell", "sale", "both"].includes(product.mode) &&
+    product.price > 0;
+
+  const canRent =
+    ["rent", "both"].includes(product.mode) &&
+    product.rent > 0;
+
+  // The server recalculates the price from these fields
+  const cartLine = {
+    ...product,
+    mode,
+    total: totalPrice,
+    ...(mode === "rent" && {
+      rentStart: start.toISOString(),
+      rentEnd: end.toISOString(),
+    }),
+  };
 
   // FAKE RATING
   const getRandomRating = (id) => {
@@ -348,7 +375,9 @@ const ProductDetail = () => {
                   setMode("sale")
                 }
 
-                className={`flex-1 py-3 rounded-xl text-sm font-medium transition ${mode === "sale"
+                disabled={!canBuy}
+
+                className={`flex-1 py-3 rounded-xl text-sm font-medium transition disabled:opacity-40 disabled:cursor-not-allowed ${mode === "sale"
                     ? "bg-white text-[#2b2545] shadow-sm"
                     : "text-gray-500"
                   }`}
@@ -361,7 +390,9 @@ const ProductDetail = () => {
                   setMode("rent")
                 }
 
-                className={`flex-1 py-3 rounded-xl text-sm font-medium transition ${mode === "rent"
+                disabled={!canRent}
+
+                className={`flex-1 py-3 rounded-xl text-sm font-medium transition disabled:opacity-40 disabled:cursor-not-allowed ${mode === "rent"
                     ? "bg-[#2b2545] text-white"
                     : "text-gray-500"
                   }`}
@@ -389,6 +420,8 @@ const ProductDetail = () => {
                     moveRangeOnFirstSelection={
                       false
                     }
+
+                    minDate={new Date()}
                   />
 
                 </div>
@@ -432,11 +465,7 @@ const ProductDetail = () => {
               {/* ADD TO CART */}
               <button
                 onClick={() => {
-                  addToCart({
-                    ...product,
-                    mode,
-                    total: totalPrice,
-                  });
+                  addToCart(cartLine);
 
                   alert(
                     "Added to cart"
@@ -457,14 +486,7 @@ const ProductDetail = () => {
                 onClick={() =>
                   navigate("/checkout", {
                     state: {
-                      items: [
-                        {
-                          ...product,
-                          mode,
-                          total:
-                            totalPrice,
-                        },
-                      ],
+                      items: [cartLine],
                     },
                   })
                 }

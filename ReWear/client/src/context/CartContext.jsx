@@ -1,14 +1,24 @@
 import { createContext, useContext, useState } from "react";
+import { useAuth } from "./AuthContext";
+import { getCartKey } from "../utils/cart";
 
 const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
+  const { user } = useAuth();
+
   const [cartItems, setCartItems] = useState([]);
 
-  // GET SAFE ID
-  const getItemId = (item) => {
-    return item._id || item.id;
-  };
+  // EMPTY THE CART WHEN A DIFFERENT USER LOGS IN OR OUT
+  const [owner, setOwner] = useState(user?._id);
+
+  if (owner !== user?._id) {
+    setOwner(user?._id);
+    setCartItems([]);
+  }
+
+  // GET SAFE ID (product + buy/rent + dates)
+  const getItemId = getCartKey;
 
   // ADD TO CART
   const addToCart = (product) => {

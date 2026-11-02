@@ -8,7 +8,7 @@ import {
   Sparkles,
 } from "lucide-react";
 
-import { useWishlist } from "../context/WishlistContext";
+import { useWishlist } from "../context/WishListContext";
 
 import ProductCard from "../components/explore/ProductCard";
 

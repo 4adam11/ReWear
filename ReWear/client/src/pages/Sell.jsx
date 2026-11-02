@@ -8,12 +8,24 @@ import {
   X,
   ImagePlus,
   Shirt,
+  LoaderCircle,
+  CircleCheck,
+  TriangleAlert,
 } from "lucide-react";
 
 import "react-date-range/dist/styles.css";
 import "react-date-range/dist/theme/default.css";
 
-const API = "http://localhost:5000/api";
+import API from "../utils/api";
+import { resizeImage } from "../utils/image";
+
+const MAX_IMAGES = 6;
+
+const ACCEPTED_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+];
 
 const Sell = () => {
   const navigate = useNavigate();
@@ -37,8 +49,13 @@ const Sell = () => {
       condition: "New",
     });
 
+  // Each photo: { id, preview, url, status: "checking" | "ok" | "rejected", message }
   const [images, setImages] =
     useState([]);
+
+  const approvedImages = images.filter(
+    (img) => img.status === "ok"
+  );
 
   const [dateRange, setDateRange] =
     useState([
@@ -66,36 +83,113 @@ const Sell = () => {
     setError("");
   };
 
+  const updateImage = (id, changes) =>
+    setImages((prev) =>
+      prev.map((img) =>
+        img.id === id
+          ? { ...img, ...changes }
+          : img
+      )
+    );
+
+  // CHECK ONE PHOTO ON THE SERVER (clothing only, nothing explicit), THEN STORE IT
+  const uploadPhoto = async (file, id) => {
+    const user = getUser();
+
+    try {
+      const preview =
+        await resizeImage(file);
+
+      updateImage(id, { preview });
+
+      const { data } =
+        await axios.post(
+          `${API}/uploads`,
+          { image: preview },
+          {
+            headers: {
+              Authorization: `Bearer ${user?.token}`,
+            },
+          }
+        );
+
+      updateImage(id, {
+        status: "ok",
+        url: data.url,
+      });
+    } catch (err) {
+      updateImage(id, {
+        status: "rejected",
+        message:
+          err.response?.data
+            ?.message ||
+          "Upload failed, please try again",
+      });
+    }
+  };
+
   // IMAGE UPLOAD
   const handleImageUpload = (e) => {
     const files = Array.from(
       e.target.files
     );
 
-    files.forEach((file) => {
-      const reader =
-        new FileReader();
+    // Let the same file be picked again after removing it
+    e.target.value = "";
 
-      reader.onloadend = () => {
-        setImages((prev) =>
-          [
+    const slots =
+      MAX_IMAGES - images.length;
+
+    if (files.length > slots) {
+      setError(
+        `You can add ${slots} more photo${slots === 1 ? "" : "s"} (maximum ${MAX_IMAGES})`
+      );
+    }
+
+    files
+      .slice(0, Math.max(slots, 0))
+      .forEach((file) => {
+        const id = `${Date.now()}-${Math.random()}`;
+
+        if (
+          !ACCEPTED_TYPES.includes(
+            file.type
+          )
+        ) {
+          setImages((prev) => [
             ...prev,
-            reader.result,
-          ].slice(0, 6)
-        );
-      };
+            {
+              id,
+              preview: "",
+              status: "rejected",
+              message:
+                "Only JPEG, PNG or WebP photos",
+            },
+          ]);
 
-      reader.readAsDataURL(file);
-    });
+          return;
+        }
+
+        setImages((prev) => [
+          ...prev,
+          {
+            id,
+            preview: "",
+            status: "checking",
+          },
+        ]);
+
+        uploadPhoto(file, id);
+      });
   };
 
   // REMOVE IMAGE
   const handleRemoveImage = (
-    index
+    id
   ) => {
     setImages((prev) =>
       prev.filter(
-        (_, i) => i !== index
+        (img) => img.id !== id
       )
     );
   };
@@ -113,8 +207,34 @@ const Sell = () => {
     }
 
     if (
+      images.some(
+        (img) =>
+          img.status === "checking"
+      )
+    ) {
+      setError(
+        "Please wait until your photos have been checked"
+      );
+
+      return;
+    }
+
+    if (
+      images.some(
+        (img) =>
+          img.status === "rejected"
+      )
+    ) {
+      setError(
+        "Remove the rejected photos before listing"
+      );
+
+      return;
+    }
+
+    if (
       !form.title ||
-      images.length === 0
+      approvedImages.length === 0
     ) {
       setError(
         "Title and at least 1 image required"
@@ -130,7 +250,9 @@ const Sell = () => {
         `${API}/products`,
         {
           title: form.title,
-          images,
+          images: approvedImages.map(
+            (img) => img.url
+          ),
           price: Number(
             form.price
           ),
@@ -262,12 +384,13 @@ const Sell = () => {
                 </p>
 
                 <p className="mt-1 text-xs text-gray-400">
-                  Maximum 6 images
+                  Maximum 6 images · clothing photos only
                 </p>
 
                 <input
                   type="file"
                   multiple
+                  accept={ACCEPTED_TYPES.join(",")}
                   className="hidden"
                   onChange={
                     handleImageUpload
@@ -281,22 +404,61 @@ const Sell = () => {
                 <div className="grid grid-cols-3 sm:grid-cols-4 gap-4 mt-5">
 
                   {images.map(
-                    (img, i) => (
+                    (img) => (
                       <div
-                        key={i}
-                        className="relative rounded-xl overflow-hidden border border-gray-100"
+                        key={img.id}
+                        className={`relative rounded-xl overflow-hidden border ${img.status === "rejected"
+                            ? "border-red-300"
+                            : "border-gray-100"
+                          }`}
                       >
 
-                        <img
-                          src={img}
-                          alt="preview"
-                          className="w-full h-28 object-cover"
-                        />
+                        {img.preview ? (
+                          <img
+                            src={img.preview}
+                            alt="preview"
+                            className={`w-full h-28 object-cover ${img.status === "ok"
+                                ? ""
+                                : "opacity-40"
+                              }`}
+                          />
+                        ) : (
+                          <div className="w-full h-28 bg-gray-100" />
+                        )}
+
+                        {/* CHECK STATUS */}
+                        {img.status === "checking" && (
+                          <div className="absolute inset-0 flex flex-col items-center justify-center text-xs text-gray-600">
+                            <LoaderCircle
+                              size={18}
+                              className="animate-spin"
+                            />
+                            <span className="mt-1">
+                              Checking…
+                            </span>
+                          </div>
+                        )}
+
+                        {img.status === "ok" && (
+                          <CircleCheck
+                            size={18}
+                            className="absolute bottom-2 left-2 text-green-500 bg-white rounded-full"
+                          />
+                        )}
+
+                        {img.status === "rejected" && (
+                          <div className="absolute inset-0 flex flex-col items-center justify-center px-2 text-center text-[11px] leading-tight text-red-600 bg-white/70">
+                            <TriangleAlert size={16} />
+                            <span className="mt-1">
+                              {img.message}
+                            </span>
+                          </div>
+                        )}
 
                         <button
                           onClick={() =>
                             handleRemoveImage(
-                              i
+                              img.id
                             )
                           }
 
@@ -567,7 +729,7 @@ const Sell = () => {
 
                 <img
                   src={
-                    images[0] ||
+                    approvedImages[0]?.preview ||
                     "https://via.placeholder.com/400x500?text=Preview"
                   }
 

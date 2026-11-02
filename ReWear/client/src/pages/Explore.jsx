@@ -7,7 +7,7 @@ import ProductCard from "../components/explore/ProductCard";
 import ProductGrid from "../components/explore/ProductGrid";
 import ExploreHeader from "../components/explore/ExploreHeader";
 
-const API = "http://localhost:5000/api";
+import API from "../utils/api";
 const ITEMS_PER_PAGE = 9;
 
 const Explore = () => {

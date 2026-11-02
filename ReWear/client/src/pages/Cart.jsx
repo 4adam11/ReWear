@@ -1,4 +1,5 @@
 import { useCart } from "../context/CartContext";
+import { getItemPrice, getCartKey } from "../utils/cart";
 import { useNavigate } from "react-router-dom";
 
 import {
@@ -21,16 +22,6 @@ const Cart = () => {
 
   const updateQuantity =
     cart?.updateQuantity || (() => { });
-
-  // SAFE PRICE
-  const getItemPrice = (item) => {
-    return (
-      item.price ||
-      item.rent ||
-      item.total ||
-      0
-    );
-  };
 
   // TOTAL
   const total = cartItems.reduce(
@@ -123,7 +114,7 @@ const Cart = () => {
 
               {cartItems.map((item, index) => {
                 const cartId =
-                  item._id || item.id;
+                  getCartKey(item);
 
                 const itemPrice =
                   getItemPrice(item);

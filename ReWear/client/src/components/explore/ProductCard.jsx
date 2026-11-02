@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 
-import { useWishlist } from "../../context/WishlistContext";
+import { useWishlist } from "../../context/WishListContext";
 
 import { motion } from "framer-motion";
 

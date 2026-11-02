@@ -1,14 +1,18 @@
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState } from "react";
 
 const AuthContext = createContext();
 
-export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+const readStoredUser = () => {
+  try {
+    return JSON.parse(localStorage.getItem("user"));
+  } catch {
+    return null;
+  }
+};
 
-  useEffect(() => {
-    const stored = JSON.parse(localStorage.getItem("user"));
-    setUser(stored);
-  }, []);
+export const AuthProvider = ({ children }) => {
+  // Read synchronously so protected routes don't redirect on refresh
+  const [user, setUser] = useState(readStoredUser);
 
   const login = (data) => {
     localStorage.setItem("user", JSON.stringify(data));
