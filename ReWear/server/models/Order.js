@@ -31,4 +31,9 @@ const orderSchema = new mongoose.Schema({
   status: { type: String, enum: ["placed", "cancelled"], default: "placed" }
 }, { timestamps: true });
 
+// Buyer's order history, seller's sales, and rental clash checks
+orderSchema.index({ user: 1, createdAt: -1 });
+orderSchema.index({ "items.seller": 1, createdAt: -1 });
+orderSchema.index({ "items.product": 1, status: 1 });
+
 export default mongoose.model("Order", orderSchema);

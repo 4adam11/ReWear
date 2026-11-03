@@ -2,6 +2,8 @@ import "dotenv/config";
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
+import helmet from "helmet";
+import compression from "compression";
 
 import authRoutes from "./routes/authRoutes.js";
 import productRoutes from "./routes/productRoutes.js";
@@ -30,10 +32,14 @@ const allowedOrigins = (process.env.CLIENT_URL || "http://localhost:5173")
   .split(",")
   .map((o) => o.trim());
 
+// Security headers (no-sniff, frame protection, etc.); the API serves no HTML, so no CSP needed
+app.use(helmet({ contentSecurityPolicy: false, crossOriginResourcePolicy: { policy: "cross-origin" } }));
+// Gzip JSON responses (product lists shrink a lot)
+app.use(compression());
 app.use(cors({ origin: allowedOrigins }));
-// Images are still sent as base64, so the body limit stays generous
-app.use(express.json({ limit: "10mb" }));
-app.use(express.urlencoded({ limit: "10mb", extended: true }));
+// Only photo uploads need big bodies; everything else is capped small to make abuse expensive
+app.use("/api/uploads", express.json({ limit: "8mb" }));
+app.use(express.json({ limit: "100kb" }));
 
 app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);

@@ -1,3 +1,5 @@
+import { CATEGORIES, SIZES, CONDITIONS, normalizeCategory } from "./catalog.js";
+
 const MAX_IMAGES = 6;
 const MAX_IMAGE_CHARS = 500;
 // Photos are uploaded (and moderated) through /api/uploads first; listings only carry the URLs
@@ -57,6 +59,12 @@ export const validateProduct = (body) => {
   for (const [key, value] of Object.entries(fields)) {
     if (value === null) return { error: `Invalid ${key}` };
   }
+
+  // Only the options the site offers, so every listing can be found by the filters
+  fields.category = normalizeCategory(fields.category);
+  if (!CATEGORIES.includes(fields.category)) return { error: "Please choose a category" };
+  if (!SIZES.includes(fields.size)) return { error: "Please choose a size" };
+  if (!CONDITIONS.includes(fields.condition)) return { error: "Please choose a condition" };
 
   // Sell page sends react-date-range's [{ startDate, endDate }]
   let availability;

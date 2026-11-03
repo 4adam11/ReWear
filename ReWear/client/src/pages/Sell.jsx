@@ -17,7 +17,9 @@ import "react-date-range/dist/styles.css";
 import "react-date-range/dist/theme/default.css";
 
 import API from "../utils/api";
-import { resizeImage } from "../utils/image";
+import { resizeImage, PLACEHOLDER_IMAGE } from "../utils/image";
+import { CATEGORIES, SIZES, CONDITIONS } from "../utils/catalog";
+import { format } from "date-fns";
 
 const MAX_IMAGES = 6;
 
@@ -263,8 +265,11 @@ const Sell = () => {
           size: form.size,
           condition:
             form.condition,
-          availability:
-            dateRange,
+          // Calendar days, so time zones can't shift them
+          availability: {
+            startDate: format(dateRange[0].startDate, "yyyy-MM-dd"),
+            endDate: format(dateRange[0].endDate, "yyyy-MM-dd"),
+          },
         },
         {
           headers: {
@@ -290,14 +295,14 @@ const Sell = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#f7f7f8] py-8 sm:py-10">
+    <div className="min-h-screen bg-[#f6f5f0] py-8 sm:py-10">
 
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* HEADER */}
         <div className="mb-8">
 
-          <h1 className="text-3xl sm:text-4xl font-semibold text-[#2b2545]">
+          <h1 className="text-3xl sm:text-4xl font-semibold text-[#1f3a2e]">
             List Your Product
           </h1>
 
@@ -343,7 +348,7 @@ const Sell = () => {
                     }
 
                     className={`flex-1 py-3 rounded-lg text-sm font-medium capitalize transition ${mode === m
-                        ? "bg-[#2b2545] text-white"
+                        ? "bg-[#1f3a2e] text-white"
                         : "text-gray-500"
                       }`}
                   >
@@ -362,17 +367,17 @@ const Sell = () => {
 
                 <ImagePlus
                   size={20}
-                  className="text-[#2b2545]"
+                  className="text-[#1f3a2e]"
                 />
 
-                <h2 className="text-lg font-medium text-[#2b2545]">
+                <h2 className="text-lg font-medium text-[#1f3a2e]">
                   Upload Photos
                 </h2>
 
               </div>
 
               {/* DROPZONE */}
-              <label className="border-2 border-dashed border-gray-200 rounded-2xl p-8 flex flex-col items-center justify-center text-center cursor-pointer hover:border-[#2b2545] transition">
+              <label className="border-2 border-dashed border-gray-200 rounded-2xl p-8 flex flex-col items-center justify-center text-center cursor-pointer hover:border-[#1f3a2e] transition">
 
                 <Upload
                   size={28}
@@ -489,7 +494,7 @@ const Sell = () => {
                   name="title"
                   placeholder="Off White Hoodie"
 
-                  className="w-full mt-2 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#2b2545]"
+                  className="w-full mt-2 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#1f3a2e]"
 
                   onChange={
                     handleChange
@@ -523,21 +528,11 @@ const Sell = () => {
 
                     className="w-full mt-2 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none"
                   >
-                    <option value="wedding">
-                      Wedding
-                    </option>
-
-                    <option value="party">
-                      Party
-                    </option>
-
-                    <option value="ethnic">
-                      Ethnic
-                    </option>
-
-                    <option value="casual">
-                      Casual
-                    </option>
+                    {CATEGORIES.map((c) => (
+                      <option key={c.value} value={c.value}>
+                        {c.label}
+                      </option>
+                    ))}
 
                   </select>
 
@@ -553,31 +548,19 @@ const Sell = () => {
                   <select
                     name="size"
 
+                    value={form.size}
+
                     onChange={
                       handleChange
                     }
 
                     className="w-full mt-2 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none"
                   >
-                    <option value="S">
-                      S
-                    </option>
-
-                    <option value="M">
-                      M
-                    </option>
-
-                    <option value="L">
-                      L
-                    </option>
-
-                    <option value="XL">
-                      XL
-                    </option>
-
-                    <option value="XXL">
-                      XXL
-                    </option>
+                    {SIZES.map((s) => (
+                      <option key={s} value={s}>
+                        {s}
+                      </option>
+                    ))}
 
                   </select>
 
@@ -603,21 +586,11 @@ const Sell = () => {
 
                     className="w-full mt-2 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none"
                   >
-                    <option value="New">
-                      New
-                    </option>
-
-                    <option value="Like New">
-                      Like New
-                    </option>
-
-                    <option value="Good">
-                      Good
-                    </option>
-
-                    <option value="Used">
-                      Used
-                    </option>
+                    {CONDITIONS.map((c) => (
+                      <option key={c} value={c}>
+                        {c}
+                      </option>
+                    ))}
 
                   </select>
 
@@ -641,7 +614,7 @@ const Sell = () => {
                     name="price"
                     placeholder="₹ 2500"
 
-                    className="w-full mt-2 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#2b2545]"
+                    className="w-full mt-2 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#1f3a2e]"
 
                     onChange={
                       handleChange
@@ -664,7 +637,7 @@ const Sell = () => {
                     name="rent"
                     placeholder="₹ 300"
 
-                    className="w-full mt-2 mb-5 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#2b2545]"
+                    className="w-full mt-2 mb-5 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#1f3a2e]"
 
                     onChange={
                       handleChange
@@ -697,7 +670,7 @@ const Sell = () => {
 
               onClick={handleSubmit}
 
-              className="w-full bg-[#2b2545] text-white py-4 rounded-xl font-medium hover:opacity-95 transition shadow-sm"
+              className="w-full bg-[#1f3a2e] text-white py-4 rounded-xl font-medium hover:opacity-95 transition shadow-sm"
             >
               {loading
                 ? "Listing Product..."
@@ -715,10 +688,10 @@ const Sell = () => {
 
                 <Shirt
                   size={20}
-                  className="text-[#2b2545]"
+                  className="text-[#1f3a2e]"
                 />
 
-                <h2 className="text-lg font-medium text-[#2b2545]">
+                <h2 className="text-lg font-medium text-[#1f3a2e]">
                   Live Preview
                 </h2>
 
@@ -730,7 +703,7 @@ const Sell = () => {
                 <img
                   src={
                     approvedImages[0]?.preview ||
-                    "https://via.placeholder.com/400x500?text=Preview"
+                    PLACEHOLDER_IMAGE
                   }
 
                   alt="preview"
@@ -740,7 +713,7 @@ const Sell = () => {
 
                 <div className="p-5">
 
-                  <h3 className="text-xl font-medium text-[#2b2545]">
+                  <h3 className="text-xl font-medium text-[#1f3a2e]">
                     {form.title ||
                       "Product Title"}
                   </h3>
@@ -758,7 +731,7 @@ const Sell = () => {
                         Price
                       </p>
 
-                      <p className="text-2xl font-semibold text-[#2b2545]">
+                      <p className="text-2xl font-semibold text-[#1f3a2e]">
                         ₹{" "}
                         {form.price ||
                           form.rent ||

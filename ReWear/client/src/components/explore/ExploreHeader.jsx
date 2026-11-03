@@ -14,7 +14,7 @@ const ExploreHeader = ({
   setSearch,
 }) => {
   return (
-    <section className="relative w-full overflow-hidden rounded-[36px] border border-white/40 bg-gradient-to-br from-[#f7f5f4] via-[#f8f5ff] to-[#efe9f7] p-6 sm:p-8 lg:p-10 shadow-[0_15px_50px_rgba(0,0,0,0.06)]">
+    <section className="relative w-full overflow-hidden rounded-[36px] border border-white/40 bg-gradient-to-br from-[#f6f5f0] via-[#f3f6ef] to-[#e2ebdb] p-6 sm:p-8 lg:p-10 shadow-[0_15px_50px_rgba(0,0,0,0.06)]">
 
       {/* BACKGROUND BLOBS */}
       <motion.div
@@ -95,7 +95,7 @@ const ExploreHeader = ({
             </div>
 
             {/* TITLE */}
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-[#2b2545] leading-[1.05]">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-[#1f3a2e] leading-[1.05]">
 
               Find Your Next
 

@@ -39,7 +39,7 @@ const HowItWorks = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-[#f7f7f8] overflow-hidden relative">
+    <div className="min-h-screen bg-[#f6f5f0] overflow-hidden relative">
 
       {/* AMBIENT GLOW */}
       <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-purple-200/20 blur-3xl rounded-full" />
@@ -73,7 +73,7 @@ const HowItWorks = () => {
 
           </div>
 
-          <h1 className="mt-8 text-4xl sm:text-5xl lg:text-6xl font-semibold tracking-tight text-[#2b2545] leading-[1.1]">
+          <h1 className="mt-8 text-4xl sm:text-5xl lg:text-6xl font-semibold tracking-tight text-[#1f3a2e] leading-[1.1]">
 
             Fashion That
             <br />
@@ -170,7 +170,7 @@ const HowItWorks = () => {
                     {/* TEXT */}
                     <div className="mt-6">
 
-                      <h2 className="text-2xl font-semibold text-[#2b2545]">
+                      <h2 className="text-2xl font-semibold text-[#1f3a2e]">
                         {step.title}
                       </h2>
 
@@ -217,7 +217,7 @@ const HowItWorks = () => {
             duration: 0.6,
           }}
 
-          className="relative overflow-hidden rounded-[40px] bg-[#2b2545] px-6 sm:px-10 py-14 sm:py-16 text-center"
+          className="relative overflow-hidden rounded-[40px] bg-[#1f3a2e] px-6 sm:px-10 py-14 sm:py-16 text-center"
         >
 
           {/* GLOW */}
@@ -251,7 +251,7 @@ const HowItWorks = () => {
                   navigate("/explore")
                 }
 
-                className="inline-flex items-center justify-center gap-2 bg-white text-[#2b2545] px-7 py-4 rounded-2xl font-medium hover:scale-[1.02] transition"
+                className="inline-flex items-center justify-center gap-2 bg-white text-[#1f3a2e] px-7 py-4 rounded-2xl font-medium hover:scale-[1.02] transition"
               >
                 Explore Products
 

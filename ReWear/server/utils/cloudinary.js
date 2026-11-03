@@ -28,3 +28,9 @@ export const uploadImage = async (dataUrl) => {
 
   return { url: result.secure_url, publicId: result.public_id };
 };
+
+// Removes a photo from Cloudinary (used when a listing is deleted)
+export const deleteImage = async (publicId) => {
+  configure();
+  await cloudinary.uploader.destroy(publicId, { resource_type: "image" });
+};

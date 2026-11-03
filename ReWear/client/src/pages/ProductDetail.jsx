@@ -4,11 +4,17 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 
 import { DateRange } from "react-date-range";
-import { differenceInDays } from "date-fns";
+import {
+  differenceInDays,
+  eachDayOfInterval,
+  format,
+  parseISO,
+  startOfToday,
+  max as maxDate,
+} from "date-fns";
 
 import {
   ArrowLeft,
-  Star,
   ShieldCheck,
   ShoppingBag,
   Heart,
@@ -20,6 +26,7 @@ import "react-date-range/dist/styles.css";
 import "react-date-range/dist/theme/default.css";
 
 import API from "../utils/api";
+import { thumb, PLACEHOLDER_IMAGE } from "../utils/image";
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -86,7 +93,7 @@ const ProductDetail = () => {
   // LOADING
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#f7f7f8] px-4 py-10">
+      <div className="min-h-screen bg-[#f6f5f0] px-4 py-10">
 
         <div className="max-w-[1400px] mx-auto">
 
@@ -107,11 +114,11 @@ const ProductDetail = () => {
   // NOT FOUND
   if (!product) {
     return (
-      <div className="min-h-screen bg-[#f7f7f8] flex items-center justify-center px-4">
+      <div className="min-h-screen bg-[#f6f5f0] flex items-center justify-center px-4">
 
         <div className="bg-white border border-gray-100 rounded-2xl p-8 shadow-sm text-center max-w-md w-full">
 
-          <h2 className="text-2xl font-semibold text-[#2b2545]">
+          <h2 className="text-2xl font-semibold text-[#1f3a2e]">
             Product not found
           </h2>
 
@@ -120,7 +127,7 @@ const ProductDetail = () => {
               navigate("/explore")
             }
 
-            className="mt-6 px-6 py-3 rounded-xl bg-[#2b2545] text-white font-medium"
+            className="mt-6 px-6 py-3 rounded-xl bg-[#1f3a2e] text-white font-medium"
           >
             Explore Products
           </button>
@@ -160,30 +167,67 @@ const ProductDetail = () => {
     ["rent", "both"].includes(product.mode) &&
     product.rent > 0;
 
+  const day = (d) => format(d, "yyyy-MM-dd");
+
+  // Days other people have already rented this item
+  const bookings = product.bookings || [];
+
+  const bookedDays = bookings.flatMap((b) =>
+    eachDayOfInterval({
+      start: parseISO(b.start),
+      end: parseISO(b.end),
+    })
+  );
+
+  const clashes = bookings.some(
+    (b) => day(start) <= b.end && day(end) >= b.start
+  );
+
+  // The seller's availability window (only if they picked a real range)
+  const windowStart = product.availability?.startDate
+    ? parseISO(product.availability.startDate.slice(0, 10))
+    : null;
+
+  const windowEnd = product.availability?.endDate
+    ? parseISO(product.availability.endDate.slice(0, 10))
+    : null;
+
+  const hasWindow =
+    windowStart &&
+    windowEnd &&
+    differenceInDays(windowEnd, windowStart) >= 1;
+
+  // Why this can't be ordered right now (empty = it can)
+  const blockedReason =
+    product.status === "sold"
+      ? "This item has been sold"
+      : mode === "sale" && !canBuy
+        ? "This item is only available to rent"
+        : mode === "rent" && !canRent
+          ? "This item is only available to buy"
+          : mode === "rent" && clashes
+            ? "Someone has already booked some of these dates"
+            : "";
+
   // The server recalculates the price from these fields
   const cartLine = {
     ...product,
     mode,
     total: totalPrice,
     ...(mode === "rent" && {
-      rentStart: start.toISOString(),
-      rentEnd: end.toISOString(),
+      rentStart: day(start),
+      rentEnd: day(end),
     }),
   };
 
-  // FAKE RATING
-  const getRandomRating = (id) => {
-    const seed =
-      id?.slice(-2) || "10";
-
-    return (
-      3 +
-      (parseInt(seed, 16) % 20) / 10
-    ).toFixed(1);
-  };
+  // Only photos uploaded through the checker live in this folder
+  const photosChecked =
+    product.images?.[0]?.includes(
+      "/rewear/products/"
+    );
 
   return (
-    <div className="min-h-screen bg-[#f7f7f8] py-8 sm:py-10">
+    <div className="min-h-screen bg-[#f6f5f0] py-8 sm:py-10">
 
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
 
@@ -191,7 +235,7 @@ const ProductDetail = () => {
         <button
           onClick={() => navigate(-1)}
 
-          className="inline-flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-[#2b2545] transition mb-8"
+          className="inline-flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-[#1f3a2e] transition mb-8"
         >
           <ArrowLeft size={18} />
 
@@ -221,8 +265,8 @@ const ProductDetail = () => {
 
               <img
                 src={
-                  activeImage ||
-                  "https://via.placeholder.com/400"
+                  thumb(activeImage, 1200) ||
+                  PLACEHOLDER_IMAGE
                 }
 
                 alt={product.title}
@@ -247,15 +291,17 @@ const ProductDetail = () => {
                         }
 
                         className={`flex-shrink-0 rounded-xl overflow-hidden border-2 transition ${activeImage === img
-                            ? "border-[#2b2545]"
+                            ? "border-[#1f3a2e]"
                             : "border-transparent"
                           }`}
                       >
 
                         <img
-                          src={img}
+                          src={thumb(img, 200)}
 
                           alt="thumb"
+
+                          loading="lazy"
 
                           className="w-20 h-24 object-cover"
                         />
@@ -291,7 +337,7 @@ const ProductDetail = () => {
             </p>
 
             {/* TITLE */}
-            <h1 className="mt-2 text-3xl sm:text-4xl font-semibold tracking-tight text-[#2b2545] leading-tight">
+            <h1 className="mt-2 text-3xl sm:text-4xl font-semibold tracking-tight text-[#1f3a2e] leading-tight">
               {product.title}
             </h1>
 
@@ -303,30 +349,22 @@ const ProductDetail = () => {
                 {product.condition}
               </div>
 
-              {/* RATING */}
-              <div className="flex items-center gap-1 text-sm font-medium text-yellow-500">
+              {/* PHOTOS CHECKED BY THE MODERATION MODEL */}
+              {photosChecked && (
+                <div className="flex items-center gap-1 text-sm font-medium text-green-600">
 
-                <Star
-                  size={16}
-                  className="fill-yellow-400"
-                />
+                  <ShieldCheck size={16} />
 
-                {getRandomRating(
-                  product._id
-                )}{" "}
+                  Photos checked
 
-                Rating
+                </div>
+              )}
 
-              </div>
-
-              {/* VERIFIED */}
-              <div className="flex items-center gap-1 text-sm font-medium text-green-600">
-
-                <ShieldCheck size={16} />
-
-                Verified Listing
-
-              </div>
+              {product.status === "sold" && (
+                <div className="px-3 py-1.5 rounded-full bg-red-50 text-sm font-medium text-red-600">
+                  Sold
+                </div>
+              )}
 
             </div>
 
@@ -340,7 +378,7 @@ const ProductDetail = () => {
                     Purchase Price
                   </p>
 
-                  <h2 className="mt-1 text-4xl font-semibold text-[#2b2545]">
+                  <h2 className="mt-1 text-4xl font-semibold text-[#1f3a2e]">
                     ₹ {product.price}
                   </h2>
 
@@ -352,7 +390,7 @@ const ProductDetail = () => {
                     Rental Price
                   </p>
 
-                  <h2 className="mt-1 text-4xl font-semibold text-[#2b2545]">
+                  <h2 className="mt-1 text-4xl font-semibold text-[#1f3a2e]">
                     ₹ {rentPerDay}
 
                     <span className="text-lg text-gray-500 font-medium">
@@ -378,7 +416,7 @@ const ProductDetail = () => {
                 disabled={!canBuy}
 
                 className={`flex-1 py-3 rounded-xl text-sm font-medium transition disabled:opacity-40 disabled:cursor-not-allowed ${mode === "sale"
-                    ? "bg-white text-[#2b2545] shadow-sm"
+                    ? "bg-white text-[#1f3a2e] shadow-sm"
                     : "text-gray-500"
                   }`}
               >
@@ -393,7 +431,7 @@ const ProductDetail = () => {
                 disabled={!canRent}
 
                 className={`flex-1 py-3 rounded-xl text-sm font-medium transition disabled:opacity-40 disabled:cursor-not-allowed ${mode === "rent"
-                    ? "bg-[#2b2545] text-white"
+                    ? "bg-[#1f3a2e] text-white"
                     : "text-gray-500"
                   }`}
               >
@@ -421,7 +459,19 @@ const ProductDetail = () => {
                       false
                     }
 
-                    minDate={new Date()}
+                    minDate={
+                      hasWindow
+                        ? maxDate([startOfToday(), windowStart])
+                        : startOfToday()
+                    }
+
+                    maxDate={
+                      hasWindow
+                        ? windowEnd
+                        : undefined
+                    }
+
+                    disabledDates={bookedDays}
                   />
 
                 </div>
@@ -436,7 +486,7 @@ const ProductDetail = () => {
                       : ""}
                   </span>
 
-                  <span className="text-lg font-semibold text-[#2b2545]">
+                  <span className="text-lg font-semibold text-[#1f3a2e]">
                     ₹ {totalRent}
                   </span>
 
@@ -448,31 +498,40 @@ const ProductDetail = () => {
             {/* DESCRIPTION */}
             <div className="mt-8">
 
-              <h3 className="text-lg font-semibold text-[#2b2545]">
+              <h3 className="text-lg font-semibold text-[#1f3a2e]">
                 Product Details
               </h3>
 
               <p className="mt-3 text-sm leading-7 text-gray-600">
                 {product.description ||
-                  "Premium fashion piece available for purchase or rental. Carefully maintained and verified for quality assurance."}
+                  "Pre-loved fashion piece listed by a ReWear seller. Check the photos, size and condition before ordering."}
               </p>
 
             </div>
 
+            {/* WHY IT CAN'T BE ORDERED */}
+            {blockedReason && (
+              <p className="mt-10 rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-700">
+                {blockedReason}
+              </p>
+            )}
+
             {/* ACTIONS */}
-            <div className="mt-10 flex flex-col sm:flex-row gap-4">
+            <div className={`${blockedReason ? "mt-4" : "mt-10"} flex flex-col sm:flex-row gap-4`}>
 
               {/* ADD TO CART */}
               <button
                 onClick={() => {
-                  addToCart(cartLine);
-
                   alert(
-                    "Added to cart"
+                    addToCart(cartLine) === "updated"
+                      ? "Your cart has been updated"
+                      : "Added to cart"
                   );
                 }}
 
-                className="flex-1 inline-flex items-center justify-center gap-2 border border-gray-300 bg-white text-[#2b2545] py-4 rounded-xl font-medium hover:border-[#2b2545] transition"
+                disabled={!!blockedReason}
+
+                className="flex-1 inline-flex items-center justify-center gap-2 border border-gray-300 bg-white text-[#1f3a2e] py-4 rounded-xl font-medium hover:border-[#1f3a2e] transition disabled:opacity-40 disabled:cursor-not-allowed"
               >
 
                 <ShoppingBag size={18} />
@@ -491,7 +550,9 @@ const ProductDetail = () => {
                   })
                 }
 
-                className="flex-1 inline-flex items-center justify-center gap-2 bg-[#2b2545] text-white py-4 rounded-xl font-medium hover:opacity-95 transition shadow-sm"
+                disabled={!!blockedReason}
+
+                className="flex-1 inline-flex items-center justify-center gap-2 bg-[#1f3a2e] text-white py-4 rounded-xl font-medium hover:opacity-95 transition shadow-sm disabled:opacity-40 disabled:cursor-not-allowed"
               >
 
                 <Heart size={18} />

@@ -1,67 +1,62 @@
-import { motion } from "framer-motion";
+import { motion, useMotionValue, useSpring } from "framer-motion";
 import { useEffect, useState } from "react";
 
 const CustomCursor = () => {
-  const [position, setPosition] = useState({ x: 0, y: 0 });
   const [variant, setVariant] = useState("default");
   const [label, setLabel] = useState("");
   const [isDesktop, setIsDesktop] = useState(true);
 
+  // Position lives in motion values, so moving the mouse doesn't re-render React
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+  const x = useSpring(mouseX, { stiffness: 260, damping: 22 });
+  const y = useSpring(mouseY, { stiffness: 260, damping: 22 });
+
   useEffect(() => {
-    // Disable cursor on mobile
-    if (window.innerWidth < 768) {
+    // Disable cursor on mobile / touch screens
+    if (window.innerWidth < 768 || window.matchMedia("(pointer: coarse)").matches) {
       setIsDesktop(false);
       return;
     }
 
     const moveCursor = (e) => {
-      setPosition({ x: e.clientX, y: e.clientY });
+      mouseX.set(e.clientX);
+      mouseY.set(e.clientY);
     };
 
     const handleMouseOver = (e) => {
       const target = e.target.closest("[data-cursor]");
+      const next = target ? "hover" : "default";
 
-      if (target) {
-        setVariant("hover");
-        setLabel(target.getAttribute("data-cursor"));
-      } else {
-        setVariant("default");
-        setLabel("");
-      }
+      // Only re-render when the state actually changes
+      setVariant((prev) => (prev === next ? prev : next));
+      setLabel(target ? target.getAttribute("data-cursor") : "");
     };
 
-    window.addEventListener("mousemove", moveCursor);
-    window.addEventListener("mouseover", handleMouseOver);
+    window.addEventListener("mousemove", moveCursor, { passive: true });
+    window.addEventListener("mouseover", handleMouseOver, { passive: true });
 
     return () => {
       window.removeEventListener("mousemove", moveCursor);
       window.removeEventListener("mouseover", handleMouseOver);
     };
-  }, []);
+  }, [mouseX, mouseY]);
 
   if (!isDesktop) return null;
 
-  const variants = {
-    default: {
-      width: 16,
-      height: 16,
-      x: position.x - 8,
-      y: position.y - 8,
-      backgroundColor: "rgba(99,102,241,0.7)"
-    },
-    hover: {
-      width: 80,
-      height: 80,
-      x: position.x - 40,
-      y: position.y - 40,
-      backgroundColor: "rgba(99,102,241,0.95)"
-    }
-  };
+  const size = variant === "hover" ? 80 : 16;
 
   return (
     <motion.div
-      animate={variant}
-      variants={variants}
+      style={{ x, y, translateX: "-50%", translateY: "-50%" }}
+      animate={{
+        width: size,
+        height: size,
+        backgroundColor:
+          variant === "hover"
+            ? "rgba(47,125,91,0.95)"
+            : "rgba(47,125,91,0.7)",
+      }}
       transition={{ type: "spring", stiffness: 260, damping: 22 }}
       className="fixed top-0 left-0 z-[9999] pointer-events-none rounded-full flex items-center justify-center text-white font-semibold"
     >

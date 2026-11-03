@@ -153,7 +153,7 @@ const Hero = () => {
               className="mt-7 max-w-xl text-base sm:text-lg leading-8 text-gray-600"
             >
               Buy, rent, and resell fashion effortlessly.
-              AI-powered pricing meets conscious style for the next generation.
+              Every photo is AI-checked, so what you see is real, wearable fashion.
             </motion.p>
 
             {/* CTA */}
@@ -171,7 +171,7 @@ const Hero = () => {
                 }}
                 whileTap={{ scale: 0.96 }}
                 onClick={() => navigate("/explore")}
-                className="w-full sm:w-auto px-8 py-4 rounded-full text-sm sm:text-base font-semibold text-white bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 shadow-[0_15px_40px_rgba(99,102,241,0.35)]"
+                className="w-full sm:w-auto px-8 py-4 rounded-full text-sm sm:text-base font-semibold text-white bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 shadow-[0_15px_40px_rgba(47,125,91,0.35)]"
               >
                 Explore Styles →
               </motion.button>
@@ -331,7 +331,7 @@ const Hero = () => {
                 }}
                 src={`${CLOUDINARY_IMAGE_BASE}/hero1_vf1dzb`}
                 alt="main"
-                className="absolute left-0 bottom-0 w-[58%] h-[76%] object-cover rounded-[34px] shadow-[0_25px_60px_rgba(99,102,241,0.18)] z-20"
+                className="absolute left-0 bottom-0 w-[58%] h-[76%] object-cover rounded-[34px] shadow-[0_25px_60px_rgba(47,125,91,0.18)] z-20"
               />
 
               {/* TOP RIGHT */}

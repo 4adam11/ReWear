@@ -19,12 +19,12 @@ const Wishlist = () => {
     useWishlist();
 
   return (
-    <div className="min-h-screen bg-[#f7f7f8] py-8 sm:py-10 overflow-hidden">
+    <div className="min-h-screen bg-[#f6f5f0] py-8 sm:py-10 overflow-hidden">
 
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* HERO */}
-        <div className="relative overflow-hidden rounded-[40px] bg-[#2b2545] px-6 sm:px-10 py-12 sm:py-14 mb-10">
+        <div className="relative overflow-hidden rounded-[40px] bg-[#1f3a2e] px-6 sm:px-10 py-12 sm:py-14 mb-10">
 
           {/* GLOW */}
           <div className="absolute top-0 left-0 w-72 h-72 bg-indigo-500/20 blur-3xl rounded-full" />
@@ -108,7 +108,7 @@ const Wishlist = () => {
 
             </div>
 
-            <h2 className="mt-8 text-3xl font-semibold text-[#2b2545]">
+            <h2 className="mt-8 text-3xl font-semibold text-[#1f3a2e]">
               Your Wishlist is Empty
             </h2>
 
@@ -124,7 +124,7 @@ const Wishlist = () => {
                 navigate("/explore")
               }
 
-              className="mt-10 inline-flex items-center gap-2 bg-[#2b2545] text-white px-7 py-4 rounded-2xl font-medium hover:opacity-95 transition"
+              className="mt-10 inline-flex items-center gap-2 bg-[#1f3a2e] text-white px-7 py-4 rounded-2xl font-medium hover:opacity-95 transition"
             >
 
               Explore Products
@@ -141,7 +141,7 @@ const Wishlist = () => {
 
               <div>
 
-                <h2 className="text-3xl font-semibold text-[#2b2545]">
+                <h2 className="text-3xl font-semibold text-[#1f3a2e]">
                   Saved Products
                 </h2>
 

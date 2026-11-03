@@ -15,7 +15,15 @@ const productSchema = new mongoose.Schema({
     startDate: Date,
     endDate: Date
   },
+  // Each listing is a single second-hand item: once bought it's "sold" and leaves Explore
+  status: { type: String, enum: ["available", "sold"], default: "available" },
   user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true }
 }, { timestamps: true });
+
+// Explore: newest available listings, optionally filtered by mode/category
+productSchema.index({ status: 1, createdAt: -1 });
+productSchema.index({ status: 1, mode: 1, category: 1 });
+// Dashboard: a seller's own listings
+productSchema.index({ user: 1, createdAt: -1 });
 
 export default mongoose.model("Product", productSchema);

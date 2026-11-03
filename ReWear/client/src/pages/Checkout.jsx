@@ -83,9 +83,9 @@ const Checkout = () => {
 
   if (!items.length) {
     return (
-      <div className="min-h-screen bg-[#f7f7f8] flex items-center justify-center px-4">
+      <div className="min-h-screen bg-[#f6f5f0] flex items-center justify-center px-4">
         <div className="bg-white border border-gray-100 rounded-2xl p-8 shadow-sm text-center max-w-md w-full">
-          <h2 className="text-2xl font-semibold text-[#2b2545]">
+          <h2 className="text-2xl font-semibold text-[#1f3a2e]">
             No checkout data found
           </h2>
 
@@ -197,7 +197,7 @@ const Checkout = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#f7f7f8] py-8 sm:py-10">
+    <div className="min-h-screen bg-[#f6f5f0] py-8 sm:py-10">
 
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
 
@@ -215,7 +215,7 @@ const Checkout = () => {
 
           {/* TITLE */}
           <div className="text-center">
-            <h1 className="text-3xl sm:text-4xl font-semibold text-[#2b2545]">
+            <h1 className="text-3xl sm:text-4xl font-semibold text-[#1f3a2e]">
               Checkout
             </h1>
 
@@ -252,7 +252,7 @@ const Checkout = () => {
             {/* ITEMS */}
             <div className="bg-white border border-gray-100 rounded-2xl p-5 sm:p-6 shadow-sm">
 
-              <h2 className="text-xl font-semibold text-[#2b2545] mb-6">
+              <h2 className="text-xl font-semibold text-[#1f3a2e] mb-6">
                 Order Items
               </h2>
 
@@ -296,7 +296,7 @@ const Checkout = () => {
                           {item.quantity || 1}
                         </div>
 
-                        <div className="text-xl font-semibold text-[#2b2545]">
+                        <div className="text-xl font-semibold text-[#1f3a2e]">
                           ₹{" "}
                           {getItemPrice(item) *
                             (item.quantity || 1)}
@@ -316,7 +316,7 @@ const Checkout = () => {
             {/* ADDRESS */}
             <div className="bg-white border border-gray-100 rounded-2xl p-5 sm:p-6 shadow-sm">
 
-              <h2 className="text-xl font-semibold text-[#2b2545] mb-6">
+              <h2 className="text-xl font-semibold text-[#1f3a2e] mb-6">
                 Shipping Address
               </h2>
 
@@ -374,7 +374,7 @@ const Checkout = () => {
             {/* PAYMENT */}
             <div className="bg-white border border-gray-100 rounded-2xl p-5 sm:p-6 shadow-sm">
 
-              <h2 className="text-xl font-semibold text-[#2b2545] mb-6">
+              <h2 className="text-xl font-semibold text-[#1f3a2e] mb-6">
                 Payment Method
               </h2>
 
@@ -451,7 +451,7 @@ const Checkout = () => {
                   className="text-indigo-500"
                 />
 
-                <h2 className="text-xl font-semibold text-[#2b2545]">
+                <h2 className="text-xl font-semibold text-[#1f3a2e]">
                   Promo Code
                 </h2>
 
@@ -490,7 +490,7 @@ const Checkout = () => {
 
             <div className="bg-white border border-gray-100 rounded-2xl p-5 sm:p-6 shadow-sm">
 
-              <h2 className="text-2xl font-semibold text-[#2b2545]">
+              <h2 className="text-2xl font-semibold text-[#1f3a2e]">
                 Order Summary
               </h2>
 
@@ -535,7 +535,7 @@ const Checkout = () => {
                   Total
                 </span>
 
-                <span className="text-3xl font-semibold text-[#2b2545]">
+                <span className="text-3xl font-semibold text-[#1f3a2e]">
                   ₹ {finalAmount}
                 </span>
 

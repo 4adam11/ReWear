@@ -21,38 +21,29 @@ export const CartProvider = ({ children }) => {
   const getItemId = getCartKey;
 
   // ADD TO CART
+  // Each listing is one physical item: adding it again (e.g. with new rental
+  // dates or buy instead of rent) replaces the existing line.
+  // Returns "added" or "updated".
   const addToCart = (product) => {
-    const productId = getItemId(product);
+    const productId = product._id || product.id;
 
-    setCartItems((prev) => {
-      // CHECK IF EXISTS
-      const existing = prev.find(
+    const exists = cartItems.some(
+      (item) =>
+        (item._id || item.id) === productId
+    );
+
+    setCartItems((prev) => [
+      ...prev.filter(
         (item) =>
-          getItemId(item) === productId
-      );
+          (item._id || item.id) !== productId
+      ),
+      {
+        ...product,
+        quantity: 1,
+      },
+    ]);
 
-      // IF EXISTS -> INCREASE QUANTITY
-      if (existing) {
-        return prev.map((item) =>
-          getItemId(item) === productId
-            ? {
-              ...item,
-              quantity:
-                item.quantity + 1,
-            }
-            : item
-        );
-      }
-
-      // NEW ITEM
-      return [
-        ...prev,
-        {
-          ...product,
-          quantity: 1,
-        },
-      ];
-    });
+    return exists ? "updated" : "added";
   };
 
   // REMOVE
@@ -75,12 +66,9 @@ export const CartProvider = ({ children }) => {
           return item;
         }
 
+        // Second-hand items are one of a kind, so never more than 1
         if (type === "inc") {
-          return {
-            ...item,
-            quantity:
-              item.quantity + 1,
-          };
+          return item;
         }
 
         if (

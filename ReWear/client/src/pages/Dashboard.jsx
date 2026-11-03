@@ -15,6 +15,7 @@ import {
 import { motion } from "framer-motion";
 
 import API from "../utils/api";
+import { thumb, PLACEHOLDER_IMAGE } from "../utils/image";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -64,8 +65,9 @@ const Dashboard = () => {
           orderRes,
           salesRes,
         ] = await Promise.all([
+          // Only your own listings (not every product on the site)
           axios.get(
-            `${API}/products`,
+            `${API}/products/mine`,
             config
           ),
 
@@ -82,20 +84,7 @@ const Dashboard = () => {
 
         // PRODUCTS
         const myProducts =
-          productRes.data.filter(
-            (p) => {
-              const uid =
-                typeof p.user ===
-                  "object"
-                  ? p.user?._id
-                  : p.user;
-
-              return (
-                String(uid) ===
-                String(userId)
-              );
-            }
-          );
+          productRes.data;
 
         // ORDERS
         const myOrders =
@@ -180,7 +169,10 @@ const Dashboard = () => {
         err.message
       );
 
-      alert("Delete failed");
+      alert(
+        err.response?.data?.message ||
+        "Delete failed"
+      );
     }
   };
 
@@ -248,11 +240,11 @@ const Dashboard = () => {
   // LOADING
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#f7f7f8] flex items-center justify-center">
+      <div className="min-h-screen bg-[#f6f5f0] flex items-center justify-center">
 
         <div className="text-center">
 
-          <div className="w-12 h-12 border-4 border-[#2b2545]/20 border-t-[#2b2545] rounded-full animate-spin mx-auto" />
+          <div className="w-12 h-12 border-4 border-[#1f3a2e]/20 border-t-[#1f3a2e] rounded-full animate-spin mx-auto" />
 
           <p className="mt-4 text-gray-500">
             Loading dashboard...
@@ -265,7 +257,7 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#f7f7f8] py-8 sm:py-10">
+    <div className="min-h-screen bg-[#f6f5f0] py-8 sm:py-10">
 
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
 
@@ -274,7 +266,7 @@ const Dashboard = () => {
 
           <div>
 
-            <h1 className="text-3xl sm:text-4xl font-semibold text-[#2b2545]">
+            <h1 className="text-3xl sm:text-4xl font-semibold text-[#1f3a2e]">
               Dashboard
             </h1>
 
@@ -290,7 +282,7 @@ const Dashboard = () => {
               navigate("/sell")
             }
 
-            className="inline-flex items-center gap-2 bg-[#2b2545] text-white px-6 py-4 rounded-2xl font-medium hover:opacity-95 transition w-fit"
+            className="inline-flex items-center gap-2 bg-[#1f3a2e] text-white px-6 py-4 rounded-2xl font-medium hover:opacity-95 transition w-fit"
           >
 
             <Plus size={18} />
@@ -321,7 +313,7 @@ const Dashboard = () => {
                   Products Listed
                 </p>
 
-                <h2 className="mt-3 text-4xl font-semibold text-[#2b2545]">
+                <h2 className="mt-3 text-4xl font-semibold text-[#1f3a2e]">
                   {totalProducts}
                 </h2>
 
@@ -354,7 +346,7 @@ const Dashboard = () => {
                   Orders
                 </p>
 
-                <h2 className="mt-3 text-4xl font-semibold text-[#2b2545]">
+                <h2 className="mt-3 text-4xl font-semibold text-[#1f3a2e]">
                   {totalOrders}
                 </h2>
 
@@ -387,7 +379,7 @@ const Dashboard = () => {
                   Earnings
                 </p>
 
-                <h2 className="mt-3 text-4xl font-semibold text-[#2b2545]">
+                <h2 className="mt-3 text-4xl font-semibold text-[#1f3a2e]">
                   ₹ {totalEarnings}
                 </h2>
 
@@ -410,7 +402,7 @@ const Dashboard = () => {
 
           <div className="flex items-center justify-between mb-6">
 
-            <h2 className="text-2xl font-semibold text-[#2b2545]">
+            <h2 className="text-2xl font-semibold text-[#1f3a2e]">
               My Listings
             </h2>
 
@@ -436,7 +428,7 @@ const Dashboard = () => {
 
               </div>
 
-              <h3 className="mt-6 text-2xl font-semibold text-[#2b2545]">
+              <h3 className="mt-6 text-2xl font-semibold text-[#1f3a2e]">
                 No Products Listed
               </h3>
 
@@ -451,7 +443,7 @@ const Dashboard = () => {
                   navigate("/sell")
                 }
 
-                className="mt-8 inline-flex items-center gap-2 bg-[#2b2545] text-white px-6 py-4 rounded-2xl font-medium"
+                className="mt-8 inline-flex items-center gap-2 bg-[#1f3a2e] text-white px-6 py-4 rounded-2xl font-medium"
               >
                 Start Selling
 
@@ -479,24 +471,31 @@ const Dashboard = () => {
 
                     <img
                       src={
-                        p.images?.[0]
+                        thumb(p.images?.[0]) ||
+                        PLACEHOLDER_IMAGE
                       }
 
                       alt={p.title}
+
+                      loading="lazy"
+
+                      decoding="async"
 
                       className="h-[320px] w-full object-cover hover:scale-105 transition duration-500"
                     />
 
                     {/* BADGE */}
-                    <div className="absolute top-4 left-4 px-3 py-1 rounded-full bg-white/90 backdrop-blur-md text-xs font-medium text-[#2b2545]">
+                    <div className="absolute top-4 left-4 px-3 py-1 rounded-full bg-white/90 backdrop-blur-md text-xs font-medium text-[#1f3a2e]">
 
-                      {p.mode ===
-                        "rent"
-                        ? "For Rent"
+                      {p.status === "sold"
+                        ? "Sold"
                         : p.mode ===
-                          "both"
-                          ? "Rent + Sale"
-                          : "For Sale"}
+                          "rent"
+                          ? "For Rent"
+                          : p.mode ===
+                            "both"
+                            ? "Rent + Sale"
+                            : "For Sale"}
 
                     </div>
 
@@ -505,7 +504,7 @@ const Dashboard = () => {
                   {/* CONTENT */}
                   <div className="p-5">
 
-                    <h3 className="text-xl font-semibold text-[#2b2545] line-clamp-1">
+                    <h3 className="text-xl font-semibold text-[#1f3a2e] line-clamp-1">
                       {p.title}
                     </h3>
 
@@ -521,7 +520,7 @@ const Dashboard = () => {
                           Price
                         </p>
 
-                        <h4 className="text-2xl font-semibold text-[#2b2545]">
+                        <h4 className="text-2xl font-semibold text-[#1f3a2e]">
                           ₹{" "}
                           {p.price ||
                             p.rent}
@@ -587,7 +586,7 @@ const Dashboard = () => {
 
           <div className="flex items-center justify-between mb-6">
 
-            <h2 className="text-2xl font-semibold text-[#2b2545]">
+            <h2 className="text-2xl font-semibold text-[#1f3a2e]">
               Recent Orders
             </h2>
 
@@ -608,7 +607,7 @@ const Dashboard = () => {
 
               <ShoppingBag className="mx-auto text-gray-400" size={42} />
 
-              <h3 className="mt-5 text-xl font-semibold text-[#2b2545]">
+              <h3 className="mt-5 text-xl font-semibold text-[#1f3a2e]">
                 No Orders Yet
               </h3>
 
@@ -639,8 +638,8 @@ const Dashboard = () => {
 
                         <img
                           src={
-                            firstItem
-                              ?.images?.[0]
+                            thumb(firstItem?.images?.[0] || firstItem?.image, 200) ||
+                            PLACEHOLDER_IMAGE
                           }
 
                           alt={
@@ -654,7 +653,7 @@ const Dashboard = () => {
 
                       <div>
 
-                        <h3 className="text-lg font-semibold text-[#2b2545]">
+                        <h3 className="text-lg font-semibold text-[#1f3a2e]">
                           {firstItem?.title ||
                             "Order"}
                         </h3>
@@ -677,7 +676,7 @@ const Dashboard = () => {
                         Total
                       </p>
 
-                      <h3 className="mt-1 text-2xl font-semibold text-[#2b2545]">
+                      <h3 className="mt-1 text-2xl font-semibold text-[#1f3a2e]">
                         ₹ {o.total}
                       </h3>
 

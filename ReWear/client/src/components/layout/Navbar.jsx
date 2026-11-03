@@ -12,6 +12,7 @@ import {
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
+import Logo from "../ui/Logo";
 
 
 const Navbar = () => {
@@ -60,11 +61,11 @@ const Navbar = () => {
           <div className="flex items-center gap-8">
 
             {/* LOGO */}
-            <Link
-              to="/"
-              className="text-2xl sm:text-3xl font-black tracking-tight bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent"
-            >
-              ReWear
+            <Link to="/" aria-label="ReWear home">
+              <Logo
+                size={36}
+                textClassName="text-2xl sm:text-3xl font-black tracking-tight bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent"
+              />
             </Link>
 
             {/* DESKTOP NAV */}

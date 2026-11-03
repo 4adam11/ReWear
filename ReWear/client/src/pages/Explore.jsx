@@ -13,36 +13,68 @@ const ITEMS_PER_PAGE = 9;
 const Explore = () => {
   const [params, setParams] = useSearchParams();
 
-  const [products, setProducts] = useState([]);
-  const [mode, setMode] = useState(params.get("mode") || "sale");
+  const [result, setResult] = useState({
+    items: [],
+    total: 0,
+    pages: 1,
+  });
+  const [mode, setMode] = useState(params.get("mode") === "rent" ? "rent" : "sale");
   const [sort, setSort] = useState("default");
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
 
-  // ✅ SAFE INITIAL FILTER STATE
+  // ✅ SAFE INITIAL FILTER STATE (category links from the home page land here)
   const [filters, setFilters] = useState({
     search: "",
     sizes: [],
-    categories: [],
+    categories: params.get("category") ? [params.get("category")] : [],
     maxPrice: 75000,
   });
 
-  // 🔥 FETCH
+  // Wait until typing pauses before searching
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
   useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(filters.search), 300);
+    return () => clearTimeout(t);
+  }, [filters.search]);
+
+  // 🔥 FETCH ONE PAGE (filtering, sorting and paging happen on the server)
+  useEffect(() => {
+    let ignore = false;
+
     const fetchProducts = async () => {
       try {
         setLoading(true);
-        const { data } = await axios.get(`${API}/products`);
-        setProducts(data);
+
+        const { data } = await axios.get(`${API}/products`, {
+          params: {
+            mode,
+            search: debouncedSearch || undefined,
+            categories: filters.categories.join(",") || undefined,
+            sizes: filters.sizes.join(",") || undefined,
+            maxPrice: filters.maxPrice,
+            sort: sort === "default" ? undefined : sort,
+            page,
+            limit: ITEMS_PER_PAGE,
+          },
+        });
+
+        // Ignore responses that arrive after the filters changed again
+        if (!ignore) setResult(data);
       } catch (err) {
         console.error(err);
       } finally {
-        setLoading(false);
+        if (!ignore) setLoading(false);
       }
     };
 
     fetchProducts();
-  }, []);
+
+    return () => {
+      ignore = true;
+    };
+  }, [mode, debouncedSearch, filters.categories, filters.sizes, filters.maxPrice, sort, page]);
 
   // 🔥 URL SYNC
   useEffect(() => {
@@ -69,68 +101,9 @@ const Explore = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [page]);
 
-  // 🔥 FINAL FILTER (100% SAFE)
-  const filteredProducts = products
-    .filter((product) => {
-      if (!product) return false;
+  const totalPages = result.pages;
 
-      const search = filters?.search || "";
-
-      // ✅ FORCE ARRAY (THIS FIXES YOUR ERROR)
-      const sizes = Array.isArray(filters?.sizes) ? filters.sizes : [];
-      const categories = Array.isArray(filters?.categories)
-        ? filters.categories
-        : [];
-
-      const maxPrice = filters?.maxPrice || 75000;
-
-      // SEARCH
-      if (
-        search &&
-        !product.title?.toLowerCase().includes(search)
-      ) return false;
-
-      // SIZE
-      if (
-        sizes.length > 0 &&
-        !sizes.includes(product.size)
-      ) return false;
-
-      // CATEGORY (SAFE)
-      if (
-        categories.length > 0 &&
-        !categories.includes(product.category?.toLowerCase())
-      ) return false;
-
-      // PRICE
-      const price = product.price || product.rent || 0;
-      if (price > maxPrice) return false;
-
-      // MODE FIX
-      const productMode = product.mode?.toLowerCase();
-
-      if (mode === "sale") {
-        if (!["sale", "sell", "both"].includes(productMode)) return false;
-      }
-
-      if (mode === "rent") {
-        if (!["rent", "both"].includes(productMode)) return false;
-      }
-
-      return true;
-    })
-    .sort((a, b) => {
-      if (sort === "low") return (a.price || a.rent) - (b.price || b.rent);
-      if (sort === "high") return (b.price || b.rent) - (a.price || a.rent);
-      return 0;
-    });
-
-  const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
-
-  const paginatedProducts = filteredProducts.slice(
-    (page - 1) * ITEMS_PER_PAGE,
-    page * ITEMS_PER_PAGE
-  );
+  const paginatedProducts = result.items;
 
   return (
     <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-10">
@@ -152,7 +125,7 @@ const Explore = () => {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-8">
 
         <p className="text-sm sm:text-base text-gray-500 font-medium">
-          {filteredProducts.length} items found
+          {result.total} items found
         </p>
 
         {/* SORT */}

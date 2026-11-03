@@ -88,7 +88,13 @@ export const WishlistProvider = ({
       }
 
       // ADD
-      return [product, ...prev];
+      // Keep only what the card shows (full products with photos can fill browser storage)
+      const { _id, id, title, images, price, rent, mode, category, size, condition } = product;
+
+      return [
+        { _id, id, title, images: images?.slice(0, 1), price, rent, mode, category, size, condition },
+        ...prev,
+      ];
     });
   };
 

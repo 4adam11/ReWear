@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { CATEGORIES, SIZES } from "../../utils/catalog";
 
 import { motion } from "framer-motion";
 
@@ -118,7 +119,7 @@ const FiltersSidebar = ({
             </motion.div>
 
             <div>
-              <h2 className="text-2xl font-black tracking-tight text-[#2b2545]">
+              <h2 className="text-2xl font-black tracking-tight text-[#1f3a2e]">
                 Filters
               </h2>
 
@@ -193,7 +194,7 @@ const FiltersSidebar = ({
 
           <div className="flex flex-wrap gap-3">
 
-            {["S", "M", "L", "XL", "XXL"].map(
+            {SIZES.map(
               (size, i) => {
                 const active =
                   filters.sizes?.includes(size);
@@ -268,13 +269,7 @@ const FiltersSidebar = ({
 
           <div className="flex flex-wrap gap-3">
 
-            {[
-              "wedding",
-              "party",
-              "ethnic",
-              "casual",
-              "street wear",
-            ].map((cat, i) => {
+            {CATEGORIES.map(({ value: cat, label }) => {
               const active =
                 filters.categories?.includes(cat);
 
@@ -299,7 +294,7 @@ const FiltersSidebar = ({
                       : "bg-white/80 border border-gray-100 text-gray-700 hover:border-indigo-200 shadow-sm"
                     }`}
                 >
-                  {cat}
+                  {label}
                 </motion.button>
               );
             })}
@@ -376,7 +371,7 @@ const FiltersSidebar = ({
 
           onClick={handleApply}
 
-          className="relative mt-10 w-full overflow-hidden rounded-2xl bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 px-6 py-4 text-sm font-bold text-white shadow-[0_15px_40px_rgba(99,102,241,0.35)]"
+          className="relative mt-10 w-full overflow-hidden rounded-2xl bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 px-6 py-4 text-sm font-bold text-white shadow-[0_15px_40px_rgba(47,125,91,0.35)]"
         >
 
           {/* MOVING SHINE */}

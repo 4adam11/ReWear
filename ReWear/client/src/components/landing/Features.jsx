@@ -28,10 +28,10 @@ const cardVariant = {
 const Features = () => {
   const features = [
     {
-      title: "AI Smart Pricing",
+      title: "AI Photo Checks",
 
       desc:
-        "Sell faster with AI-powered price suggestions based on demand and market trends.",
+        "Every listing photo is checked by an AI model, so you only see real clothing and nothing inappropriate.",
 
       gradient:
         "from-indigo-500 via-purple-500 to-pink-500",
@@ -181,7 +181,7 @@ const Features = () => {
               <div className="relative h-full rounded-[32px] border border-gray-100 bg-white/80 backdrop-blur-xl p-7 sm:p-8 shadow-lg transition-all duration-500 overflow-hidden">
 
                 {/* HOVER SPOTLIGHT */}
-                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition duration-500 bg-[radial-gradient(circle_at_top_right,rgba(99,102,241,0.12),transparent_40%)]" />
+                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition duration-500 bg-[radial-gradient(circle_at_top_right,rgba(47,125,91,0.12),transparent_40%)]" />
 
                 {/* FLOATING PARTICLE */}
                 <motion.div

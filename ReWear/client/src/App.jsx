@@ -1,23 +1,33 @@
+import { lazy, Suspense } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import MainLayout from "./components/layout/MainLayout";
 
 import Landing from "./pages/Landing";
-import Explore from "./pages/Explore";
-import ProductDetail from "./pages/ProductDetail";
-import Login from "./pages/Login";
-import Checkout from "./pages/Checkout";
-import OrderSuccess from "./pages/OrderSuccess";
-import Orders from "./pages/Orders";
-import HowItWorks from "./pages/HowitWorks";
 import ScrollProgress from "./components/ui/ScrollProgress";
 import CustomCursor from "./components/ui/CustomCursor";
-import Sell from "./pages/Sell";
-import Cart from "./pages/Cart";
-import Wishlist from "./pages/WishList";
-import Dashboard from "./pages/Dashboard";
 import ScrollToTop from "./components/ui/ScrolltoTop";
 
 import ProtectedRoute from "./components/ProtectedRoute";
+
+// Each page is downloaded only when it's first visited, so the home page
+// doesn't wait for the calendar, checkout, dashboard, etc.
+const Explore = lazy(() => import("./pages/Explore"));
+const ProductDetail = lazy(() => import("./pages/ProductDetail"));
+const Login = lazy(() => import("./pages/Login"));
+const Checkout = lazy(() => import("./pages/Checkout"));
+const OrderSuccess = lazy(() => import("./pages/OrderSuccess"));
+const Orders = lazy(() => import("./pages/Orders"));
+const HowItWorks = lazy(() => import("./pages/HowitWorks"));
+const Sell = lazy(() => import("./pages/Sell"));
+const Cart = lazy(() => import("./pages/Cart"));
+const Wishlist = lazy(() => import("./pages/WishList"));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+
+const PageLoader = () => (
+  <div className="min-h-[60vh] flex items-center justify-center">
+    <div className="w-8 h-8 rounded-full border-2 border-gray-200 border-t-[#1f3a2e] animate-spin" />
+  </div>
+);
 
 function App() {
   return (
@@ -29,6 +39,7 @@ function App() {
       <CustomCursor />
 
       <MainLayout>
+        <Suspense fallback={<PageLoader />}>
         <Routes>
 
           {/* PUBLIC ROUTES */}
@@ -38,7 +49,14 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/howitworks" element={<HowItWorks />} />
           <Route path="/wishlist" element={<Wishlist />} />
-          <Route path="/dashboard" element={<Dashboard />} />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
 
           {/* 🔒 PROTECTED ROUTES */}
           <Route
@@ -87,6 +105,7 @@ function App() {
           />
 
         </Routes>
+        </Suspense>
       </MainLayout>
 
     </Router>

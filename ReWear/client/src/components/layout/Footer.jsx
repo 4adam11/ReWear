@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import Logo from "../ui/Logo";
 
 import {
   ArrowUpRight,
@@ -34,20 +35,13 @@ const Footer = () => {
           {/* BRAND */}
           <div className="max-w-md">
 
-            <h2
-              className="
-                text-3xl
-                font-black
-                tracking-tight
-                bg-gradient-to-r
-                from-indigo-500
-                via-purple-500
-                to-pink-500
-                bg-clip-text
-                text-transparent
-              "
-            >
-              ReWear
+            <h2>
+              <Logo
+                size={40}
+                textClassName="text-3xl font-black tracking-tight bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent"
+              />
+
+
             </h2>
 
             <p
@@ -95,6 +89,10 @@ const Footer = () => {
                 AbdulQadir — EN23CS301035
               </p>
 
+              <p className="text-gray-600 text-sm">
+                Adam Rajasthanwala — EN23CS301054
+              </p>
+
             </div>
 
           </div>
@@ -119,7 +117,7 @@ const Footer = () => {
                 mt-5
                 text-2xl
                 font-bold
-                text-[#2b2545]
+                text-[#1f3a2e]
               "
             >
               HaideryDynamics

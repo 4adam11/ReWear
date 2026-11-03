@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- ReWear mark: a dress on a clothes hanger. Keep in sync with src/components/ui/Logo.jsx -->
+  <defs>
+    <linearGradient id="rw-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2f7d5b"/>
+      <stop offset="0.55" stop-color="#6a8a55"/>
+      <stop offset="1" stop-color="#d4623a"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="16" fill="url(#rw-bg)"/>
+  <path d="M29.6 12.6 a2.4 2.4 0 1 1 2.4 2.4 v2.4 l-11 6.4 h22 l-11 -6.4" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M25.6 26 h3.6 l2.8 3.4 l2.8 -3.4 h3.6 l-1.1 10.6 q6.2 7.8 9.2 17 q-14.5 4.3 -29 0 q3 -9.2 9.2 -17 z" fill="#fff"/>
+  <path d="M27.5 36.7 h9" stroke="#2f7d5b" stroke-width="1.8" stroke-linecap="round"/>
+</svg>

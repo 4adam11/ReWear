@@ -14,6 +14,7 @@ import {
 } from "framer-motion";
 
 import { useAuth } from "../context/AuthContext";
+import { LogoMark } from "../components/ui/Logo";
 
 import API from "../utils/api";
 
@@ -196,15 +197,11 @@ const Login = () => {
           {/* BRAND */}
           <div className="mb-10">
 
-            <h1
-              className="
-                text-5xl
-                font-semibold
-                text-white
-                tracking-tight
-              "
-            >
+            <h1 className="text-5xl font-semibold text-white tracking-tight inline-flex items-center gap-4">
+              <LogoMark size={52} />
               ReWear
+
+
             </h1>
 
             <p className="mt-3 text-gray-300 text-lg">

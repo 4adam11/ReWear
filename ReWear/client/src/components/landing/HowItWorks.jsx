@@ -12,7 +12,7 @@ const steps = [
     title: "Upload Your Piece",
 
     desc:
-      "List your outfit in seconds with AI-powered smart suggestions and styling.",
+      "List your outfit in seconds. Our AI photo check makes sure every listing shows real clothing.",
 
     icon: <UploadCloud size={28} />,
 

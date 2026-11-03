@@ -59,7 +59,7 @@ const ProductGrid = ({ products }) => {
             text-2xl
             font-black
             tracking-tight
-            text-[#2b2545]
+            text-[#1f3a2e]
           ">
             No Products Found
           </h3>

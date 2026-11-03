@@ -4,8 +4,6 @@ import { useNavigate } from "react-router-dom";
 
 import {
   ArrowLeft,
-  Minus,
-  Plus,
   Trash2,
   ShoppingBag,
 } from "lucide-react";
@@ -20,8 +18,6 @@ const Cart = () => {
   const removeFromCart =
     cart?.removeFromCart || (() => { });
 
-  const updateQuantity =
-    cart?.updateQuantity || (() => { });
 
   // TOTAL
   const total = cartItems.reduce(
@@ -33,7 +29,7 @@ const Cart = () => {
   );
 
   return (
-    <div className="min-h-screen bg-[#f7f7f8] py-8 sm:py-10">
+    <div className="min-h-screen bg-[#f6f5f0] py-8 sm:py-10">
 
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
 
@@ -44,7 +40,7 @@ const Cart = () => {
           <button
             onClick={() => navigate(-1)}
 
-            className="inline-flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-[#2b2545] transition"
+            className="inline-flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-[#1f3a2e] transition"
           >
             <ArrowLeft size={18} />
 
@@ -54,7 +50,7 @@ const Cart = () => {
           {/* TITLE */}
           <div className="text-center">
 
-            <h1 className="text-3xl sm:text-4xl font-semibold text-[#2b2545]">
+            <h1 className="text-3xl sm:text-4xl font-semibold text-[#1f3a2e]">
               Your Cart
             </h1>
 
@@ -86,7 +82,7 @@ const Cart = () => {
 
             </div>
 
-            <h2 className="mt-6 text-2xl font-semibold text-[#2b2545]">
+            <h2 className="mt-6 text-2xl font-semibold text-[#1f3a2e]">
               Your cart is empty
             </h2>
 
@@ -100,7 +96,7 @@ const Cart = () => {
                 navigate("/explore")
               }
 
-              className="mt-8 px-6 py-3 rounded-xl bg-[#2b2545] text-white font-medium hover:opacity-95 transition"
+              className="mt-8 px-6 py-3 rounded-xl bg-[#1f3a2e] text-white font-medium hover:opacity-95 transition"
             >
               Explore Products
             </button>
@@ -157,7 +153,7 @@ const Cart = () => {
 
                             <div>
 
-                              <h2 className="text-lg font-medium text-[#2b2545]">
+                              <h2 className="text-lg font-medium text-[#1f3a2e]">
                                 {item.title}
                               </h2>
 
@@ -184,7 +180,7 @@ const Cart = () => {
                           </div>
 
                           {/* PRICE */}
-                          <p className="mt-4 text-2xl font-semibold text-[#2b2545]">
+                          <p className="mt-4 text-2xl font-semibold text-[#1f3a2e]">
                             ₹ {itemPrice}
                           </p>
 
@@ -193,39 +189,11 @@ const Cart = () => {
                         {/* BOTTOM */}
                         <div className="flex items-center justify-between mt-6">
 
-                          {/* QUANTITY */}
-                          <div className="flex items-center border border-gray-200 rounded-xl overflow-hidden">
-
-                            <button
-                              onClick={() =>
-                                updateQuantity(
-                                  cartId,
-                                  "dec"
-                                )
-                              }
-
-                              className="w-10 h-10 flex items-center justify-center hover:bg-gray-50 transition"
-                            >
-                              <Minus size={16} />
-                            </button>
-
-                            <div className="w-10 text-center text-sm font-medium">
-                              {quantity}
-                            </div>
-
-                            <button
-                              onClick={() =>
-                                updateQuantity(
-                                  cartId,
-                                  "inc"
-                                )
-                              }
-
-                              className="w-10 h-10 flex items-center justify-center hover:bg-gray-50 transition"
-                            >
-                              <Plus size={16} />
-                            </button>
-
+                          {/* ONE OF A KIND (second-hand items have no quantity) */}
+                          <div className="px-3 py-2 rounded-xl border border-gray-200 text-sm text-gray-600">
+                            {item.mode === "rent" && item.rentStart
+                              ? `${item.rentStart} → ${item.rentEnd}`
+                              : "One of a kind"}
                           </div>
 
                           {/* TOTAL */}
@@ -235,7 +203,7 @@ const Cart = () => {
                               Total
                             </p>
 
-                            <p className="text-lg font-semibold text-[#2b2545]">
+                            <p className="text-lg font-semibold text-[#1f3a2e]">
                               ₹{" "}
                               {itemPrice *
                                 quantity}
@@ -260,7 +228,7 @@ const Cart = () => {
 
               <div className="bg-white border border-gray-100 rounded-2xl p-5 sm:p-6 shadow-sm">
 
-                <h2 className="text-2xl font-semibold text-[#2b2545]">
+                <h2 className="text-2xl font-semibold text-[#1f3a2e]">
                   Order Summary
                 </h2>
 
@@ -303,7 +271,7 @@ const Cart = () => {
                     Total
                   </span>
 
-                  <span className="text-3xl font-semibold text-[#2b2545]">
+                  <span className="text-3xl font-semibold text-[#1f3a2e]">
                     ₹ {total}
                   </span>
 
@@ -319,7 +287,7 @@ const Cart = () => {
                     })
                   }
 
-                  className="w-full mt-8 bg-[#2b2545] text-white py-4 rounded-xl font-medium hover:opacity-95 transition shadow-sm"
+                  className="w-full mt-8 bg-[#1f3a2e] text-white py-4 rounded-xl font-medium hover:opacity-95 transition shadow-sm"
                 >
                   Proceed to Checkout
                 </button>

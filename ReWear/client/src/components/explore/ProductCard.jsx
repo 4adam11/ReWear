@@ -6,9 +6,16 @@ import { motion } from "framer-motion";
 
 import {
   Heart,
-  Star,
+  ShieldCheck,
   ArrowUpRight,
 } from "lucide-react";
+
+import {
+  thumb,
+  PLACEHOLDER_IMAGE,
+} from "../../utils/image";
+
+import { categoryLabel } from "../../utils/catalog";
 
 const ProductCard = ({ product }) => {
   const navigate = useNavigate();
@@ -20,21 +27,16 @@ const ProductCard = ({ product }) => {
     (p) => p._id === product._id
   );
 
+  // A card-sized copy, not the full-resolution original
   const image =
-    product?.images &&
-      product.images.length > 0
-      ? product.images[0]
-      : "https://via.placeholder.com/300x400?text=No+Image";
+    thumb(product?.images?.[0], 600) ||
+    PLACEHOLDER_IMAGE;
 
-  // FAKE RATING
-  const getRandomRating = (id) => {
-    const seed = id?.slice(-2) || "10";
-
-    return (
-      3 +
-      (parseInt(seed, 16) % 20) / 10
-    ).toFixed(1);
-  };
+  // Only photos uploaded through the checker live in this folder
+  const photosChecked =
+    product?.images?.[0]?.includes(
+      "/rewear/products/"
+    );
 
   return (
     <motion.div
@@ -85,26 +87,18 @@ const ProductCard = ({ product }) => {
 
           alt={product.title}
 
+          loading="lazy"
+
+          decoding="async"
+
           className="w-full h-full object-cover"
         />
 
         {/* OVERLAY */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-80" />
 
-        {/* SHINE EFFECT */}
-        <motion.div
-          animate={{
-            x: ["-120%", "120%"],
-          }}
-
-          transition={{
-            repeat: Infinity,
-            duration: 3,
-            ease: "linear",
-          }}
-
-          className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent rotate-12"
-        />
+        {/* SHINE EFFECT (on hover only, instead of animating every card forever) */}
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent rotate-12 -translate-x-[120%] group-hover:translate-x-[120%] transition-transform duration-[1500ms] ease-linear" />
 
         {/* MODE BADGE */}
         <div className="absolute top-4 left-4">
@@ -189,20 +183,8 @@ const ProductCard = ({ product }) => {
 
             {/* CATEGORY */}
             <p className="mt-1 text-sm text-gray-500 capitalize">
-              {product.category}
+              {categoryLabel(product.category)}
             </p>
-
-          </div>
-
-          {/* RATING */}
-          <div className="flex items-center gap-1 rounded-full bg-yellow-50 px-3 py-1 text-xs font-bold text-yellow-600">
-
-            <Star
-              size={14}
-              className="fill-yellow-400 text-yellow-400"
-            />
-
-            {getRandomRating(product._id)}
 
           </div>
 
@@ -213,7 +195,7 @@ const ProductCard = ({ product }) => {
 
           <div>
 
-            <p className="text-2xl font-black tracking-tight text-[#2b2545]">
+            <p className="text-2xl font-black tracking-tight text-[#1f3a2e]">
 
               ₹ {product.price || product.rent}
 
@@ -248,9 +230,12 @@ const ProductCard = ({ product }) => {
               "Good Condition"}
           </div>
 
-          <p className="text-xs text-gray-400">
-            Premium Listing
-          </p>
+          {photosChecked && (
+            <p className="inline-flex items-center gap-1 text-xs text-gray-400">
+              <ShieldCheck size={14} />
+              Photos checked
+            </p>
+          )}
 
         </div>
 
