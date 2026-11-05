@@ -23,6 +23,19 @@ body {
   }
 }
 
+/* Thin, warm scrollbar for sideways product rows */
+.scroll-row {
+  scrollbar-width: thin;
+  scrollbar-color: #d9cbb9 transparent;
+}
+.scroll-row::-webkit-scrollbar {
+  height: 6px;
+}
+.scroll-row::-webkit-scrollbar-thumb {
+  background: #d9cbb9;
+  border-radius: 999px;
+}
+
 /* Booking calendars in the brand colour */
 .rdrDayToday .rdrDayNumber span:after {
   background: #6b4430;

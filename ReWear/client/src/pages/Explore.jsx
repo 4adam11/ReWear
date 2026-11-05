@@ -4,7 +4,8 @@ import axios from "axios";
 import { SlidersHorizontal, X, ChevronLeft, ChevronRight } from "lucide-react";
 
 import API from "../utils/api";
-import { CATEGORIES, SIZES, categoryLabel } from "../utils/catalog";
+import { CATEGORIES, SIZES, categoryLabel, categoryInfo } from "../utils/catalog";
+import { cardImage } from "../utils/image";
 import ProductCard from "../components/explore/ProductCard";
 import usePageTitle from "../hooks/usePageTitle";
 import { money } from "../utils/format";
@@ -115,7 +116,7 @@ const Explore = () => {
 
   const heading =
     seller ? result.items[0]?.sellerName ? `${result.items[0].sellerName}'s items` : "Seller's items"
-      : categories.length === 1 ? `${categoryLabel(categories[0])} wear`
+      : categories.length === 1 ? categoryInfo(categories[0])?.title || `${categoryLabel(categories[0])} wear`
         : mode === "rent" ? "Rent an outfit"
           : mode === "sale" ? "Buy pre-loved"
             : "All fashion";
@@ -132,6 +133,11 @@ const Explore = () => {
     ...(seller ? [{ label: "This seller", clear: () => update({ seller: "" }) }] : []),
   ];
 
+  // One occasion picked: show its banner
+  const single = categories.length === 1 && !seller ? categoryInfo(categories[0]) : null;
+  const bannerImage = single ? result.items[0]?.images?.[0] : null;
+  const counts = result.categoryCounts;
+
   const first = result.total ? (page - 1) * PER_PAGE + 1 : 0;
   const last = Math.min(page * PER_PAGE, result.total);
 
@@ -145,13 +151,63 @@ const Explore = () => {
         <span>{heading}</span>
       </nav>
 
-      <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 mt-2 mb-5">
-        <h1 className="text-[26px] font-bold tracking-tight">{heading}</h1>
-        <span className="text-sm text-muted">
-          {loading ? "Loading…" : `${result.total} item${result.total === 1 ? "" : "s"}`}
-          {search && ` for “${search}”`}
-        </span>
-      </div>
+      {single ? (
+        <section
+          className="mt-3 mb-4 rounded-xl overflow-hidden text-white grid sm:grid-cols-[minmax(0,1fr)_220px]"
+          style={{ backgroundColor: single.color }}
+        >
+          <div className="p-6 sm:p-8 flex flex-col justify-center gap-2">
+            <span className="text-xs font-semibold tracking-[0.08em] uppercase text-white/75">Shop by occasion</span>
+            <h1 className="text-[28px] sm:text-3xl font-bold tracking-tight">{single.title}</h1>
+            <p className="text-[15px] leading-relaxed text-white/85 max-w-xl">{single.tagline}</p>
+            <p className="text-sm font-semibold text-white/90">
+              {loading ? "Loading…" : `${result.total} item${result.total === 1 ? "" : "s"}`}
+              {search && ` for “${search}”`}
+            </p>
+          </div>
+          {bannerImage && (
+            <img src={cardImage(bannerImage, 440)} alt="" className="hidden sm:block w-full h-full max-h-56 object-cover" />
+          )}
+        </section>
+      ) : (
+        <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 mt-2 mb-4">
+          <h1 className="text-[26px] font-bold tracking-tight">{heading}</h1>
+          <span className="text-sm text-muted">
+            {loading ? "Loading…" : `${result.total} item${result.total === 1 ? "" : "s"}`}
+            {search && ` for “${search}”`}
+          </span>
+        </div>
+      )}
+
+      {/* CATEGORY PILLS with live counts */}
+      <nav aria-label="Occasions" className="scroll-row -mx-4 px-4 sm:mx-0 sm:px-0 mb-5 flex gap-2 overflow-x-auto pb-2">
+        <button
+          type="button"
+          onClick={() => update({ category: "" })}
+          aria-pressed={categories.length === 0}
+          className={`flex-shrink-0 h-9 px-4 rounded-full border text-sm font-semibold transition ${categories.length === 0 ? "bg-ink border-ink text-paper" : "bg-white border-line text-ink hover:border-ink"}`}
+        >
+          All{counts ? ` · ${Object.values(counts).reduce((a, b) => a + b, 0)}` : ""}
+        </button>
+        {CATEGORIES.map((c) => {
+          const on = categories.length === 1 && categories[0] === c.value;
+          const n = counts?.[c.value] || 0;
+          return (
+            <button
+              key={c.value}
+              type="button"
+              onClick={() => update({ category: on ? "" : c.value })}
+              aria-pressed={on}
+              className={`flex-shrink-0 inline-flex items-center gap-2 h-9 px-4 rounded-full border text-sm font-semibold transition ${on ? "text-white" : "bg-white border-line text-ink hover:border-ink"} ${counts && !n && !on ? "opacity-50" : ""}`}
+              style={on ? { backgroundColor: c.color, borderColor: c.color } : undefined}
+            >
+              {!on && <span aria-hidden="true" className="w-2 h-2 rounded-full" style={{ backgroundColor: c.color }} />}
+              {c.label}
+              {counts && <span className={on ? "text-white/80" : "text-muted font-medium"}>{n}</span>}
+            </button>
+          );
+        })}
+      </nav>
 
       <div className="flex flex-col lg:flex-row gap-6 items-start">
         {/* FILTERS */}
@@ -197,7 +253,8 @@ const Explore = () => {
                     onChange={() => toggle("category", categories, c.value)}
                     className="w-4 h-4 accent-[#6b4430]"
                   />
-                  {c.label}
+                  <span className="flex-1">{c.label}</span>
+                  {counts && <span className="text-xs text-muted">{counts[c.value] || 0}</span>}
                 </label>
               ))}
             </div>

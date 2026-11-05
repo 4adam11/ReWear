@@ -186,7 +186,13 @@ const CategoryBar = () => {
     <nav aria-label="Categories" className="border-t border-[#efe6da]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-stretch gap-1 overflow-x-auto">
         {CATEGORIES.map((c) => (
-          <Link key={c.value} to={`/explore?category=${c.value}`} className={linkClass(activeCategory === c.value)}>
+          <Link
+            key={c.value}
+            to={`/explore?category=${c.value}`}
+            className={`${linkClass(activeCategory === c.value)} inline-flex items-center gap-1.5`}
+            style={activeCategory === c.value ? { color: c.color, boxShadow: `inset 0 -2px 0 ${c.color}` } : undefined}
+          >
+            <span aria-hidden="true" className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: c.color }} />
             {c.label}
           </Link>
         ))}

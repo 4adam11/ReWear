@@ -60,7 +60,16 @@ export default {
         line: "#e7ddd0",
         muted: "#6e5d50",
         cream: "#f6efe5",
+        // Alternate section background, one step deeper than paper
+        sand: "#f1e8db",
+        // Warm highlight for small badges ("New") and active states
+        accent: "#a8571f",
         brand: { DEFAULT: "#6b4430", dark: "#4a2e20" },
+      },
+      // Warm, low shadows instead of grey ones
+      boxShadow: {
+        card: "0 1px 2px rgba(43, 29, 20, 0.06)",
+        lift: "0 14px 30px -14px rgba(43, 29, 20, 0.35)",
       },
       fontFamily: {
         sans: ["Inter", "system-ui", "-apple-system", "Segoe UI", "sans-serif"],

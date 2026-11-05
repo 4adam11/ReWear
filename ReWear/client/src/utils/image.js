@@ -25,12 +25,28 @@ export const resizeImage = (file, maxSize = 1600, quality = 0.85) =>
     img.src = url;
   });
 
-// Asks Cloudinary for a resized, compressed copy (WebP/AVIF where supported)
-// instead of the full-size original. Other URLs are returned unchanged.
-export const thumb = (url, width = 600) =>
-  typeof url === "string" && url.includes("res.cloudinary.com") && url.includes("/upload/")
-    ? url.replace("/upload/", `/upload/f_auto,q_auto,c_limit,w_${width}/`)
-    : url;
+const isCloudinary = (url) => typeof url === "string" && url.includes("res.cloudinary.com") && url.includes("/upload/");
+
+// Cloudinary does the photo work on the fly (originals are never changed):
+//   e_improve      automatic colour, contrast and exposure correction
+//   e_sharpen      a light sharpen so fabric texture reads at small sizes
+//   f_auto/q_auto  WebP/AVIF at a "good" quality where the browser supports it
+const ENHANCE = "e_improve,e_sharpen:30,f_auto,q_auto:good";
+
+const transform = (url, t) => (isCloudinary(url) ? url.replace("/upload/", `/upload/${t}/`) : url);
+
+// Resized whole photo (no cropping), e.g. the main product image or small thumbnails
+export const thumb = (url, width = 600) => transform(url, `${ENHANCE},c_limit,w_${width}`);
+
+// Product-card crop: every card the same 3:4 shape, with the garment kept in frame (g_auto)
+export const cardImage = (url, width = 400) => transform(url, `${ENHANCE},c_fill,g_auto,ar_3:4,w_${width}`);
+
+// Sharper photos on high-resolution (retina) screens
+export const cardSrcSet = (url, width = 400) =>
+  isCloudinary(url) ? `${cardImage(url, width)} 1x, ${cardImage(url, width * 2)} 2x` : undefined;
+
+export const photoSrcSet = (url, width = 900) =>
+  isCloudinary(url) ? `${thumb(url, width)} 1x, ${thumb(url, Math.min(width * 2, 2000))} 2x` : undefined;
 
 // Local placeholder (the old via.placeholder.com service no longer exists)
 export const PLACEHOLDER_IMAGE =

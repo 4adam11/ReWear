@@ -16,7 +16,7 @@ import "react-date-range/dist/styles.css";
 import "react-date-range/dist/theme/default.css";
 
 import API from "../utils/api";
-import { thumb, PLACEHOLDER_IMAGE } from "../utils/image";
+import { thumb, cardImage, photoSrcSet, PLACEHOLDER_IMAGE } from "../utils/image";
 import { categoryLabel } from "../utils/catalog";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
@@ -210,13 +210,13 @@ const ProductDetail = () => {
                   aria-pressed={activeImage === img}
                   className={`flex-shrink-0 w-[68px] h-[85px] rounded-md overflow-hidden bg-cream ${activeImage === img ? "ring-2 ring-brand" : "border border-line"}`}
                 >
-                  <img src={thumb(img, 160)} alt="" loading="lazy" className="w-full h-full object-cover" />
+                  <img src={cardImage(img, 140)} alt="" loading="lazy" className="w-full h-full object-cover" />
                 </button>
               ))}
             </div>
           )}
           <div className="flex-1 aspect-[4/5] rounded-lg overflow-hidden bg-cream border border-line">
-            <img src={thumb(activeImage, 1200) || PLACEHOLDER_IMAGE} alt={product.title} className="w-full h-full object-cover" />
+            <img src={thumb(activeImage, 900) || PLACEHOLDER_IMAGE} srcSet={photoSrcSet(activeImage, 900)} alt={product.title} className="w-full h-full object-cover" />
           </div>
         </div>
 

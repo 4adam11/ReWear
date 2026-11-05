@@ -138,16 +138,30 @@ router.get("/", async (req, res) => {
   const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || 9, 1), 24);
   const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
 
-  const [items, total] = await Promise.all([
+  // Counts per category with every other filter applied (for the category pills)
+  const { category: _ignored, ...facetFilter } = filter;
+
+  const [items, total, facets] = await Promise.all([
     listQuery(Product.find(filter).sort(sort).skip((page - 1) * limit).limit(limit)),
     Product.countDocuments(filter),
+    Product.aggregate([
+      { $match: facetFilter },
+      { $group: { _id: "$category", n: { $sum: 1 } } },
+    ]),
   ]);
+
+  const categoryCounts = {};
+  for (const f of facets) {
+    const key = normalizeCategory(f._id);
+    if (CATEGORIES.includes(key)) categoryCounts[key] = (categoryCounts[key] || 0) + f.n;
+  }
 
   res.json({
     items: await withSellerNames(items),
     total,
     page,
     pages: Math.max(Math.ceil(total / limit), 1),
+    categoryCounts,
   });
 });
 
@@ -157,22 +171,43 @@ router.get("/", async (req, res) => {
 router.get("/home", async (req, res) => {
   const live = { status: { $in: LIVE } };
 
-  const [fresh, rentals, covers] = await Promise.all([
+  const [fresh, rentals, groups] = await Promise.all([
     listQuery(Product.find(live).sort({ createdAt: -1 }).limit(10)),
     listQuery(Product.find({ ...live, mode: { $in: ["rent", "both"] } }).sort({ createdAt: -1 }).limit(5)),
+    // Per category: how many, a cover photo and the newest few items for its row
     Product.aggregate([
       { $match: { ...live, category: { $in: CATEGORIES } } },
       { $sort: { createdAt: -1 } },
-      { $group: { _id: "$category", image: { $first: { $arrayElemAt: ["$images", 0] } } } },
+      {
+        $group: {
+          _id: "$category",
+          count: { $sum: 1 },
+          items: {
+            $push: {
+              _id: "$_id", title: "$title", price: "$price", rent: "$rent", mode: "$mode", category: "$category",
+              size: "$size", condition: "$condition", status: "$status", user: "$user", createdAt: "$createdAt",
+              images: { $slice: ["$images", 1] },
+            },
+          },
+        },
+      },
+      { $project: { count: 1, items: { $slice: ["$items", 8] } } },
     ]),
   ]);
+
+  const categories = {};
+  for (const g of groups) {
+    categories[g._id] = { count: g.count, cover: g.items[0]?.images?.[0] || null, items: await withSellerNames(g.items) };
+  }
 
   // Rarely changes; let browsers reuse it for a minute
   res.set("Cache-Control", "public, max-age=60");
   res.json({
     fresh: await withSellerNames(fresh),
     rentals: await withSellerNames(rentals),
-    covers: Object.fromEntries(covers.map((c) => [c._id, c.image])),
+    categories,
+    // Kept for older clients
+    covers: Object.fromEntries(Object.entries(categories).map(([k, v]) => [k, v.cover])),
   });
 });
 
