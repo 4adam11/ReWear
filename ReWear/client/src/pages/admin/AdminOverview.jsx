@@ -10,7 +10,7 @@ import usePageTitle from "../../hooks/usePageTitle";
 
 const Stat = ({ label, value, to, tone = "text-ink" }) => {
   const body = (
-    <div className="bg-white border border-line rounded-lg p-5 h-full hover:border-gray-300 transition">
+    <div className="bg-white border border-line rounded-sm p-5 h-full hover:border-gray-300 transition">
       <p className="text-sm text-muted">{label}</p>
       <p className={`mt-2 text-3xl font-semibold tabular-nums ${tone}`}>{value}</p>
     </div>
@@ -39,14 +39,14 @@ const AdminOverview = () => {
   }, []);
 
   if (error) return <p className="text-sm text-red-600">{error}</p>;
-  if (!stats) return <div className="h-40 rounded-lg bg-white border border-line animate-pulse" />;
+  if (!stats) return <div className="h-40 rounded-sm bg-white border border-line animate-pulse" />;
 
   const { listings } = stats;
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-[26px] font-bold tracking-tight text-ink">Overview</h1>
+        <h1 className="page-title">Overview</h1>
         <p className="mt-1 text-sm text-muted">What needs your attention today.</p>
       </div>
 

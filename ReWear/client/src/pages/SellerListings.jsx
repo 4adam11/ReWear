@@ -63,7 +63,7 @@ const PriceEditor = ({ product, onSaved, onClose }) => {
   };
 
   return (
-    <form onSubmit={save} className="mt-3 flex flex-wrap items-end gap-3 rounded-lg border border-line bg-gray-50 p-3">
+    <form onSubmit={save} className="mt-3 flex flex-wrap items-end gap-3 rounded-sm border border-line bg-gray-50 p-3">
       {canSell(product) && (
         <label className="text-xs text-gray-600">
           Selling price (₹)
@@ -90,7 +90,7 @@ const PriceEditor = ({ product, onSaved, onClose }) => {
         </label>
       )}
 
-      <button disabled={busy} className="px-3 py-1.5 rounded-md bg-brand text-white text-sm font-medium disabled:opacity-40">
+      <button disabled={busy} className="btn btn-dark btn-sm">
         {busy ? "Saving…" : "Save price"}
       </button>
       <button type="button" onClick={onClose} className="px-3 py-1.5 rounded-md border border-line bg-white text-sm text-gray-700">
@@ -163,7 +163,7 @@ const SellerListings = () => {
 
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
           <div>
-            <h1 className="text-2xl font-semibold text-ink">My listings</h1>
+            <h1 className="page-title">My listings</h1>
             <p className="mt-1 text-sm text-muted">
               Change prices any time. New photos or details are checked by an admin before going live.
             </p>
@@ -171,7 +171,7 @@ const SellerListings = () => {
 
           <Link
             to="/sell"
-            className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-brand text-white text-sm font-medium hover:bg-brand-dark"
+            className="btn btn-dark btn-sm"
           >
             <Plus size={16} />
             New listing
@@ -185,12 +185,12 @@ const SellerListings = () => {
           </div>
         )}
 
-        <div className="flex gap-1 overflow-x-auto bg-white border border-line rounded-lg p-1 w-fit max-w-full">
+        <div className="tab-bar">
           {TABS.map((t) => (
             <button
               key={t.key}
               onClick={() => setTab(t.key)}
-              className={`px-3 py-1.5 rounded-md text-sm font-medium whitespace-nowrap transition ${tab === t.key ? "bg-brand text-white" : "text-gray-600 hover:bg-gray-50"}`}
+              className={`tab ${tab === t.key ? "tab-active" : ""}`}
             >
               {t.label}
               <span className="ml-1.5 opacity-70">{counts[t.key]}</span>
@@ -199,7 +199,7 @@ const SellerListings = () => {
         </div>
 
         {loading ? (
-          <div className="h-40 rounded-lg bg-white border border-line animate-pulse" />
+          <div className="h-40 rounded-sm bg-white border border-line animate-pulse" />
         ) : shown.length === 0 ? (
           <div className="rounded-lg border border-dashed border-gray-300 bg-white py-16 text-center">
             <p className="text-ink font-medium">No listings here</p>
@@ -208,7 +208,7 @@ const SellerListings = () => {
             </p>
           </div>
         ) : (
-          <ul className="bg-white border border-line rounded-lg divide-y divide-gray-100">
+          <ul className="bg-white border border-line rounded-sm divide-y divide-gray-100">
             {shown.map((p) => {
               const note = statusNote(p);
 

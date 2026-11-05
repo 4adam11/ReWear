@@ -5,7 +5,7 @@ import usePageTitle from "../hooks/usePageTitle";
 // Shows a friendly message instead of a blank page if something on a page crashes
 export const ProblemPage = ({ title, text, action }) => (
   <div className="max-w-md mx-auto px-4 py-24 text-center">
-    <h1 className="text-2xl font-bold">{title}</h1>
+    <h1 className="font-display text-2xl font-bold uppercase tracking-[0.04em]">{title}</h1>
     <p className="mt-2 text-sm text-muted">{text}</p>
     <div className="mt-6">{action}</div>
   </div>
@@ -18,7 +18,7 @@ export const NotFound = () => {
     title="We couldn't find that page"
     text="The link may be broken, or the page may have been removed."
     action={
-      <Link to="/" className="inline-flex items-center h-11 px-5 rounded-md bg-brand text-white text-sm font-semibold hover:bg-brand-dark">
+      <Link to="/" className="btn btn-dark">
         Go to the home page
       </Link>
     }
@@ -55,7 +55,7 @@ class ErrorBoundary extends Component {
           <button
             type="button"
             onClick={() => window.location.reload()}
-            className="h-11 px-5 rounded-md bg-brand text-white text-sm font-semibold hover:bg-brand-dark"
+            className="btn btn-dark"
           >
             Reload the page
           </button>

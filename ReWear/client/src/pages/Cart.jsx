@@ -22,9 +22,9 @@ const Cart = () => {
     return (
       <div className="max-w-md mx-auto px-4 py-24 text-center">
         <ShoppingBag size={32} className="mx-auto text-muted" />
-        <h1 className="mt-4 text-2xl font-bold">Your bag is empty</h1>
+        <h1 className="mt-4 font-display text-2xl font-bold uppercase tracking-[0.04em]">Your bag is empty</h1>
         <p className="mt-2 text-sm text-muted">Items you add to your bag will show up here.</p>
-        <Link to="/explore" className="mt-6 inline-flex items-center h-11 px-5 rounded-md bg-brand text-white text-sm font-semibold hover:bg-brand-dark">
+        <Link to="/explore" className="btn btn-dark mt-6">
           Start shopping
         </Link>
       </div>
@@ -34,14 +34,14 @@ const Cart = () => {
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6">
       <div className="flex flex-wrap items-baseline gap-x-3 mb-5">
-        <h1 className="text-[26px] font-bold tracking-tight">Your bag</h1>
+        <h1 className="page-title">Your bag</h1>
         <span className="text-sm text-muted">
           {cartItems.length} item{cartItems.length !== 1 ? "s" : ""}
         </span>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px] items-start">
-        <ul className="bg-white border border-line rounded-lg divide-y divide-[#efe6da]">
+        <ul className="bg-white border border-line rounded-sm divide-y divide-[#efe6da]">
           {cartItems.map((item) => {
             const key = getCartKey(item);
             const saved = wishlist.some((p) => p._id === item._id);
@@ -104,7 +104,7 @@ const Cart = () => {
           })}
         </ul>
 
-        <aside className="bg-white border border-line rounded-lg p-5 lg:sticky lg:top-32 flex flex-col gap-4">
+        <aside className="bg-white border border-line rounded-sm p-5 lg:sticky lg:top-32 flex flex-col gap-4">
           <h2 className="text-base font-bold">Price details</h2>
           <dl className="flex flex-col gap-2 text-sm">
             <div className="flex justify-between">
@@ -123,7 +123,7 @@ const Cart = () => {
           <button
             type="button"
             onClick={() => navigate("/checkout", { state: { items: cartItems } })}
-            className="h-12 rounded-md bg-brand text-white font-semibold hover:bg-brand-dark"
+            className="btn btn-dark h-12"
           >
             Proceed to checkout
           </button>

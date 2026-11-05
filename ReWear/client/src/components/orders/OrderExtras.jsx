@@ -18,8 +18,6 @@ const DISPUTE_REASONS = {
 
 const BUYER_REASONS = ["not_received", "not_as_described", "damaged", "wrong_item", "other"];
 
-const btn = "h-9 px-4 rounded-md text-[13px] font-semibold disabled:opacity-50";
-
 // Buyer rates the seller once the order is completed
 export const ReviewBox = ({ order, onDone }) => {
   const { authHeader } = useAuth();
@@ -39,7 +37,7 @@ export const ReviewBox = ({ order, onDone }) => {
 
   if (!open) {
     return (
-      <button type="button" onClick={() => setOpen(true)} className={`${btn} bg-brand text-white hover:bg-brand-dark`}>
+      <button type="button" onClick={() => setOpen(true)} className="btn btn-dark btn-sm">
         Rate the seller
       </button>
     );
@@ -60,7 +58,7 @@ export const ReviewBox = ({ order, onDone }) => {
   };
 
   return (
-    <form onSubmit={submit} className="w-full rounded-lg border border-line p-4 flex flex-col gap-3">
+    <form onSubmit={submit} className="w-full rounded-sm border border-line p-4 flex flex-col gap-3">
       <p className="text-sm font-semibold">How was buying from {order.seller?.name || "this seller"}?</p>
       <StarPicker value={rating} onChange={setRating} />
       <label className="flex flex-col gap-1.5 text-sm">
@@ -76,10 +74,10 @@ export const ReviewBox = ({ order, onDone }) => {
       </label>
       {error && <p className="text-[13px] text-red-700">{error}</p>}
       <div className="flex gap-2">
-        <button type="submit" disabled={busy || !rating} className={`${btn} bg-brand text-white hover:bg-brand-dark`}>
+        <button type="submit" disabled={busy || !rating} className="btn btn-dark btn-sm">
           Post review
         </button>
-        <button type="button" onClick={() => setOpen(false)} className={`${btn} border border-line`}>
+        <button type="button" onClick={() => setOpen(false)} className="btn btn-outline btn-sm">
           Cancel
         </button>
       </div>
@@ -99,7 +97,7 @@ export const ProblemBox = ({ order, role, onDone }) => {
 
   if (!open) {
     return (
-      <button type="button" onClick={() => setOpen(true)} className={`${btn} border border-line text-ink hover:border-brand inline-flex items-center gap-1.5`}>
+      <button type="button" onClick={() => setOpen(true)} className="btn btn-outline btn-sm">
         <TriangleAlert size={15} />
         {role === "seller" ? "Report not returned" : "Report a problem"}
       </button>
@@ -121,7 +119,7 @@ export const ProblemBox = ({ order, role, onDone }) => {
   };
 
   return (
-    <form onSubmit={submit} className="w-full rounded-lg border border-line p-4 flex flex-col gap-3">
+    <form onSubmit={submit} className="w-full rounded-sm border border-line p-4 flex flex-col gap-3">
       <p className="text-sm font-semibold">Report a problem with this order</p>
       <p className="-mt-2 text-[13px] text-muted">A ReWear admin reviews every report and can refund the buyer.</p>
       {reasons.length > 1 && (
@@ -149,10 +147,10 @@ export const ProblemBox = ({ order, role, onDone }) => {
       </label>
       {error && <p className="text-[13px] text-red-700">{error}</p>}
       <div className="flex gap-2">
-        <button type="submit" disabled={busy || details.trim().length < 10} className={`${btn} bg-brand text-white hover:bg-brand-dark`}>
+        <button type="submit" disabled={busy || details.trim().length < 10} className="btn btn-dark btn-sm">
           Send report
         </button>
-        <button type="button" onClick={() => setOpen(false)} className={`${btn} border border-line`}>
+        <button type="button" onClick={() => setOpen(false)} className="btn btn-outline btn-sm">
           Cancel
         </button>
       </div>

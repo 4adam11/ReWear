@@ -357,7 +357,7 @@ const Sell = () => {
         {/* HEADER */}
         <div className="mb-8">
 
-          <h1 className="text-[26px] font-bold tracking-tight text-ink">
+          <h1 className="page-title">
             {editId ? "Edit listing" : "List an item"}
           </h1>
 
@@ -383,7 +383,7 @@ const Sell = () => {
           <div className="space-y-6">
 
             {/* MODE */}
-            <div className="bg-white border border-line rounded-lg p-5">
+            <div className="bg-white border border-line rounded-sm p-5">
 
               <p className="text-sm font-medium text-gray-700 mb-4">
                 How do you want to list it?
@@ -415,7 +415,7 @@ const Sell = () => {
             </div>
 
             {/* UPLOAD */}
-            <div className="bg-white border border-line rounded-lg p-5">
+            <div className="bg-white border border-line rounded-sm p-5">
 
               <div className="flex items-center gap-2 mb-5">
 
@@ -546,7 +546,7 @@ const Sell = () => {
             </div>
 
             {/* DETAILS */}
-            <div className="bg-white border border-line rounded-lg p-5 space-y-5">
+            <div className="bg-white border border-line rounded-sm p-5 space-y-5">
 
               <div>
 
@@ -688,7 +688,7 @@ const Sell = () => {
             {(mode === "sell" ||
               mode === "both" ||
               mode === "sale") && (
-                <div className="bg-white border border-line rounded-lg p-5">
+                <div className="bg-white border border-line rounded-sm p-5">
 
                   <label className="text-sm font-medium text-gray-700">
                     Sale price (₹)
@@ -715,7 +715,7 @@ const Sell = () => {
             {/* RENT */}
             {(mode === "rent" ||
               mode === "both") && (
-                <div className="bg-white border border-line rounded-lg p-5">
+                <div className="bg-white border border-line rounded-sm p-5">
 
                   <label className="text-sm font-medium text-gray-700">
                     Rent per day (₹)
@@ -768,7 +768,7 @@ const Sell = () => {
 
               onClick={handleSubmit}
 
-              className="w-full bg-brand text-white py-4 rounded-lg font-medium hover:opacity-95 transition"
+              className="btn btn-dark w-full"
             >
               {loading
                 ? "Saving..."
@@ -782,7 +782,7 @@ const Sell = () => {
           {/* RIGHT */}
           <div className="lg:sticky lg:top-24">
 
-            <div className="bg-white border border-line rounded-lg p-5">
+            <div className="bg-white border border-line rounded-sm p-5">
 
               <div className="flex items-center gap-2 mb-5">
 

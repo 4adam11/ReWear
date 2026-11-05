@@ -52,7 +52,7 @@ const OrderCard = ({ order, onUpdate }) => {
   };
 
   return (
-    <article className="bg-white border border-line rounded-lg overflow-hidden">
+    <article className="bg-white border border-line rounded-sm overflow-hidden">
 
       {/* HEADER */}
       <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-3 bg-gray-50 border-b border-line text-sm">
@@ -152,7 +152,7 @@ const OrderCard = ({ order, onUpdate }) => {
             <button
               disabled={busy}
               onClick={() => act("deliver")}
-              className="px-4 py-2 rounded-lg bg-brand text-white text-sm font-medium hover:bg-brand-dark disabled:opacity-40"
+              className="btn btn-dark btn-sm"
             >
               I've received it
             </button>
@@ -162,7 +162,7 @@ const OrderCard = ({ order, onUpdate }) => {
             <button
               disabled={busy}
               onClick={() => act("complete", "Is everything as described? This completes the order.")}
-              className="px-4 py-2 rounded-lg bg-brand text-white text-sm font-medium hover:bg-brand-dark disabled:opacity-40"
+              className="btn btn-dark btn-sm"
             >
               Everything's fine, complete order
             </button>
@@ -262,16 +262,16 @@ const Orders = () => {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-5">
 
         <div>
-          <h1 className="text-2xl font-semibold text-ink">My orders</h1>
+          <h1 className="page-title">My orders</h1>
           <p className="mt-1 text-sm text-muted">Track deliveries, rentals and returns.</p>
         </div>
 
-        <div className="flex gap-1 overflow-x-auto bg-white border border-line rounded-lg p-1 w-fit max-w-full">
+        <div className="tab-bar">
           {FILTERS.map((f) => (
             <button
               key={f.key}
               onClick={() => setFilter(f.key)}
-              className={`px-3 py-1.5 rounded-md text-sm font-medium whitespace-nowrap transition ${filter === f.key ? "bg-brand text-white" : "text-gray-600 hover:bg-gray-50"}`}
+              className={`tab ${filter === f.key ? "tab-active" : ""}`}
             >
               {f.label}
             </button>
@@ -283,7 +283,7 @@ const Orders = () => {
         {loading ? (
           <div className="space-y-3">
             {[1, 2].map((i) => (
-              <div key={i} className="h-56 rounded-lg bg-white border border-line animate-pulse" />
+              <div key={i} className="h-56 rounded-sm bg-white border border-line animate-pulse" />
             ))}
           </div>
         ) : shown.length === 0 ? (

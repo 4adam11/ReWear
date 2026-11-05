@@ -63,7 +63,7 @@ const ListingReview = ({ item, onDone }) => {
   };
 
   return (
-    <article className="bg-white border border-line rounded-lg overflow-hidden">
+    <article className="bg-white border border-line rounded-sm overflow-hidden">
       <div className="p-5 flex flex-col md:flex-row gap-5">
 
         {/* PHOTOS (all of them, so the admin sees what buyers will see) */}
@@ -74,7 +74,7 @@ const ListingReview = ({ item, onDone }) => {
                 src={thumb(url, 320) || PLACEHOLDER_IMAGE}
                 alt={`${item.title} photo ${i + 1}`}
                 loading="lazy"
-                className={`object-cover rounded-lg border border-line ${i === 0 ? "w-32 h-40 md:w-40 md:h-48" : "w-20 h-24 md:w-40 md:h-24"}`}
+                className={`object-cover rounded-sm border border-line ${i === 0 ? "w-32 h-40 md:w-40 md:h-48" : "w-20 h-24 md:w-40 md:h-24"}`}
               />
             </a>
           ))}
@@ -133,7 +133,7 @@ const ListingReview = ({ item, onDone }) => {
 
           {/* REJECT FORM */}
           {rejecting && (
-            <div className="mt-4 rounded-lg border border-line p-3">
+            <div className="mt-4 rounded-sm border border-line p-3">
               <p className="text-sm font-medium text-gray-800">
                 {isLive ? "Why are you taking this listing down?" : "Why are you rejecting this listing?"}
               </p>
@@ -144,7 +144,7 @@ const ListingReview = ({ item, onDone }) => {
                   <button
                     key={r}
                     onClick={() => setReason(r)}
-                    className={`px-2.5 py-1 rounded-md border text-xs transition ${reason === r ? "border-gray-900 bg-brand text-white" : "border-line text-gray-700 hover:border-gray-400"}`}
+                    className={`px-2.5 py-1 rounded-md border text-xs transition ${reason === r ? "border-ink bg-ink text-paper" : "border-line text-gray-700 hover:border-gray-400"}`}
                   >
                     {r}
                   </button>
@@ -157,7 +157,7 @@ const ListingReview = ({ item, onDone }) => {
                 rows={2}
                 maxLength={500}
                 placeholder="Or write your own reason"
-                className="mt-3 w-full rounded-lg border border-line px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                className="mt-3 w-full rounded-sm border border-line px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-200"
               />
 
               <div className="mt-3 flex gap-2">
@@ -170,7 +170,7 @@ const ListingReview = ({ item, onDone }) => {
                 </button>
                 <button
                   onClick={() => setRejecting(false)}
-                  className="px-4 py-2 rounded-lg border border-line text-sm text-gray-700 hover:bg-gray-50"
+                  className="btn btn-outline btn-sm"
                 >
                   Cancel
                 </button>
@@ -206,7 +206,7 @@ const ListingReview = ({ item, onDone }) => {
 
             <Link
               to={`/product/${item._id}`}
-              className="flex-1 md:flex-none inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg border border-line text-gray-700 text-sm hover:bg-gray-50"
+              className="flex-1 md:flex-none inline-flex items-center justify-center gap-2 px-4 py-2 rounded-sm border border-line text-gray-700 text-sm hover:bg-gray-50"
             >
               <ExternalLink size={16} />
               View page
@@ -273,7 +273,7 @@ const AdminListings = () => {
   return (
     <div className="space-y-5">
       <div>
-        <h1 className="text-2xl font-semibold text-ink">Review queue</h1>
+        <h1 className="page-title">Review queue</h1>
         <p className="mt-1 text-sm text-muted">
           New and edited listings stay hidden until you approve them. The AI check flags anything it's unsure about, but you make the final call.
         </p>
@@ -281,7 +281,7 @@ const AdminListings = () => {
 
       {/* TABS + SEARCH */}
       <div className="flex flex-col md:flex-row md:items-center gap-3 justify-between">
-        <div className="flex gap-1 overflow-x-auto bg-white border border-line rounded-lg p-1">
+        <div className="tab-bar md:flex-1">
           {TABS.map((t) => (
             <button
               key={t.key}
@@ -289,7 +289,7 @@ const AdminListings = () => {
                 setParams(t.key === "pending" ? {} : { status: t.key });
                 setPage(1);
               }}
-              className={`px-3 py-1.5 rounded-md text-sm font-medium whitespace-nowrap transition ${tab === t.key ? "bg-brand text-white" : "text-gray-600 hover:bg-gray-50"}`}
+              className={`tab ${tab === t.key ? "tab-active" : ""}`}
             >
               {t.label}
               {tab === t.key && !loading && <span className="ml-1.5 opacity-70">{result.total}</span>}
@@ -310,7 +310,7 @@ const AdminListings = () => {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search titles"
-            className="w-full pl-9 pr-3 py-2 rounded-lg border border-line bg-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-200"
+            className="w-full pl-9 pr-3 py-2 rounded-sm border border-line bg-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-200"
           />
         </form>
       </div>
@@ -320,7 +320,7 @@ const AdminListings = () => {
       {loading ? (
         <div className="space-y-3">
           {[1, 2].map((i) => (
-            <div key={i} className="h-48 rounded-lg bg-white border border-line animate-pulse" />
+            <div key={i} className="h-48 rounded-sm bg-white border border-line animate-pulse" />
           ))}
         </div>
       ) : result.items.length === 0 ? (
@@ -343,7 +343,7 @@ const AdminListings = () => {
           <button
             disabled={page <= 1}
             onClick={() => setPage(page - 1)}
-            className="px-3 py-1.5 rounded-lg border border-line bg-white text-sm disabled:opacity-40"
+            className="px-3 py-1.5 rounded-sm border border-line bg-white text-sm disabled:opacity-40"
           >
             Previous
           </button>
@@ -353,7 +353,7 @@ const AdminListings = () => {
           <button
             disabled={page >= result.pages}
             onClick={() => setPage(page + 1)}
-            className="px-3 py-1.5 rounded-lg border border-line bg-white text-sm disabled:opacity-40"
+            className="px-3 py-1.5 rounded-sm border border-line bg-white text-sm disabled:opacity-40"
           >
             Next
           </button>

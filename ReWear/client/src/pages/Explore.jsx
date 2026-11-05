@@ -349,7 +349,7 @@ const Explore = () => {
               <button
                 type="button"
                 onClick={() => setParams({})}
-                className="mt-4 h-10 px-4 rounded-md bg-brand text-white text-sm font-semibold hover:bg-brand-dark"
+                className="mt-4 btn btn-dark btn-sm"
               >
                 Clear filters
               </button>
@@ -379,7 +379,7 @@ const Explore = () => {
                   type="button"
                   aria-current={page === i + 1 ? "page" : undefined}
                   onClick={() => update({ page: i + 1 }, { keepPage: true })}
-                  className={`min-w-[44px] h-10 rounded-md text-sm ${page === i + 1 ? "bg-brand text-white font-semibold" : "bg-white border border-line hover:border-brand"}`}
+                  className={`min-w-[44px] h-10 rounded-md text-sm ${page === i + 1 ? "bg-ink text-paper font-semibold" : "bg-white border border-line hover:border-brand"}`}
                 >
                   {i + 1}
                 </button>

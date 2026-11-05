@@ -31,18 +31,18 @@ const AdminActivity = () => {
   return (
     <div className="space-y-5">
       <div>
-        <h1 className="text-[26px] font-bold tracking-tight">Activity log</h1>
+        <h1 className="page-title">Activity log</h1>
         <p className="mt-1 text-sm text-muted">Every admin decision, who made it and when. The latest 100 are shown.</p>
       </div>
 
       {!logs ? (
-        <div className="h-40 rounded-lg bg-white border border-line animate-pulse" />
+        <div className="h-40 rounded-sm bg-white border border-line animate-pulse" />
       ) : logs.length === 0 ? (
         <div className="rounded-lg border border-dashed border-[#d9cbb9] bg-white py-14 text-center text-sm text-muted">
           No admin actions yet.
         </div>
       ) : (
-        <div className="bg-white border border-line rounded-lg overflow-x-auto">
+        <div className="bg-white border border-line rounded-sm overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="text-left text-xs text-muted border-b border-line">

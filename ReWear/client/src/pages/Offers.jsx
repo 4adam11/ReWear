@@ -10,7 +10,7 @@ import StatusBadge from "../components/ui/StatusBadge";
 import { money } from "../utils/format";
 import usePageTitle from "../hooks/usePageTitle";
 
-const btn = "h-9 px-3.5 rounded-md text-[13px] font-semibold disabled:opacity-50";
+const btn = "btn btn-sm";
 
 const OfferRow = ({ offer, side, onChange }) => {
   const { authHeader } = useAuth();
@@ -69,10 +69,10 @@ const OfferRow = ({ offer, side, onChange }) => {
 
       {side === "received" && status === "pending" && !countering && (
         <div className="flex flex-wrap gap-2">
-          <button type="button" disabled={busy} onClick={() => act("accept")} className={`${btn} bg-brand text-white hover:bg-brand-dark`}>
+          <button type="button" disabled={busy} onClick={() => act("accept")} className="btn btn-dark btn-sm">
             Accept {money(offer.amount)}
           </button>
-          <button type="button" disabled={busy} onClick={() => setCountering(true)} className={`${btn} border border-line hover:border-brand`}>
+          <button type="button" disabled={busy} onClick={() => setCountering(true)} className="btn btn-outline btn-sm">
             Counter
           </button>
           <button type="button" disabled={busy} onClick={() => act("reject")} className={`${btn} text-red-700 hover:bg-red-50`}>
@@ -102,7 +102,7 @@ const OfferRow = ({ offer, side, onChange }) => {
             onChange={(e) => setCounter(e.target.value)}
             className="h-9 w-32 px-3 rounded-md border border-[#d9cbb9] focus:outline-none focus:border-brand"
           />
-          <button type="submit" disabled={busy || !counter} className={`${btn} bg-brand text-white hover:bg-brand-dark`}>
+          <button type="submit" disabled={busy || !counter} className="btn btn-dark btn-sm">
             Send counter-offer
           </button>
           <button type="button" onClick={() => setCountering(false)} className={`${btn} text-muted`}>
@@ -113,10 +113,10 @@ const OfferRow = ({ offer, side, onChange }) => {
 
       {side === "sent" && status === "countered" && (
         <div className="flex flex-wrap gap-2">
-          <button type="button" disabled={busy} onClick={() => act("accept")} className={`${btn} bg-brand text-white hover:bg-brand-dark`}>
+          <button type="button" disabled={busy} onClick={() => act("accept")} className="btn btn-dark btn-sm">
             Accept {money(offer.counterAmount)}
           </button>
-          <button type="button" disabled={busy} onClick={() => act("reject")} className={`${btn} border border-line hover:border-brand`}>
+          <button type="button" disabled={busy} onClick={() => act("reject")} className="btn btn-outline btn-sm">
             Decline
           </button>
         </div>
@@ -129,7 +129,7 @@ const OfferRow = ({ offer, side, onChange }) => {
       )}
 
       {side === "sent" && status === "accepted" && (
-        <Link to={`/product/${offer.product}`} className={`${btn} self-start inline-flex items-center bg-brand text-white hover:bg-brand-dark`}>
+        <Link to={`/product/${offer.product}`} className="btn btn-dark btn-sm self-start">
           Buy at {money(offer.amount)}
         </Link>
       )}
@@ -156,11 +156,11 @@ const Offers = () => {
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 flex flex-col gap-5">
       <div>
-        <h1 className="text-[26px] font-bold tracking-tight">Offers</h1>
+        <h1 className="page-title">Offers</h1>
         <p className="text-sm text-muted">Haggle like a real market: buyers make offers, sellers accept, decline or counter.</p>
       </div>
 
-      <div role="tablist" aria-label="Offers" className="flex gap-1 border-b border-line">
+      <div role="tablist" aria-label="Offers" className="tab-bar">
         {[
           ["sent", "Offers you made"],
           ["received", "Offers on your items"],
@@ -171,7 +171,7 @@ const Offers = () => {
             role="tab"
             aria-selected={tab === key}
             onClick={() => setParams(key === "received" ? { tab: key } : {})}
-            className={`px-4 py-2.5 text-sm font-semibold -mb-px border-b-2 ${tab === key ? "border-brand text-brand" : "border-transparent text-muted hover:text-ink"}`}
+            className={`tab ${tab === key ? "tab-active" : ""}`}
           >
             {label}
           </button>
@@ -179,7 +179,7 @@ const Offers = () => {
       </div>
 
       {!offers ? (
-        <div className="h-40 rounded-lg bg-white border border-line animate-pulse" />
+        <div className="h-40 rounded-sm bg-white border border-line animate-pulse" />
       ) : offers.length === 0 ? (
         <div className="rounded-lg border border-dashed border-[#d9cbb9] bg-white py-14 text-center">
           <p className="font-semibold">No offers yet</p>
@@ -188,7 +188,7 @@ const Offers = () => {
           </p>
         </div>
       ) : (
-        <ul className="bg-white border border-line rounded-lg divide-y divide-[#efe6da]">
+        <ul className="bg-white border border-line rounded-sm divide-y divide-[#efe6da]">
           {offers.map((o) => (
             <OfferRow key={o._id} offer={o} side={tab} onChange={(next) => setOffers((list) => list.map((x) => (x._id === next._id ? next : x)))} />
           ))}

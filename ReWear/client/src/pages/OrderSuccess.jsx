@@ -25,9 +25,9 @@ const OrderSuccess = () => {
 
   return (
     <div className="max-w-xl mx-auto px-4 py-12">
-      <div className="bg-white border border-line rounded-lg p-7 sm:p-9">
+      <div className="bg-white border border-line rounded-sm p-7 sm:p-9">
         <CircleCheck size={40} className="text-[#3f6b4a]" />
-        <h1 className="mt-4 text-2xl font-bold tracking-tight">
+        <h1 className="mt-4 font-display text-2xl font-bold uppercase tracking-[0.04em]">
           Order placed{user?.name ? `, ${user.name.split(" ")[0]}` : ""}
         </h1>
         <p className="mt-2 text-[15px] text-muted">
@@ -50,10 +50,10 @@ const OrderSuccess = () => {
         </div>
 
         <div className="mt-7 flex flex-wrap gap-2.5">
-          <Link to="/orders" className="inline-flex items-center h-11 px-5 rounded-md bg-brand text-white text-sm font-semibold hover:bg-brand-dark">
+          <Link to="/orders" className="btn btn-dark">
             Track your order
           </Link>
-          <Link to="/explore" className="inline-flex items-center h-11 px-5 rounded-md border border-ink text-sm font-semibold hover:bg-cream">
+          <Link to="/explore" className="btn btn-outline">
             Continue shopping
           </Link>
         </div>

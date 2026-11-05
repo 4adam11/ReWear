@@ -20,7 +20,7 @@ const Field = ({ id, label, className = "", children }) => (
 );
 
 const Card = ({ title, text, children }) => (
-  <section className="bg-white border border-line rounded-lg">
+  <section className="bg-white border border-line rounded-sm">
     <div className="px-5 py-4 border-b border-[#efe6da]">
       <h2 className="text-base font-bold">{title}</h2>
       {text && <p className="text-[13px] text-muted">{text}</p>}
@@ -37,7 +37,7 @@ const Message = ({ msg }) =>
   ) : null;
 
 const SaveButton = ({ busy, children }) => (
-  <button type="submit" disabled={busy} className="h-10 px-5 rounded-md bg-brand text-white text-sm font-semibold hover:bg-brand-dark disabled:opacity-50">
+  <button type="submit" disabled={busy} className="btn btn-dark btn-sm">
     {children}
   </button>
 );
@@ -118,7 +118,7 @@ const Account = () => {
   if (!profile) {
     return (
       <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6">
-        <div className="h-64 rounded-lg bg-white border border-line animate-pulse" />
+        <div className="h-64 rounded-sm bg-white border border-line animate-pulse" />
       </div>
     );
   }
@@ -128,7 +128,7 @@ const Account = () => {
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6 flex flex-col gap-5">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h1 className="text-[26px] font-bold tracking-tight">Your account</h1>
+        <h1 className="page-title">Your account</h1>
         <Link to={`/seller/${profile._id}`} className="text-sm font-semibold text-brand hover:underline">
           View your public shop
         </Link>
@@ -192,7 +192,7 @@ const Account = () => {
               </div>
               <div className="sm:col-span-2 flex gap-2">
                 <SaveButton busy={busy === "address"}>Save address</SaveButton>
-                <button type="button" onClick={() => setAdding(false)} className="h-10 px-4 rounded-md border border-line text-sm font-semibold">
+                <button type="button" onClick={() => setAdding(false)} className="btn btn-outline btn-sm">
                   Cancel
                 </button>
               </div>

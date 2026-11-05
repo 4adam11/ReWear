@@ -113,8 +113,8 @@ const ProductDetail = () => {
   if (loading) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 grid lg:grid-cols-2 gap-10">
-        <div className="aspect-[4/5] rounded-lg bg-white border border-line animate-pulse" />
-        <div className="h-[520px] rounded-lg bg-white border border-line animate-pulse" />
+        <div className="aspect-[4/5] rounded-sm bg-white border border-line animate-pulse" />
+        <div className="h-[520px] rounded-sm bg-white border border-line animate-pulse" />
       </div>
     );
   }
@@ -122,9 +122,9 @@ const ProductDetail = () => {
   if (!product) {
     return (
       <div className="max-w-md mx-auto px-4 py-24 text-center">
-        <h1 className="text-2xl font-bold">This item isn't available</h1>
+        <h1 className="font-display text-2xl font-bold uppercase tracking-[0.04em]">This item isn't available</h1>
         <p className="mt-2 text-sm text-muted">It may have been removed by the seller.</p>
-        <Link to="/explore" className="mt-6 inline-flex items-center h-11 px-5 rounded-md bg-brand text-white text-sm font-semibold">
+        <Link to="/explore" className="btn btn-dark mt-6">
           Keep shopping
         </Link>
       </div>
@@ -252,7 +252,7 @@ const ProductDetail = () => {
           </div>
 
           {mode === "rent" && canRent && (
-            <div className="bg-white border border-line rounded-lg overflow-hidden">
+            <div className="bg-white border border-line rounded-sm overflow-hidden">
               <p className="px-4 pt-3.5 text-sm font-semibold">Pick your dates</p>
               <div className="flex justify-center rewear-calendar">
                 <DateRange
@@ -279,7 +279,7 @@ const ProductDetail = () => {
           )}
 
           {mode === "sale" && canBuy && (
-            <div className="bg-white border border-line rounded-lg p-4">
+            <div className="bg-white border border-line rounded-sm p-4">
               <p className="text-sm font-semibold">One of a kind</p>
               <p className="mt-1 text-[13px] leading-relaxed text-muted">
                 There is only one of this piece. Once someone buys it, it comes off the site.
@@ -360,7 +360,7 @@ const ProductDetail = () => {
 
       {/* DETAILS + SELLER */}
       <section className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] items-start">
-        <div className="bg-white border border-line rounded-lg p-6">
+        <div className="bg-white border border-line rounded-sm p-6">
           <h2 className="text-lg font-bold">Product details</h2>
           <p className="mt-3 text-[15px] leading-relaxed text-[#4a3a2e] whitespace-pre-line">
             {product.description || "The seller hasn't added a description. Check the photos, size and condition before ordering."}
@@ -384,7 +384,7 @@ const ProductDetail = () => {
         </div>
 
         {product.seller && (
-          <div className="bg-white border border-line rounded-lg p-6 flex flex-col gap-3">
+          <div className="bg-white border border-line rounded-sm p-6 flex flex-col gap-3">
             <h2 className="text-lg font-bold">About the seller</h2>
             <div className="flex items-center gap-3">
               <span aria-hidden="true" className="w-11 h-11 rounded-full bg-[#f1e6d8] text-brand font-bold flex items-center justify-center">

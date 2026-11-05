@@ -18,7 +18,7 @@ const SELLING = [
 ];
 
 const Steps = ({ title, steps }) => (
-  <section className="bg-white border border-line rounded-xl p-6 sm:p-8">
+  <section className="bg-white border border-line rounded-sm p-6 sm:p-8">
     <h2 className="text-xl font-bold mb-5">{title}</h2>
     <ol className="flex flex-col gap-5">
       {steps.map((s, i) => (
@@ -41,7 +41,7 @@ const HowItWorks = () => {
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 flex flex-col gap-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">How ReWear works</h1>
+        <h1 className="page-title">How ReWear works</h1>
         <p className="mt-2 text-[15px] text-muted max-w-2xl">
           ReWear is a marketplace for pre-loved Indian fashion. You can buy a piece to keep, or rent it for an event and send it back.
         </p>
@@ -53,12 +53,12 @@ const HowItWorks = () => {
       </div>
 
       <div className="flex flex-wrap gap-3">
-        <Link to="/explore" className="inline-flex items-center h-11 px-5 rounded-md bg-brand text-white text-sm font-semibold hover:bg-brand-dark">
+        <Link to="/explore" className="btn btn-dark">
           Start shopping
         </Link>
         <Link
           to="/sell"
-          className="inline-flex items-center h-11 px-5 rounded-md border border-ink text-sm font-semibold hover:bg-cream"
+          className="btn btn-outline"
         >
           List an item
         </Link>

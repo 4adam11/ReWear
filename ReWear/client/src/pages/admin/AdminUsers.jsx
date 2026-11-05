@@ -49,7 +49,7 @@ const AdminUsers = () => {
     <div className="space-y-5">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold text-ink">Users</h1>
+          <h1 className="page-title">Users</h1>
           <p className="mt-1 text-sm text-muted">Block accounts that break the rules. Their live listings are hidden too.</p>
         </div>
 
@@ -65,14 +65,14 @@ const AdminUsers = () => {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search name or email"
-            className="w-full pl-9 pr-3 py-2 rounded-lg border border-line bg-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-200"
+            className="w-full pl-9 pr-3 py-2 rounded-sm border border-line bg-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-200"
           />
         </form>
       </div>
 
       {error && <p className="text-sm text-red-600">{error}</p>}
 
-      <div className="bg-white border border-line rounded-lg overflow-x-auto">
+      <div className="bg-white border border-line rounded-sm overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="text-left text-muted border-b border-line">

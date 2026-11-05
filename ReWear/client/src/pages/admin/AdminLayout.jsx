@@ -22,7 +22,7 @@ const AdminLayout = () => (
       <div className="flex flex-col lg:flex-row gap-6 items-start">
 
         {/* SIDEBAR */}
-        <nav className="w-full lg:w-56 flex-shrink-0 bg-white border border-line rounded-lg p-2 flex lg:flex-col gap-1 overflow-x-auto lg:sticky lg:top-24">
+        <nav className="w-full lg:w-56 flex-shrink-0 bg-white border border-line rounded-sm p-2 flex lg:flex-col gap-1 overflow-x-auto lg:sticky lg:top-24">
           {LINKS.map(({ to, label, icon: Icon, end }) => (
             <NavLink
               key={to}

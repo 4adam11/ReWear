@@ -58,7 +58,7 @@ const SaleCard = ({ order, onUpdate }) => {
   };
 
   return (
-    <article className="bg-white border border-line rounded-lg overflow-hidden">
+    <article className="bg-white border border-line rounded-sm overflow-hidden">
       <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-3 bg-gray-50 border-b border-line text-sm">
         <div className="flex flex-wrap items-center gap-x-6 gap-y-1 text-gray-600">
           <StatusBadge status={status} />
@@ -135,13 +135,13 @@ const SaleCard = ({ order, onUpdate }) => {
 
           {/* SHIP FORM */}
           {form === "ship" && (
-            <div className="rounded-lg border border-line p-4 space-y-3">
+            <div className="rounded-sm border border-line p-4 space-y-3">
               <p className="text-sm font-medium text-ink">Shipping details</p>
               <div className="flex flex-wrap gap-3">
                 <select
                   value={courier}
                   onChange={(e) => setCourier(e.target.value)}
-                  className="rounded-lg border border-line px-3 py-2 text-sm bg-white"
+                  className="rounded-sm border border-line px-3 py-2 text-sm bg-white"
                 >
                   {COURIERS.map((c) => (
                     <option key={c}>{c}</option>
@@ -151,18 +151,18 @@ const SaleCard = ({ order, onUpdate }) => {
                   value={tracking}
                   onChange={(e) => setTracking(e.target.value)}
                   placeholder={courier === "Self delivery" ? "e.g. Hand-delivered" : "Tracking number"}
-                  className="flex-1 min-w-[180px] rounded-lg border border-line px-3 py-2 text-sm"
+                  className="flex-1 min-w-[180px] rounded-sm border border-line px-3 py-2 text-sm"
                 />
               </div>
               <div className="flex gap-2">
                 <button
                   disabled={busy || !tracking.trim()}
                   onClick={() => act("ship", { courier, trackingNumber: tracking })}
-                  className="px-4 py-2 rounded-lg bg-brand text-white text-sm font-medium disabled:opacity-40"
+                  className="btn btn-dark btn-sm"
                 >
                   Mark as shipped
                 </button>
-                <button onClick={() => setForm(null)} className="px-4 py-2 rounded-lg border border-line text-sm">
+                <button onClick={() => setForm(null)} className="btn btn-outline btn-sm">
                   Cancel
                 </button>
               </div>
@@ -171,7 +171,7 @@ const SaleCard = ({ order, onUpdate }) => {
 
           {/* DECLINE FORM */}
           {form === "decline" && (
-            <div className="rounded-lg border border-line p-4 space-y-3">
+            <div className="rounded-sm border border-line p-4 space-y-3">
               <p className="text-sm font-medium text-ink">Why can't you fulfil this order?</p>
               <p className="text-xs text-muted -mt-2">The buyer will see this, and the item goes back on sale.</p>
               <textarea
@@ -180,7 +180,7 @@ const SaleCard = ({ order, onUpdate }) => {
                 rows={2}
                 maxLength={500}
                 placeholder="e.g. Found a stain while packing"
-                className="w-full rounded-lg border border-line px-3 py-2 text-sm"
+                className="w-full rounded-sm border border-line px-3 py-2 text-sm"
               />
               <div className="flex gap-2">
                 <button
@@ -190,7 +190,7 @@ const SaleCard = ({ order, onUpdate }) => {
                 >
                   Cancel order
                 </button>
-                <button onClick={() => setForm(null)} className="px-4 py-2 rounded-lg border border-line text-sm">
+                <button onClick={() => setForm(null)} className="btn btn-outline btn-sm">
                   Back
                 </button>
               </div>
@@ -226,7 +226,7 @@ const SaleCard = ({ order, onUpdate }) => {
               {status === "accepted" && (
                 <button
                   onClick={() => setForm("ship")}
-                  className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-brand text-white text-sm font-medium hover:bg-brand-dark"
+                  className="btn btn-dark btn-sm"
                 >
                   <Truck size={16} />
                   Mark as shipped
@@ -237,7 +237,7 @@ const SaleCard = ({ order, onUpdate }) => {
                 <button
                   disabled={busy}
                   onClick={() => act("deliver")}
-                  className="px-4 py-2 rounded-lg bg-brand text-white text-sm font-medium hover:bg-brand-dark disabled:opacity-40"
+                  className="btn btn-dark btn-sm"
                 >
                   Mark as delivered
                 </button>
@@ -247,7 +247,7 @@ const SaleCard = ({ order, onUpdate }) => {
                 <button
                   disabled={busy}
                   onClick={() => window.confirm("Confirm the outfit has been returned to you?") && act("return")}
-                  className="px-4 py-2 rounded-lg bg-brand text-white text-sm font-medium hover:bg-brand-dark disabled:opacity-40"
+                  className="btn btn-dark btn-sm"
                 >
                   Confirm return
                 </button>
@@ -292,16 +292,16 @@ const SellerOrders = () => {
     <div className="min-h-screen bg-paper">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-5">
         <div>
-          <h1 className="text-2xl font-semibold text-ink">Orders to fulfil</h1>
+          <h1 className="page-title">Orders to fulfil</h1>
           <p className="mt-1 text-sm text-muted">Accept new orders, ship them with tracking, and confirm rental returns.</p>
         </div>
 
-        <div className="flex gap-1 overflow-x-auto bg-white border border-line rounded-lg p-1 w-fit max-w-full">
+        <div className="tab-bar">
           {TABS.map((t) => (
             <button
               key={t.key}
               onClick={() => setTab(t.key)}
-              className={`px-3 py-1.5 rounded-md text-sm font-medium whitespace-nowrap transition ${tab === t.key ? "bg-brand text-white" : "text-gray-600 hover:bg-gray-50"}`}
+              className={`tab ${tab === t.key ? "tab-active" : ""}`}
             >
               {t.label}
               <span className={`ml-1.5 ${counts[t.key] && ["confirmed", "accepted"].includes(t.key) && tab !== t.key ? "text-pink-700 font-semibold" : "opacity-70"}`}>
@@ -312,7 +312,7 @@ const SellerOrders = () => {
         </div>
 
         {loading ? (
-          <div className="h-48 rounded-lg bg-white border border-line animate-pulse" />
+          <div className="h-48 rounded-sm bg-white border border-line animate-pulse" />
         ) : shown.length === 0 ? (
           <div className="rounded-lg border border-dashed border-gray-300 bg-white py-16 text-center">
             <p className="text-ink font-medium">Nothing here</p>

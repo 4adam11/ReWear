@@ -31,7 +31,7 @@ const DisputeCard = ({ dispute, onResolved }) => {
   const open = dispute.status === "open";
 
   return (
-    <article className="bg-white border border-line rounded-lg overflow-hidden">
+    <article className="bg-white border border-line rounded-sm overflow-hidden">
       <div className="flex flex-wrap items-center justify-between gap-2 px-5 py-3 bg-cream border-b border-line text-sm">
         <span className="flex items-center gap-2">
           <StatusBadge status={dispute.status === "open" ? "open" : dispute.status} />
@@ -75,7 +75,7 @@ const DisputeCard = ({ dispute, onResolved }) => {
                   type="button"
                   disabled={busy || note.trim().length < 5}
                   onClick={() => resolve("refund")}
-                  className="h-9 px-4 rounded-md bg-brand text-white text-[13px] font-semibold hover:bg-brand-dark disabled:opacity-50"
+                  className="btn btn-dark btn-sm"
                 >
                   Refund the buyer
                 </button>
@@ -83,7 +83,7 @@ const DisputeCard = ({ dispute, onResolved }) => {
                   type="button"
                   disabled={busy || note.trim().length < 5}
                   onClick={() => resolve("reject")}
-                  className="h-9 px-4 rounded-md border border-line text-[13px] font-semibold hover:border-brand disabled:opacity-50"
+                  className="btn btn-outline btn-sm"
                 >
                   Reject report, order continues
                 </button>
@@ -133,11 +133,11 @@ const AdminDisputes = () => {
   return (
     <div className="space-y-5">
       <div>
-        <h1 className="text-[26px] font-bold tracking-tight">Problem reports</h1>
+        <h1 className="page-title">Problem reports</h1>
         <p className="mt-1 text-sm text-muted">Buyers and sellers report problems with orders. You decide whether the buyer is refunded.</p>
       </div>
 
-      <div className="flex gap-1 bg-white border border-line rounded-lg p-1 w-fit">
+      <div className="tab-bar">
         {[
           ["open", "Open"],
           ["closed", "Resolved"],
@@ -146,7 +146,7 @@ const AdminDisputes = () => {
             key={key}
             type="button"
             onClick={() => setTab(key)}
-            className={`px-3 py-1.5 rounded-md text-sm font-medium ${tab === key ? "bg-brand text-white" : "text-muted hover:bg-cream"}`}
+            className={`tab ${tab === key ? "tab-active" : ""}`}
           >
             {label}
           </button>
@@ -154,7 +154,7 @@ const AdminDisputes = () => {
       </div>
 
       {!disputes ? (
-        <div className="h-40 rounded-lg bg-white border border-line animate-pulse" />
+        <div className="h-40 rounded-sm bg-white border border-line animate-pulse" />
       ) : disputes.length === 0 ? (
         <div className="rounded-lg border border-dashed border-[#d9cbb9] bg-white py-14 text-center text-sm text-muted">
           {tab === "open" ? "No open reports. Nice." : "No resolved reports yet."}

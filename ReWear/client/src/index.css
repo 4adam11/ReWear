@@ -28,6 +28,34 @@ body {
   .btn-outline {
     @apply border-2 border-ink text-ink hover:bg-ink hover:text-paper;
   }
+  .btn-sm {
+    @apply h-9 px-4 text-[12px];
+  }
+
+  /* Page heading used across the inner pages, with a short bar under it */
+  .page-title {
+    @apply font-display text-[26px] sm:text-[30px] font-bold uppercase tracking-[0.04em] leading-tight text-ink;
+  }
+  .page-title::after {
+    content: "";
+    @apply block w-12 h-1 mt-2 bg-ink;
+  }
+
+  /* Underlined tabs (orders, listings, admin queues) */
+  .tab-bar {
+    @apply flex gap-1 overflow-x-auto overflow-y-hidden shadow-[inset_0_-1px_0_#e7ddd0];
+  }
+  .tab {
+    @apply px-3 sm:px-4 py-2.5 border-b-2 border-transparent font-display text-[12.5px] font-semibold uppercase tracking-[0.08em] whitespace-nowrap text-muted hover:text-ink transition-colors;
+  }
+  .tab-active {
+    @apply border-ink text-ink;
+  }
+
+  /* Plain white box for forms, order cards and lists */
+  .panel {
+    @apply bg-white border border-line rounded-sm;
+  }
 }
 
 /* Clear focus ring for keyboard users only */

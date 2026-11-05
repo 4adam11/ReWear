@@ -193,7 +193,7 @@ const Login = () => {
             <button
               type="submit"
               disabled={loading}
-              className="mt-1 h-11 rounded-md bg-brand text-white text-sm font-semibold hover:bg-brand-dark disabled:opacity-60"
+              className="btn btn-dark mt-1"
             >
               {loading ? "Please wait…" : isRegister ? "Create account" : "Log in"}
             </button>

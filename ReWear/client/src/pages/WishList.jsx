@@ -12,7 +12,7 @@ const Wishlist = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
       <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 mb-5">
-        <h1 className="text-[26px] font-bold tracking-tight">Wishlist</h1>
+        <h1 className="page-title">Wishlist</h1>
         <span className="text-sm text-muted">
           {wishlist.length} saved item{wishlist.length === 1 ? "" : "s"}
         </span>
@@ -25,7 +25,7 @@ const Wishlist = () => {
           <p className="mt-1 text-sm text-muted">Tap the heart on any item to keep it here for later.</p>
           <Link
             to="/explore"
-            className="mt-4 inline-flex items-center h-10 px-4 rounded-md bg-brand text-white text-sm font-semibold hover:bg-brand-dark"
+            className="btn btn-dark btn-sm mt-4"
           >
             Start browsing
           </Link>

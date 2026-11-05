@@ -28,13 +28,13 @@ const AdminOrders = () => {
   return (
     <div className="space-y-5">
       <div>
-        <h1 className="text-2xl font-semibold text-ink">Orders</h1>
+        <h1 className="page-title">Orders</h1>
         <p className="mt-1 text-sm text-muted">The 100 most recent orders across the marketplace.</p>
       </div>
 
       {error && <p className="text-sm text-red-600">{error}</p>}
 
-      <div className="bg-white border border-line rounded-lg overflow-x-auto">
+      <div className="bg-white border border-line rounded-sm overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="text-left text-muted border-b border-line">

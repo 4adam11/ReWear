@@ -33,7 +33,7 @@ const Field = ({ id, label, error, className = "", children }) => (
 );
 
 const Step = ({ n, title, children }) => (
-  <section className="bg-white border border-line rounded-lg">
+  <section className="bg-white border border-line rounded-sm">
     <h2 className="flex items-center gap-3 px-5 py-4 border-b border-[#efe6da] text-base font-bold">
       <span className="w-7 h-7 rounded-full bg-[#f1e6d8] text-brand text-sm flex items-center justify-center">{n}</span>
       {title}
@@ -118,9 +118,9 @@ const Checkout = () => {
   if (!items.length) {
     return (
       <div className="max-w-md mx-auto px-4 py-24 text-center">
-        <h1 className="text-2xl font-bold">Nothing to check out</h1>
+        <h1 className="font-display text-2xl font-bold uppercase tracking-[0.04em]">Nothing to check out</h1>
         <p className="mt-2 text-sm text-muted">Add something to your bag first.</p>
-        <Link to="/explore" className="mt-6 inline-flex items-center h-11 px-5 rounded-md bg-brand text-white text-sm font-semibold hover:bg-brand-dark">
+        <Link to="/explore" className="btn btn-dark mt-6">
           Continue shopping
         </Link>
       </div>
@@ -206,7 +206,7 @@ const Checkout = () => {
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6">
       <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
-        <h1 className="text-[26px] font-bold tracking-tight">Checkout</h1>
+        <h1 className="page-title">Checkout</h1>
         <span className="inline-flex items-center gap-1.5 text-[13px] text-muted">
           <Lock size={14} />
           Prices are checked on our server before the order is placed
@@ -341,7 +341,7 @@ const Checkout = () => {
         </div>
 
         {/* SUMMARY */}
-        <aside className="bg-white border border-line rounded-lg p-5 lg:sticky lg:top-32 flex flex-col gap-4">
+        <aside className="bg-white border border-line rounded-sm p-5 lg:sticky lg:top-32 flex flex-col gap-4">
           <h2 className="text-base font-bold">Order summary</h2>
 
           <div className="flex gap-2">
@@ -358,7 +358,7 @@ const Checkout = () => {
               placeholder="Promo code"
               className={`${inputClass} uppercase`}
             />
-            <button type="button" onClick={applyPromo} className="h-11 px-4 rounded-md border border-ink text-sm font-semibold hover:bg-cream">
+            <button type="button" onClick={applyPromo} className="btn btn-outline">
               Apply
             </button>
           </div>
@@ -389,7 +389,7 @@ const Checkout = () => {
             type="button"
             disabled={loading || !quote}
             onClick={placeOrder}
-            className="h-12 rounded-md bg-brand text-white font-semibold hover:bg-brand-dark disabled:opacity-50"
+            className="btn btn-dark h-12"
           >
             {loading ? "Placing order…" : `Place order · ${money(total)}`}
           </button>

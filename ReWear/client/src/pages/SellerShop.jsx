@@ -37,7 +37,7 @@ const SellerShop = ({ id }) => {
   if (!seller) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
-        <div className="h-32 rounded-lg bg-white border border-line animate-pulse" />
+        <div className="h-32 rounded-sm bg-white border border-line animate-pulse" />
       </div>
     );
   }
@@ -57,7 +57,7 @@ const SellerShop = ({ id }) => {
         <span>{seller.name}</span>
       </nav>
 
-      <section className="bg-white border border-line rounded-lg p-6 flex flex-wrap items-center gap-6">
+      <section className="bg-white border border-line rounded-sm p-6 flex flex-wrap items-center gap-6">
         <span aria-hidden="true" className="w-16 h-16 rounded-full bg-[#f1e6d8] text-brand text-2xl font-bold flex items-center justify-center">
           {seller.name?.[0]?.toUpperCase()}
         </span>
@@ -89,7 +89,7 @@ const SellerShop = ({ id }) => {
         </dl>
       </section>
 
-      <div role="tablist" aria-label="Shop sections" className="flex gap-1 border-b border-line">
+      <div role="tablist" aria-label="Shop sections" className="tab-bar">
         {[
           ["items", `Items (${items.total})`],
           ["reviews", `Reviews (${rating.count})`],
@@ -100,7 +100,7 @@ const SellerShop = ({ id }) => {
             role="tab"
             aria-selected={tab === key}
             onClick={() => setTab(key)}
-            className={`px-4 py-2.5 text-sm font-semibold -mb-px border-b-2 ${tab === key ? "border-brand text-brand" : "border-transparent text-muted hover:text-ink"}`}
+            className={`tab ${tab === key ? "tab-active" : ""}`}
           >
             {label}
           </button>
@@ -125,7 +125,7 @@ const SellerShop = ({ id }) => {
                     type="button"
                     aria-current={page === i + 1 ? "page" : undefined}
                     onClick={() => setPage(i + 1)}
-                    className={`min-w-[44px] h-10 rounded-md text-sm ${page === i + 1 ? "bg-brand text-white font-semibold" : "bg-white border border-line"}`}
+                    className={`min-w-[44px] h-10 rounded-md text-sm ${page === i + 1 ? "bg-ink text-paper font-semibold" : "bg-white border border-line"}`}
                   >
                     {i + 1}
                   </button>
@@ -138,7 +138,7 @@ const SellerShop = ({ id }) => {
         <p className="py-12 text-center text-sm text-muted">No reviews yet. Reviews appear after buyers complete an order.</p>
       ) : (
         <div className="grid gap-6 lg:grid-cols-[260px_minmax(0,1fr)] items-start">
-          <div className="bg-white border border-line rounded-lg p-5">
+          <div className="bg-white border border-line rounded-sm p-5">
             <p className="text-3xl font-bold">{rating.avg.toFixed(1)}</p>
             <Stars value={rating.avg} size={16} />
             <p className="mt-1 text-[13px] text-muted">{rating.count} reviews</p>
@@ -155,7 +155,7 @@ const SellerShop = ({ id }) => {
             </ul>
           </div>
 
-          <ul className="bg-white border border-line rounded-lg divide-y divide-[#efe6da]">
+          <ul className="bg-white border border-line rounded-sm divide-y divide-[#efe6da]">
             {seller.reviews.map((r) => (
               <li key={r._id} className="p-5">
                 <div className="flex flex-wrap items-center gap-2">

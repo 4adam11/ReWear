@@ -38,7 +38,7 @@ const OfferBox = ({ product, offer, setOffer }) => {
 
   const respond = (action) => call(() => axios.patch(`${API}/offers/${offer._id}/${action}`, {}, authHeader));
 
-  const box = "rounded-lg border border-line bg-white p-4 text-sm";
+  const box = "rounded-sm border border-line bg-white p-4 text-sm";
 
   if (offer?.status === "accepted") {
     return (
@@ -71,10 +71,10 @@ const OfferBox = ({ product, offer, setOffer }) => {
         <p className="mt-1 text-[13px] text-muted">You offered {money(offer.amount)}.</p>
         {error && <p className="mt-2 text-[13px] text-red-700">{error}</p>}
         <div className="mt-3 flex gap-2">
-          <button type="button" disabled={busy} onClick={() => respond("accept")} className="h-9 px-4 rounded-md bg-brand text-white text-[13px] font-semibold hover:bg-brand-dark">
+          <button type="button" disabled={busy} onClick={() => respond("accept")} className="btn btn-dark btn-sm">
             Accept {money(offer.counterAmount)}
           </button>
-          <button type="button" disabled={busy} onClick={() => respond("reject")} className="h-9 px-4 rounded-md border border-line text-[13px] font-semibold hover:border-brand">
+          <button type="button" disabled={busy} onClick={() => respond("reject")} className="btn btn-outline btn-sm">
             Decline
           </button>
         </div>
@@ -128,7 +128,7 @@ const OfferBox = ({ product, offer, setOffer }) => {
             className="h-10 w-full pl-7 pr-3 rounded-md border border-[#d9cbb9] focus:outline-none focus:border-brand"
           />
         </div>
-        <button type="submit" disabled={busy || !amount} className="h-10 px-4 rounded-md bg-brand text-white text-[13px] font-semibold hover:bg-brand-dark disabled:opacity-50">
+        <button type="submit" disabled={busy || !amount} className="btn btn-dark btn-sm">
           Send offer
         </button>
         <button type="button" onClick={() => setOpen(false)} className="h-10 px-3 text-[13px] font-semibold text-muted hover:text-ink">

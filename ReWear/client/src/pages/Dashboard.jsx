@@ -14,7 +14,7 @@ import usePageTitle from "../hooks/usePageTitle";
 const statusOf = (o) => (o.status === "placed" ? "confirmed" : o.status);
 
 const Stat = ({ label, value, to, note }) => (
-  <Link to={to} className="bg-white border border-line rounded-lg p-4 hover:border-brand transition-colors">
+  <Link to={to} className="bg-white border border-line rounded-sm p-4 hover:border-brand transition-colors">
     <p className="text-[13px] text-muted">{label}</p>
     <p className="mt-1 text-2xl font-bold">{value}</p>
     {note && <p className="mt-0.5 text-xs text-muted">{note}</p>}
@@ -22,7 +22,7 @@ const Stat = ({ label, value, to, note }) => (
 );
 
 const Panel = ({ title, to, linkText, children }) => (
-  <section className="bg-white border border-line rounded-lg">
+  <section className="bg-white border border-line rounded-sm">
     <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#efe6da]">
       <h2 className="text-base font-bold">{title}</h2>
       {to && (
@@ -71,7 +71,7 @@ const Dashboard = () => {
     return (
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 grid gap-4 sm:grid-cols-4">
         {[...Array(4)].map((_, i) => (
-          <div key={i} className="h-24 rounded-lg bg-white border border-line animate-pulse" />
+          <div key={i} className="h-24 rounded-sm bg-white border border-line animate-pulse" />
         ))}
       </div>
     );
@@ -88,10 +88,10 @@ const Dashboard = () => {
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 flex flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-[26px] font-bold tracking-tight">Hi, {user?.name?.split(" ")[0]}</h1>
+          <h1 className="page-title">Hi, {user?.name?.split(" ")[0]}</h1>
           <p className="text-sm text-muted">Your shop and orders at a glance.</p>
         </div>
-        <Link to="/sell" className="inline-flex items-center gap-2 h-11 px-5 rounded-md bg-brand text-white text-sm font-semibold hover:bg-brand-dark">
+        <Link to="/sell" className="btn btn-dark">
           <Plus size={17} />
           List an item
         </Link>
