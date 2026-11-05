@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import { DateRange } from "react-date-range";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 import {
   Upload,
@@ -17,7 +17,7 @@ import "react-date-range/dist/styles.css";
 import "react-date-range/dist/theme/default.css";
 
 import API from "../utils/api";
-import { resizeImage, PLACEHOLDER_IMAGE } from "../utils/image";
+import { resizeImage, thumb, PLACEHOLDER_IMAGE } from "../utils/image";
 import { CATEGORIES, SIZES, CONDITIONS } from "../utils/catalog";
 import { format } from "date-fns";
 
@@ -32,6 +32,9 @@ const ACCEPTED_TYPES = [
 const Sell = () => {
   const navigate = useNavigate();
 
+  // /sell/:id edits an existing listing; /sell creates a new one
+  const { id: editId } = useParams();
+
   const [mode, setMode] =
     useState("both");
 
@@ -44,6 +47,7 @@ const Sell = () => {
   const [form, setForm] =
     useState({
       title: "",
+      description: "",
       category: "party",
       size: "M",
       price: "",
@@ -73,6 +77,49 @@ const Sell = () => {
     JSON.parse(
       localStorage.getItem("user")
     );
+
+  // EDIT MODE: load the listing and fill in the form
+  useEffect(() => {
+    if (!editId) return;
+
+    const user = getUser();
+
+    axios
+      .get(`${API}/products/${editId}`, {
+        headers: { Authorization: `Bearer ${user?.token}` },
+      })
+      .then(({ data }) => {
+        setMode(data.mode === "sale" ? "sell" : data.mode);
+        setForm({
+          title: data.title || "",
+          description: data.description || "",
+          category: data.category || "party",
+          size: data.size || "M",
+          price: data.price ?? "",
+          rent: data.rent ?? "",
+          condition: data.condition || "New",
+        });
+        setImages(
+          (data.images || []).map((url, i) => ({
+            id: `existing-${i}`,
+            preview: thumb(url, 400),
+            url,
+            status: "ok",
+          }))
+        );
+        if (data.availability?.startDate && data.availability?.endDate) {
+          setDateRange([
+            {
+              startDate: new Date(data.availability.startDate),
+              endDate: new Date(data.availability.endDate),
+              key: "selection",
+            },
+          ]);
+        }
+      })
+      .catch(() => setError("Could not load this listing"));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editId]);
 
   // INPUT
   const handleChange = (e) => {
@@ -118,6 +165,8 @@ const Sell = () => {
       updateImage(id, {
         status: "ok",
         url: data.url,
+        // The AI wasn't sure about this photo: allowed, but an admin will look closely
+        aiNote: data.aiNote,
       });
     } catch (err) {
       updateImage(id, {
@@ -248,10 +297,9 @@ const Sell = () => {
     try {
       setLoading(true);
 
-      await axios.post(
-        `${API}/products`,
-        {
+      const payload = {
           title: form.title,
+          description: form.description,
           images: approvedImages.map(
             (img) => img.url
           ),
@@ -270,17 +318,23 @@ const Sell = () => {
             startDate: format(dateRange[0].startDate, "yyyy-MM-dd"),
             endDate: format(dateRange[0].endDate, "yyyy-MM-dd"),
           },
+      };
+
+      const config = {
+        headers: {
+          Authorization: `Bearer ${user.token}`,
         },
-        {
-          headers: {
-            Authorization: `Bearer ${user.token}`,
-          },
-        }
-      );
+      };
 
-      alert("Product Listed 🚀");
+      if (editId) {
+        const { data } = await axios.put(`${API}/products/${editId}`, payload, config);
+        alert(data.message);
+      } else {
+        await axios.post(`${API}/products`, payload, config);
+        alert("Listing submitted for review. You'll get a notification when an admin approves it.");
+      }
 
-      navigate("/explore");
+      navigate("/seller/listings");
     } catch (err) {
       console.error(err);
 
@@ -295,20 +349,21 @@ const Sell = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#f6f5f0] py-8 sm:py-10">
+    <div className="min-h-screen bg-[#faf6ef] py-8 sm:py-10">
 
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* HEADER */}
         <div className="mb-8">
 
-          <h1 className="text-3xl sm:text-4xl font-semibold text-[#1f3a2e]">
-            List Your Product
+          <h1 className="text-3xl sm:text-4xl font-semibold text-[#2b1d14]">
+            {editId ? "Edit Listing" : "List Your Product"}
           </h1>
 
           <p className="mt-2 text-sm text-gray-500">
-            Upload your fashion item
-            for sale or rent.
+            {editId
+              ? "Price changes go live straight away. New photos or details are re-checked by an admin."
+              : "Upload your fashion item for sale or rent. An admin reviews every listing before it goes live."}
           </p>
 
         </div>
@@ -348,7 +403,7 @@ const Sell = () => {
                     }
 
                     className={`flex-1 py-3 rounded-lg text-sm font-medium capitalize transition ${mode === m
-                        ? "bg-[#1f3a2e] text-white"
+                        ? "bg-[#2b1d14] text-white"
                         : "text-gray-500"
                       }`}
                   >
@@ -367,17 +422,17 @@ const Sell = () => {
 
                 <ImagePlus
                   size={20}
-                  className="text-[#1f3a2e]"
+                  className="text-[#2b1d14]"
                 />
 
-                <h2 className="text-lg font-medium text-[#1f3a2e]">
+                <h2 className="text-lg font-medium text-[#2b1d14]">
                   Upload Photos
                 </h2>
 
               </div>
 
               {/* DROPZONE */}
-              <label className="border-2 border-dashed border-gray-200 rounded-2xl p-8 flex flex-col items-center justify-center text-center cursor-pointer hover:border-[#1f3a2e] transition">
+              <label className="border-2 border-dashed border-gray-200 rounded-2xl p-8 flex flex-col items-center justify-center text-center cursor-pointer hover:border-[#2b1d14] transition">
 
                 <Upload
                   size={28}
@@ -444,11 +499,21 @@ const Sell = () => {
                           </div>
                         )}
 
-                        {img.status === "ok" && (
+                        {img.status === "ok" && !img.aiNote && (
                           <CircleCheck
                             size={18}
                             className="absolute bottom-2 left-2 text-green-500 bg-white rounded-full"
                           />
+                        )}
+
+                        {/* AI unsure: allowed, but flagged for the admin */}
+                        {img.status === "ok" && img.aiNote && (
+                          <div
+                            title={img.aiNote}
+                            className="absolute bottom-0 inset-x-0 bg-orange-500/90 text-white text-[10px] leading-tight px-1.5 py-1 text-center"
+                          >
+                            AI flagged: an admin will check this photo
+                          </div>
                         )}
 
                         {img.status === "rejected" && (
@@ -494,11 +559,31 @@ const Sell = () => {
                   name="title"
                   placeholder="Off White Hoodie"
 
-                  className="w-full mt-2 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#1f3a2e]"
+                  value={form.title}
+
+                  className="w-full mt-2 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#2b1d14]"
 
                   onChange={
                     handleChange
                   }
+                />
+
+              </div>
+
+              <div>
+
+                <label className="text-sm font-medium text-gray-700">
+                  Description
+                </label>
+
+                <textarea
+                  name="description"
+                  rows={4}
+                  maxLength={2000}
+                  placeholder="Fabric, fit, how many times it was worn, any marks or alterations…"
+                  value={form.description}
+                  onChange={handleChange}
+                  className="w-full mt-2 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#2b1d14]"
                 />
 
               </div>
@@ -614,7 +699,11 @@ const Sell = () => {
                     name="price"
                     placeholder="₹ 2500"
 
-                    className="w-full mt-2 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#1f3a2e]"
+                    type="number"
+
+                    value={form.price}
+
+                    className="w-full mt-2 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#2b1d14]"
 
                     onChange={
                       handleChange
@@ -637,7 +726,11 @@ const Sell = () => {
                     name="rent"
                     placeholder="₹ 300"
 
-                    className="w-full mt-2 mb-5 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#1f3a2e]"
+                    type="number"
+
+                    value={form.rent}
+
+                    className="w-full mt-2 mb-5 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#2b1d14]"
 
                     onChange={
                       handleChange
@@ -670,11 +763,13 @@ const Sell = () => {
 
               onClick={handleSubmit}
 
-              className="w-full bg-[#1f3a2e] text-white py-4 rounded-xl font-medium hover:opacity-95 transition shadow-sm"
+              className="w-full bg-[#2b1d14] text-white py-4 rounded-xl font-medium hover:opacity-95 transition shadow-sm"
             >
               {loading
-                ? "Listing Product..."
-                : "List Product"}
+                ? "Saving..."
+                : editId
+                  ? "Save changes"
+                  : "Submit for review"}
             </button>
 
           </div>
@@ -688,10 +783,10 @@ const Sell = () => {
 
                 <Shirt
                   size={20}
-                  className="text-[#1f3a2e]"
+                  className="text-[#2b1d14]"
                 />
 
-                <h2 className="text-lg font-medium text-[#1f3a2e]">
+                <h2 className="text-lg font-medium text-[#2b1d14]">
                   Live Preview
                 </h2>
 
@@ -713,7 +808,7 @@ const Sell = () => {
 
                 <div className="p-5">
 
-                  <h3 className="text-xl font-medium text-[#1f3a2e]">
+                  <h3 className="text-xl font-medium text-[#2b1d14]">
                     {form.title ||
                       "Product Title"}
                   </h3>
@@ -731,7 +826,7 @@ const Sell = () => {
                         Price
                       </p>
 
-                      <p className="text-2xl font-semibold text-[#1f3a2e]">
+                      <p className="text-2xl font-semibold text-[#2b1d14]">
                         ₹{" "}
                         {form.price ||
                           form.rent ||

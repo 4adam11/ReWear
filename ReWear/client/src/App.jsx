@@ -8,6 +8,7 @@ import CustomCursor from "./components/ui/CustomCursor";
 import ScrollToTop from "./components/ui/ScrolltoTop";
 
 import ProtectedRoute from "./components/ProtectedRoute";
+import AdminRoute from "./components/AdminRoute";
 
 // Each page is downloaded only when it's first visited, so the home page
 // doesn't wait for the calendar, checkout, dashboard, etc.
@@ -22,10 +23,16 @@ const Sell = lazy(() => import("./pages/Sell"));
 const Cart = lazy(() => import("./pages/Cart"));
 const Wishlist = lazy(() => import("./pages/WishList"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
+const SellerListings = lazy(() => import("./pages/SellerListings"));
+const AdminLayout = lazy(() => import("./pages/admin/AdminLayout"));
+const AdminOverview = lazy(() => import("./pages/admin/AdminOverview"));
+const AdminListings = lazy(() => import("./pages/admin/AdminListings"));
+const AdminUsers = lazy(() => import("./pages/admin/AdminUsers"));
+const AdminOrders = lazy(() => import("./pages/admin/AdminOrders"));
 
 const PageLoader = () => (
   <div className="min-h-[60vh] flex items-center justify-center">
-    <div className="w-8 h-8 rounded-full border-2 border-gray-200 border-t-[#1f3a2e] animate-spin" />
+    <div className="w-8 h-8 rounded-full border-2 border-gray-200 border-t-[#2b1d14] animate-spin" />
   </div>
 );
 
@@ -67,6 +74,40 @@ function App() {
               </ProtectedRoute>
             }
           />
+
+          {/* Edit an existing listing */}
+          <Route
+            path="/sell/:id"
+            element={
+              <ProtectedRoute>
+                <Sell />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/seller/listings"
+            element={
+              <ProtectedRoute>
+                <SellerListings />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* ADMIN */}
+          <Route
+            path="/admin"
+            element={
+              <AdminRoute>
+                <AdminLayout />
+              </AdminRoute>
+            }
+          >
+            <Route index element={<AdminOverview />} />
+            <Route path="listings" element={<AdminListings />} />
+            <Route path="users" element={<AdminUsers />} />
+            <Route path="orders" element={<AdminOrders />} />
+          </Route>
 
           <Route
             path="/checkout"

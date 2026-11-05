@@ -1,6 +1,6 @@
 import { useId } from "react";
 
-// ReWear mark: a dress on a clothes hanger.
+// ReWear mark: a "pre-loved" thrift price tag with a heart.
 // Same drawing as public/favicon.svg (the browser-tab icon), so they always match.
 export const LogoMark = ({ size = 36, className = "" }) => {
   // Unique id so several logos on one page don't clash
@@ -17,37 +17,35 @@ export const LogoMark = ({ size = 36, className = "" }) => {
     >
       <defs>
         <linearGradient id={`${uid}-bg`} x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#2f7d5b" />
-          <stop offset="0.55" stopColor="#6a8a55" />
-          <stop offset="1" stopColor="#d4623a" />
+          <stop offset="0" stopColor="#5a3826" />
+          <stop offset="0.55" stopColor="#8b5e3c" />
+          <stop offset="1" stopColor="#c0834f" />
         </linearGradient>
       </defs>
 
-      <rect width="64" height="64" rx="16" fill={`url(#${uid}-bg)`} />
+      <rect width="64" height="64" rx="18" fill={`url(#${uid}-bg)`} />
 
-      {/* HANGER */}
+      {/* STRING */}
       <path
-        d="M29.6 12.6 a2.4 2.4 0 1 1 2.4 2.4 v2.4 l-11 6.4 h22 l-11 -6.4"
+        d="M16 11.5 C8.5 19 11 32 21.1 39.3"
         fill="none"
-        stroke="#fff"
+        stroke="#f6ead8"
         strokeWidth="2.4"
         strokeLinecap="round"
-        strokeLinejoin="round"
       />
 
-      {/* DRESS */}
-      <path
-        d="M25.6 26 h3.6 l2.8 3.4 l2.8 -3.4 h3.6 l-1.1 10.6 q6.2 7.8 9.2 17 q-14.5 4.3 -29 0 q3 -9.2 9.2 -17 z"
-        fill="#fff"
-      />
-
-      {/* WAIST */}
-      <path
-        d="M27.5 36.7 h9"
-        stroke="#2f7d5b"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-      />
+      {/* TAG + HEART */}
+      <g transform="rotate(-24 33 34)">
+        <path
+          d="M22.5 22 h22 a4.5 4.5 0 0 1 4.5 4.5 v15 a4.5 4.5 0 0 1 -4.5 4.5 h-22 l-10 -12 z"
+          fill="#f6ead8"
+        />
+        <circle cx="20" cy="34" r="2.6" fill="#8b5e3c" />
+        <path
+          d="M35.5 40.5 l-6.2 -6 a3.7 3.7 0 1 1 6.2 -4.2 a3.7 3.7 0 1 1 6.2 4.2 z"
+          fill="#c0834f"
+        />
+      </g>
     </svg>
   );
 };

@@ -27,23 +27,56 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
-  // If the API rejects the saved login (expired token, or the account no longer
-  // exists, e.g. after switching databases), log out and go to the login page
-  // instead of failing every request with "Not authorized".
+  // Headers for logged-in API calls
+  const authHeader = {
+    headers: {
+      Authorization: `Bearer ${user?.token}`,
+    },
+  };
+
+  const isAdmin = user?.role === "admin";
+
+  // Pick up role changes made on the server (e.g. someone was made an admin)
+  // without asking them to log out and back in.
+  useEffect(() => {
+    if (!user?.token) return;
+
+    axios
+      .get(`${API}/auth/me`, authHeader)
+      .then(({ data }) => {
+        if (data.role !== user.role || data.name !== user.name) {
+          login({ ...user, role: data.role, name: data.name });
+        }
+      })
+      .catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.token]);
+
+  // If the API rejects the saved login (expired token, the account no longer
+  // exists, or it was blocked by an admin), log out and go to the login page
+  // instead of failing every request.
   useEffect(() => {
     const id = axios.interceptors.response.use(
       (res) => res,
       (err) => {
         const url = err.config?.url || "";
+        const status = err.response?.status;
+        const blocked =
+          status === 403 &&
+          /blocked/i.test(err.response?.data?.message || "");
 
         if (
-          err.response?.status === 401 &&
+          (status === 401 || blocked) &&
           url.startsWith(API) &&
           localStorage.getItem("user")
         ) {
           localStorage.removeItem("user");
           setUser(null);
-          alert("Your session has expired. Please log in again.");
+          alert(
+            blocked
+              ? err.response.data.message
+              : "Your session has expired. Please log in again."
+          );
           window.location.assign("/login");
         }
 
@@ -55,7 +88,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, login, logout, authHeader, isAdmin }}>
       {children}
     </AuthContext.Provider>
   );

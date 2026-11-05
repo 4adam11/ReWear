@@ -12,6 +12,8 @@ const uploadSchema = new mongoose.Schema({
     clothing: Number,
     topLabel: String,
   },
+  // Set when the AI is unsure about the photo; shown to the admin reviewing the listing
+  aiNote: String,
 }, { timestamps: true });
 
 export default mongoose.model("Upload", uploadSchema);

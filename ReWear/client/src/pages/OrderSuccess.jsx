@@ -4,7 +4,7 @@ const OrderSuccess = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-[#f6f5f0]">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-[#faf6ef]">
 
       <div className="bg-white p-10 rounded-xl shadow text-center space-y-4">
         <h1>Hey AbdulQadir 👋</h1>

@@ -36,5 +36,5 @@ export const thumb = (url, width = 600) =>
 export const PLACEHOLDER_IMAGE =
   "data:image/svg+xml;utf8," +
   encodeURIComponent(
-    `<svg xmlns="http://www.w3.org/2000/svg" width="300" height="400" viewBox="0 0 300 400"><rect width="300" height="400" fill="#efeee8"/><path d="M150 150a18 18 0 1 1 18 18v14l70 42a10 10 0 0 1-5 19H67a10 10 0 0 1-5-19l70-42" fill="none" stroke="#a8b5a2" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/></svg>`
+    `<svg xmlns="http://www.w3.org/2000/svg" width="300" height="400" viewBox="0 0 300 400"><rect width="300" height="400" fill="#f3ebe0"/><path d="M150 150a18 18 0 1 1 18 18v14l70 42a10 10 0 0 1-5 19H67a10 10 0 0 1-5-19l70-42" fill="none" stroke="#c9a184" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/></svg>`
   );

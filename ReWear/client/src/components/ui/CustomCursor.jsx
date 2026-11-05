@@ -54,8 +54,8 @@ const CustomCursor = () => {
         height: size,
         backgroundColor:
           variant === "hover"
-            ? "rgba(47,125,91,0.95)"
-            : "rgba(47,125,91,0.7)",
+            ? "rgba(107,68,48,0.95)"
+            : "rgba(107,68,48,0.7)",
       }}
       transition={{ type: "spring", stiffness: 260, damping: 22 }}
       className="fixed top-0 left-0 z-[9999] pointer-events-none rounded-full flex items-center justify-center text-white font-semibold"

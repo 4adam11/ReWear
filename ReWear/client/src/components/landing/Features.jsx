@@ -181,7 +181,7 @@ const Features = () => {
               <div className="relative h-full rounded-[32px] border border-gray-100 bg-white/80 backdrop-blur-xl p-7 sm:p-8 shadow-lg transition-all duration-500 overflow-hidden">
 
                 {/* HOVER SPOTLIGHT */}
-                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition duration-500 bg-[radial-gradient(circle_at_top_right,rgba(47,125,91,0.12),transparent_40%)]" />
+                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition duration-500 bg-[radial-gradient(circle_at_top_right,rgba(107,68,48,0.12),transparent_40%)]" />
 
                 {/* FLOATING PARTICLE */}
                 <motion.div

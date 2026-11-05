@@ -1,5 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
+import { useAuth } from "../context/AuthContext";
 import { useState, useEffect } from "react";
 import axios from "axios";
 
@@ -35,6 +36,8 @@ const ProductDetail = () => {
 
   const { addToCart } = useCart();
 
+  const { user, authHeader } = useAuth();
+
   const [product, setProduct] =
     useState(null);
 
@@ -64,7 +67,9 @@ const ProductDetail = () => {
 
         const { data } =
           await axios.get(
-            `${API}/products/${id}`
+            `${API}/products/${id}`,
+            // Logged in: sellers and admins can also open listings that aren't live yet
+            user ? authHeader : undefined
           );
 
         setProduct(data);
@@ -93,7 +98,7 @@ const ProductDetail = () => {
   // LOADING
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#f6f5f0] px-4 py-10">
+      <div className="min-h-screen bg-[#faf6ef] px-4 py-10">
 
         <div className="max-w-[1400px] mx-auto">
 
@@ -114,11 +119,11 @@ const ProductDetail = () => {
   // NOT FOUND
   if (!product) {
     return (
-      <div className="min-h-screen bg-[#f6f5f0] flex items-center justify-center px-4">
+      <div className="min-h-screen bg-[#faf6ef] flex items-center justify-center px-4">
 
         <div className="bg-white border border-gray-100 rounded-2xl p-8 shadow-sm text-center max-w-md w-full">
 
-          <h2 className="text-2xl font-semibold text-[#1f3a2e]">
+          <h2 className="text-2xl font-semibold text-[#2b1d14]">
             Product not found
           </h2>
 
@@ -127,7 +132,7 @@ const ProductDetail = () => {
               navigate("/explore")
             }
 
-            className="mt-6 px-6 py-3 rounded-xl bg-[#1f3a2e] text-white font-medium"
+            className="mt-6 px-6 py-3 rounded-xl bg-[#2b1d14] text-white font-medium"
           >
             Explore Products
           </button>
@@ -201,6 +206,12 @@ const ProductDetail = () => {
   const blockedReason =
     product.status === "sold"
       ? "This item has been sold"
+      : product.status === "pending"
+        ? "This listing is waiting for admin approval. Only you and admins can see it."
+        : product.status === "rejected"
+          ? `This listing was rejected by an admin${product.review?.rejectReason ? `: ${product.review.rejectReason}` : "."}`
+          : product.status === "paused"
+            ? "This listing is paused and hidden from buyers."
       : mode === "sale" && !canBuy
         ? "This item is only available to rent"
         : mode === "rent" && !canRent
@@ -227,7 +238,7 @@ const ProductDetail = () => {
     );
 
   return (
-    <div className="min-h-screen bg-[#f6f5f0] py-8 sm:py-10">
+    <div className="min-h-screen bg-[#faf6ef] py-8 sm:py-10">
 
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
 
@@ -235,7 +246,7 @@ const ProductDetail = () => {
         <button
           onClick={() => navigate(-1)}
 
-          className="inline-flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-[#1f3a2e] transition mb-8"
+          className="inline-flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-[#2b1d14] transition mb-8"
         >
           <ArrowLeft size={18} />
 
@@ -291,7 +302,7 @@ const ProductDetail = () => {
                         }
 
                         className={`flex-shrink-0 rounded-xl overflow-hidden border-2 transition ${activeImage === img
-                            ? "border-[#1f3a2e]"
+                            ? "border-[#2b1d14]"
                             : "border-transparent"
                           }`}
                       >
@@ -337,7 +348,7 @@ const ProductDetail = () => {
             </p>
 
             {/* TITLE */}
-            <h1 className="mt-2 text-3xl sm:text-4xl font-semibold tracking-tight text-[#1f3a2e] leading-tight">
+            <h1 className="mt-2 text-3xl sm:text-4xl font-semibold tracking-tight text-[#2b1d14] leading-tight">
               {product.title}
             </h1>
 
@@ -378,7 +389,7 @@ const ProductDetail = () => {
                     Purchase Price
                   </p>
 
-                  <h2 className="mt-1 text-4xl font-semibold text-[#1f3a2e]">
+                  <h2 className="mt-1 text-4xl font-semibold text-[#2b1d14]">
                     ₹ {product.price}
                   </h2>
 
@@ -390,7 +401,7 @@ const ProductDetail = () => {
                     Rental Price
                   </p>
 
-                  <h2 className="mt-1 text-4xl font-semibold text-[#1f3a2e]">
+                  <h2 className="mt-1 text-4xl font-semibold text-[#2b1d14]">
                     ₹ {rentPerDay}
 
                     <span className="text-lg text-gray-500 font-medium">
@@ -416,7 +427,7 @@ const ProductDetail = () => {
                 disabled={!canBuy}
 
                 className={`flex-1 py-3 rounded-xl text-sm font-medium transition disabled:opacity-40 disabled:cursor-not-allowed ${mode === "sale"
-                    ? "bg-white text-[#1f3a2e] shadow-sm"
+                    ? "bg-white text-[#2b1d14] shadow-sm"
                     : "text-gray-500"
                   }`}
               >
@@ -431,7 +442,7 @@ const ProductDetail = () => {
                 disabled={!canRent}
 
                 className={`flex-1 py-3 rounded-xl text-sm font-medium transition disabled:opacity-40 disabled:cursor-not-allowed ${mode === "rent"
-                    ? "bg-[#1f3a2e] text-white"
+                    ? "bg-[#2b1d14] text-white"
                     : "text-gray-500"
                   }`}
               >
@@ -486,7 +497,7 @@ const ProductDetail = () => {
                       : ""}
                   </span>
 
-                  <span className="text-lg font-semibold text-[#1f3a2e]">
+                  <span className="text-lg font-semibold text-[#2b1d14]">
                     ₹ {totalRent}
                   </span>
 
@@ -498,7 +509,7 @@ const ProductDetail = () => {
             {/* DESCRIPTION */}
             <div className="mt-8">
 
-              <h3 className="text-lg font-semibold text-[#1f3a2e]">
+              <h3 className="text-lg font-semibold text-[#2b1d14]">
                 Product Details
               </h3>
 
@@ -531,7 +542,7 @@ const ProductDetail = () => {
 
                 disabled={!!blockedReason}
 
-                className="flex-1 inline-flex items-center justify-center gap-2 border border-gray-300 bg-white text-[#1f3a2e] py-4 rounded-xl font-medium hover:border-[#1f3a2e] transition disabled:opacity-40 disabled:cursor-not-allowed"
+                className="flex-1 inline-flex items-center justify-center gap-2 border border-gray-300 bg-white text-[#2b1d14] py-4 rounded-xl font-medium hover:border-[#2b1d14] transition disabled:opacity-40 disabled:cursor-not-allowed"
               >
 
                 <ShoppingBag size={18} />
@@ -552,7 +563,7 @@ const ProductDetail = () => {
 
                 disabled={!!blockedReason}
 
-                className="flex-1 inline-flex items-center justify-center gap-2 bg-[#1f3a2e] text-white py-4 rounded-xl font-medium hover:opacity-95 transition shadow-sm disabled:opacity-40 disabled:cursor-not-allowed"
+                className="flex-1 inline-flex items-center justify-center gap-2 bg-[#2b1d14] text-white py-4 rounded-xl font-medium hover:opacity-95 transition shadow-sm disabled:opacity-40 disabled:cursor-not-allowed"
               >
 
                 <Heart size={18} />

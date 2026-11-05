@@ -10,6 +10,9 @@ import productRoutes from "./routes/productRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
+import adminRoutes from "./routes/adminRoutes.js";
+import notificationRoutes from "./routes/notificationRoutes.js";
+import Product from "./models/Product.js";
 import { loadModels } from "./utils/imageModeration.js";
 
 // Fail fast instead of running with a missing or guessable secret
@@ -46,6 +49,8 @@ app.use("/api/products", productRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/uploads", uploadRoutes);
+app.use("/api/admin", adminRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 app.get("/", (req, res) => res.send("API Running"));
 
@@ -74,8 +79,15 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 5000;
 
 mongoose.connect(process.env.MONGO_URI)
-  .then(() => {
+  .then(async () => {
     console.log("Mongo Connected");
+
+    // One-time migration: listings from before admin review count as already approved
+    const migrated = await Product.updateMany(
+      { status: "available" },
+      { $set: { status: "live", "review.everApproved": true } }
+    );
+    if (migrated.modifiedCount) console.log(`Marked ${migrated.modifiedCount} older listings as live`);
     app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
     // Load the image models in the background so the first upload isn't slow.

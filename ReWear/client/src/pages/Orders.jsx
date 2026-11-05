@@ -113,11 +113,11 @@ const Orders = () => {
   // LOADING
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#f6f5f0] flex items-center justify-center">
+      <div className="min-h-screen bg-[#faf6ef] flex items-center justify-center">
 
         <div className="text-center">
 
-          <div className="w-12 h-12 border-4 border-[#1f3a2e]/20 border-t-[#1f3a2e] rounded-full animate-spin mx-auto" />
+          <div className="w-12 h-12 border-4 border-[#2b1d14]/20 border-t-[#2b1d14] rounded-full animate-spin mx-auto" />
 
           <p className="mt-4 text-gray-500">
             Loading orders...
@@ -130,7 +130,7 @@ const Orders = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#f6f5f0] py-8 sm:py-10">
+    <div className="min-h-screen bg-[#faf6ef] py-8 sm:py-10">
 
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
 
@@ -139,7 +139,7 @@ const Orders = () => {
 
           <div>
 
-            <h1 className="text-3xl sm:text-4xl font-semibold text-[#1f3a2e]">
+            <h1 className="text-3xl sm:text-4xl font-semibold text-[#2b1d14]">
               My Orders
             </h1>
 
@@ -184,7 +184,7 @@ const Orders = () => {
 
             </div>
 
-            <h2 className="mt-6 text-2xl font-semibold text-[#1f3a2e]">
+            <h2 className="mt-6 text-2xl font-semibold text-[#2b1d14]">
               No Orders Yet
             </h2>
 
@@ -199,7 +199,7 @@ const Orders = () => {
                 navigate("/explore")
               }
 
-              className="mt-8 inline-flex items-center gap-2 bg-[#1f3a2e] text-white px-7 py-4 rounded-2xl font-medium hover:opacity-95 transition"
+              className="mt-8 inline-flex items-center gap-2 bg-[#2b1d14] text-white px-7 py-4 rounded-2xl font-medium hover:opacity-95 transition"
             >
               Start Shopping
 
@@ -284,7 +284,7 @@ const Orders = () => {
 
                             </div>
 
-                            <h2 className="mt-4 text-2xl font-semibold text-[#1f3a2e]">
+                            <h2 className="mt-4 text-2xl font-semibold text-[#2b1d14]">
                               {firstItem?.title ||
                                 "Order"}
                             </h2>
@@ -327,7 +327,7 @@ const Orders = () => {
                             Total Amount
                           </p>
 
-                          <h3 className="mt-1 text-3xl font-semibold text-[#1f3a2e]">
+                          <h3 className="mt-1 text-3xl font-semibold text-[#2b1d14]">
                             ₹ {order.total}
                           </h3>
 

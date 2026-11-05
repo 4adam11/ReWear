@@ -1,7 +1,7 @@
 import express from "express";
 import mongoose from "mongoose";
 import Order from "../models/Order.js";
-import Product from "../models/Product.js";
+import Product, { LIVE } from "../models/Product.js";
 import protect from "../middleware/authMiddleware.js";
 import {
   DAY_MS,
@@ -64,6 +64,11 @@ const buildItems = async (rawItems, buyerId) => {
 
     if (product.status === "sold") {
       return { error: `"${product.title}" has already been sold` };
+    }
+
+    // Only approved, active listings can be ordered (not in review, rejected or paused)
+    if (!LIVE.includes(product.status)) {
+      return { error: `"${product.title}" isn't available right now` };
     }
 
     const mode = raw.mode === "rent" ? "rent" : "sale";
@@ -208,12 +213,12 @@ router.post("/", protect, async (req, res) => {
     const reserved = [];
     for (const item of items.filter((i) => i.mode === "sale")) {
       const updated = await Product.findOneAndUpdate(
-        { _id: item.product, status: { $ne: "sold" } },
+        { _id: item.product, status: { $in: LIVE } },
         { $set: { status: "sold" } }
       );
 
       if (!updated) {
-        await Product.updateMany({ _id: { $in: reserved } }, { $set: { status: "available" } });
+        await Product.updateMany({ _id: { $in: reserved } }, { $set: { status: "live" } });
         return { status: 409, body: { message: `"${item.title}" was just sold to someone else` } };
       }
       reserved.push(item.product);
@@ -235,7 +240,7 @@ router.post("/", protect, async (req, res) => {
 
       return { status: 201, body: order };
     } catch (err) {
-      await Product.updateMany({ _id: { $in: reserved } }, { $set: { status: "available" } });
+      await Product.updateMany({ _id: { $in: reserved } }, { $set: { status: "live" } });
       throw err;
     }
   });
@@ -310,7 +315,7 @@ router.patch("/:id/cancel", protect, async (req, res) => {
   // Bought items go back on sale
   const sold = order.items.filter((i) => i.mode === "sale").map((i) => i.product);
   if (sold.length) {
-    await Product.updateMany({ _id: { $in: sold } }, { $set: { status: "available" } });
+    await Product.updateMany({ _id: { $in: sold } }, { $set: { status: "live" } });
   }
 
   res.json(order);

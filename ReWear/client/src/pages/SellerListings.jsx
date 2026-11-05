@@ -1,0 +1,323 @@
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import axios from "axios";
+import { formatDistanceToNow } from "date-fns";
+import { Plus, Pencil, Pause, Play, Trash2, ExternalLink, IndianRupee } from "lucide-react";
+
+import API from "../utils/api";
+import { useAuth } from "../context/AuthContext";
+import { thumb, PLACEHOLDER_IMAGE } from "../utils/image";
+import { categoryLabel } from "../utils/catalog";
+import StatusBadge from "../components/ui/StatusBadge";
+
+const TABS = [
+  { key: "all", label: "All" },
+  { key: "live", label: "Live" },
+  { key: "pending", label: "In review" },
+  { key: "rejected", label: "Needs changes" },
+  { key: "paused", label: "Paused" },
+  { key: "sold", label: "Sold" },
+];
+
+const isLive = (p) => ["live", "available"].includes(p.status);
+const inTab = (p, tab) => tab === "all" || (tab === "live" ? isLive(p) : p.status === tab);
+
+const canSell = (p) => ["sell", "sale", "both"].includes(p.mode);
+const canRent = (p) => ["rent", "both"].includes(p.mode);
+
+// Inline price editor. Saves the whole listing with new prices; on an approved
+// listing price changes go live straight away (no re-review).
+const PriceEditor = ({ product, onSaved, onClose }) => {
+  const { authHeader } = useAuth();
+  const [price, setPrice] = useState(product.price ?? "");
+  const [rent, setRent] = useState(product.rent ?? "");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+
+  const save = async (e) => {
+    e.preventDefault();
+    setBusy(true);
+    setError("");
+
+    try {
+      // The edit endpoint takes the full listing, so start from the current one
+      const { data: full } = await axios.get(`${API}/products/${product._id}`, authHeader);
+
+      const { data } = await axios.put(
+        `${API}/products/${product._id}`,
+        {
+          ...full,
+          price: canSell(product) ? Number(price) : undefined,
+          rent: canRent(product) ? Number(rent) : undefined,
+        },
+        authHeader
+      );
+
+      onSaved(data.product, data.message);
+    } catch (err) {
+      setError(err.response?.data?.message || "Could not save the new price");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <form onSubmit={save} className="mt-3 flex flex-wrap items-end gap-3 rounded-lg border border-gray-200 bg-gray-50 p-3">
+      {canSell(product) && (
+        <label className="text-xs text-gray-600">
+          Selling price (₹)
+          <input
+            type="number"
+            min="1"
+            value={price}
+            onChange={(e) => setPrice(e.target.value)}
+            className="mt-1 block w-32 rounded-md border border-gray-200 bg-white px-2.5 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-200"
+          />
+        </label>
+      )}
+
+      {canRent(product) && (
+        <label className="text-xs text-gray-600">
+          Rent per day (₹)
+          <input
+            type="number"
+            min="1"
+            value={rent}
+            onChange={(e) => setRent(e.target.value)}
+            className="mt-1 block w-32 rounded-md border border-gray-200 bg-white px-2.5 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-200"
+          />
+        </label>
+      )}
+
+      <button disabled={busy} className="px-3 py-1.5 rounded-md bg-gray-900 text-white text-sm font-medium disabled:opacity-40">
+        {busy ? "Saving…" : "Save price"}
+      </button>
+      <button type="button" onClick={onClose} className="px-3 py-1.5 rounded-md border border-gray-200 bg-white text-sm text-gray-700">
+        Cancel
+      </button>
+
+      {error && <p className="w-full text-xs text-red-600">{error}</p>}
+    </form>
+  );
+};
+
+const statusNote = (p) => {
+  if (p.status === "pending") {
+    return p.review?.everApproved
+      ? "Your changes are waiting for admin approval. The listing is hidden until then."
+      : "Waiting for admin approval before it appears to buyers.";
+  }
+  if (p.status === "rejected") return p.review?.rejectReason ? `Admin feedback: ${p.review.rejectReason}` : "Rejected by an admin.";
+  if (p.status === "paused") return "Hidden from buyers. Relist it whenever you're ready.";
+  if (p.status === "sold") return "Sold. Kept here for your records.";
+  return null;
+};
+
+const SellerListings = () => {
+  const { authHeader } = useAuth();
+  const [listings, setListings] = useState([]);
+  const [tab, setTab] = useState("all");
+  const [loading, setLoading] = useState(true);
+  const [editingPrice, setEditingPrice] = useState(null);
+  const [notice, setNotice] = useState("");
+
+  useEffect(() => {
+    axios
+      .get(`${API}/products/mine`, authHeader)
+      .then(({ data }) => setListings(data))
+      .finally(() => setLoading(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const replace = (updated) =>
+    setListings((list) => list.map((p) => (p._id === updated._id ? { ...p, ...updated, images: p.images } : p)));
+
+  const run = async (request, success) => {
+    try {
+      const { data } = await request();
+      success(data);
+    } catch (err) {
+      alert(err.response?.data?.message || "Something went wrong");
+    }
+  };
+
+  const pause = (p) => run(() => axios.patch(`${API}/products/${p._id}/pause`, {}, authHeader), replace);
+  const resume = (p) => run(() => axios.patch(`${API}/products/${p._id}/resume`, {}, authHeader), replace);
+
+  const remove = (p) => {
+    if (!window.confirm(`Delete "${p.title}"? This can't be undone.`)) return;
+    run(
+      () => axios.delete(`${API}/products/${p._id}`, authHeader),
+      () => setListings((list) => list.filter((x) => x._id !== p._id))
+    );
+  };
+
+  const counts = Object.fromEntries(TABS.map((t) => [t.key, listings.filter((p) => inTab(p, t.key)).length]));
+  const shown = listings.filter((p) => inTab(p, tab));
+
+  return (
+    <div className="min-h-screen bg-[#faf6ef]">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-5">
+
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
+          <div>
+            <h1 className="text-2xl font-semibold text-gray-900">My listings</h1>
+            <p className="mt-1 text-sm text-gray-500">
+              Change prices any time. New photos or details are checked by an admin before going live.
+            </p>
+          </div>
+
+          <Link
+            to="/sell"
+            className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-gray-900 text-white text-sm font-medium hover:bg-gray-800"
+          >
+            <Plus size={16} />
+            New listing
+          </Link>
+        </div>
+
+        {notice && (
+          <div className="flex items-start justify-between gap-3 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+            {notice}
+            <button onClick={() => setNotice("")} className="text-emerald-700 hover:underline">Dismiss</button>
+          </div>
+        )}
+
+        <div className="flex gap-1 overflow-x-auto bg-white border border-gray-200 rounded-lg p-1 w-fit max-w-full">
+          {TABS.map((t) => (
+            <button
+              key={t.key}
+              onClick={() => setTab(t.key)}
+              className={`px-3 py-1.5 rounded-md text-sm font-medium whitespace-nowrap transition ${tab === t.key ? "bg-gray-900 text-white" : "text-gray-600 hover:bg-gray-50"}`}
+            >
+              {t.label}
+              <span className="ml-1.5 opacity-70">{counts[t.key]}</span>
+            </button>
+          ))}
+        </div>
+
+        {loading ? (
+          <div className="h-40 rounded-xl bg-white border border-gray-200 animate-pulse" />
+        ) : shown.length === 0 ? (
+          <div className="rounded-xl border border-dashed border-gray-300 bg-white py-16 text-center">
+            <p className="text-gray-900 font-medium">No listings here</p>
+            <p className="mt-1 text-sm text-gray-500">
+              {listings.length === 0 ? "List your first item to start selling." : "Nothing in this tab right now."}
+            </p>
+          </div>
+        ) : (
+          <ul className="bg-white border border-gray-200 rounded-xl divide-y divide-gray-100">
+            {shown.map((p) => {
+              const note = statusNote(p);
+
+              return (
+                <li key={p._id} className="p-4 flex flex-col sm:flex-row gap-4">
+                  <img
+                    src={thumb(p.images?.[0], 200) || PLACEHOLDER_IMAGE}
+                    alt={p.title}
+                    loading="lazy"
+                    className="w-20 h-24 rounded-lg object-cover border border-gray-200 flex-shrink-0"
+                  />
+
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <StatusBadge status={p.status} />
+                      <span className="text-xs text-gray-400">
+                        Updated {formatDistanceToNow(new Date(p.updatedAt || p.createdAt), { addSuffix: true })}
+                      </span>
+                    </div>
+
+                    <p className="mt-1.5 font-medium text-gray-900 truncate">{p.title}</p>
+                    <p className="text-sm text-gray-600">
+                      {canSell(p) && p.price ? `₹${p.price.toLocaleString("en-IN")}` : ""}
+                      {canSell(p) && canRent(p) && p.price && p.rent ? " · " : ""}
+                      {canRent(p) && p.rent ? `₹${p.rent.toLocaleString("en-IN")}/day rent` : ""}
+                      <span className="text-gray-400"> · {categoryLabel(p.category)} · Size {p.size}</span>
+                    </p>
+
+                    {note && (
+                      <p className={`mt-1.5 text-sm ${p.status === "rejected" ? "text-red-700" : "text-gray-500"}`}>{note}</p>
+                    )}
+
+                    {editingPrice === p._id && (
+                      <PriceEditor
+                        product={p}
+                        onClose={() => setEditingPrice(null)}
+                        onSaved={(updated, message) => {
+                          replace(updated);
+                          setEditingPrice(null);
+                          setNotice(message);
+                        }}
+                      />
+                    )}
+                  </div>
+
+                  {/* ACTIONS */}
+                  {p.status !== "sold" && editingPrice !== p._id && (
+                    <div className="flex sm:flex-col flex-wrap gap-2 sm:w-36 flex-shrink-0">
+                      <button
+                        onClick={() => setEditingPrice(p._id)}
+                        className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md border border-gray-200 text-sm text-gray-700 hover:bg-gray-50"
+                      >
+                        <IndianRupee size={14} />
+                        Edit price
+                      </button>
+
+                      <Link
+                        to={`/sell/${p._id}`}
+                        className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md border border-gray-200 text-sm text-gray-700 hover:bg-gray-50"
+                      >
+                        <Pencil size={14} />
+                        {p.status === "rejected" ? "Fix & resubmit" : "Edit details"}
+                      </Link>
+
+                      {isLive(p) && (
+                        <button
+                          onClick={() => pause(p)}
+                          className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md border border-gray-200 text-sm text-gray-700 hover:bg-gray-50"
+                        >
+                          <Pause size={14} />
+                          Pause
+                        </button>
+                      )}
+
+                      {p.status === "paused" && (
+                        <button
+                          onClick={() => resume(p)}
+                          className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md border border-gray-200 text-sm text-gray-700 hover:bg-gray-50"
+                        >
+                          <Play size={14} />
+                          Relist
+                        </button>
+                      )}
+
+                      <button
+                        onClick={() => remove(p)}
+                        className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md border border-red-200 text-sm text-red-700 hover:bg-red-50"
+                      >
+                        <Trash2 size={14} />
+                        Delete
+                      </button>
+                    </div>
+                  )}
+
+                  {p.status === "sold" && (
+                    <Link
+                      to={`/product/${p._id}`}
+                      className="inline-flex items-center gap-1.5 self-start text-sm text-gray-600 hover:text-gray-900"
+                    >
+                      <ExternalLink size={14} />
+                      View
+                    </Link>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default SellerListings;

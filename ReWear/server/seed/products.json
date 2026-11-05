@@ -1,0 +1,494 @@
+[
+  {
+    "title": "Ivory & Gold Brocade Sherwani",
+    "mode": "both",
+    "price": 18500,
+    "rent": 1800,
+    "size": "L",
+    "condition": "Like New",
+    "description": "Ivory brocade sherwani with gold buttons and a contrast red stole. Worn once for a wedding, dry-cleaned and ready for your big day.",
+    "category": "wedding",
+    "photo": {
+      "url": "https://commons.wikimedia.org/wiki/Special:FilePath/A%20Bridegroom%20dress%20for%20Indian%20wedding.jpg?width=1200",
+      "page": "https://commons.wikimedia.org/wiki/File:A_Bridegroom_dress_for_Indian_wedding.jpg",
+      "artist": "Wikilover90",
+      "license": "CC BY-SA 4.0",
+      "source": "Wikimedia Commons"
+    }
+  },
+  {
+    "title": "Red Bridal Lehenga with Zari Work",
+    "mode": "both",
+    "price": 32000,
+    "rent": 3500,
+    "size": "M",
+    "condition": "Like New",
+    "description": "Classic red bridal lehenga with heavy zari and embroidery, matching blouse and dupatta. Perfect for the wedding day or reception.",
+    "category": "wedding",
+    "photo": {
+      "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Two%20traditional%20Indian%20wedding%20dresses%20with%20intricate%20gold%20zari%20work.jpg?width=1200",
+      "page": "https://commons.wikimedia.org/wiki/File:Two_traditional_Indian_wedding_dresses_with_intricate_gold_zari_work.jpg",
+      "artist": "Iwaqarhashmi",
+      "license": "CC BY-SA 4.0",
+      "source": "Wikimedia Commons"
+    }
+  },
+  {
+    "title": "Ivory Embroidered Wedding Saree",
+    "mode": "both",
+    "price": 14500,
+    "rent": 1500,
+    "size": "M",
+    "condition": "Like New",
+    "description": "Ivory saree with scalloped embroidered border and a sleeveless embellished blouse. Elegant for a white or pastel wedding theme.",
+    "category": "wedding",
+    "photo": {
+      "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Rianta's%20Designer%20Saree%20%2C%20Bridal%20wear%20%2C%20Wedding%20wear%20%2C%20Riantas%20white.jpg?width=1200",
+      "page": "https://commons.wikimedia.org/wiki/File:Rianta%27s_Designer_Saree_,_Bridal_wear_,_Wedding_wear_,_Riantas_white.jpg",
+      "artist": "Rianta's",
+      "license": "CC0",
+      "source": "Wikimedia Commons"
+    }
+  },
+  {
+    "title": "Red Banarasi Silk Bridal Saree",
+    "mode": "sell",
+    "price": 12000,
+    "size": "M",
+    "condition": "New",
+    "description": "Pure Banarasi silk saree in bridal red with woven gold motifs. Unworn, still folded from the store.",
+    "category": "wedding",
+    "photo": {
+      "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Chilly%20Red%20Bridal%20Tissue%20Silk%20Saree%20with%20Silver%20and%20Gold%20Zari.jpg?width=1200",
+      "page": "https://commons.wikimedia.org/wiki/File:Chilly_Red_Bridal_Tissue_Silk_Saree_with_Silver_and_Gold_Zari.jpg",
+      "artist": "Pachaiyappassilk",
+      "license": "CC0",
+      "source": "Wikimedia Commons"
+    }
+  },
+  {
+    "title": "Silver Sequin Reception Saree",
+    "mode": "rent",
+    "rent": 1200,
+    "size": "M",
+    "condition": "Good",
+    "description": "Shimmering ivory and silver sequinned saree with a backless embellished blouse. Made for the reception spotlight.",
+    "category": "wedding",
+    "photo": {
+      "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Rianta's%20Designer%20Saree%20%2C%20Bridal%20wear%20%2C%20Wedding%20wear%20%2C%20Riantas.jpg?width=1200",
+      "page": "https://commons.wikimedia.org/wiki/File:Rianta%27s_Designer_Saree_,_Bridal_wear_,_Wedding_wear_,_Riantas.jpg",
+      "artist": "Rianta's",
+      "license": "CC0",
+      "source": "Wikimedia Commons"
+    }
+  },
+  {
+    "title": "Red Silk Wedding Saree",
+    "mode": "both",
+    "price": 9800,
+    "rent": 1100,
+    "size": "M",
+    "condition": "Good",
+    "description": "Rich red silk saree with gold border, worn for a family wedding. Pairs beautifully with temple jewellery.",
+    "category": "wedding",
+    "photo": {
+      "url": "https://commons.wikimedia.org/wiki/Special:FilePath/South%20Asian%20Bridal%20Stying%20by%20pattupleats.jpg?width=1200",
+      "page": "https://commons.wikimedia.org/wiki/File:South_Asian_Bridal_Stying_by_pattupleats.jpg",
+      "artist": "Pattupleats",
+      "license": "CC BY-SA 4.0",
+      "source": "Wikimedia Commons"
+    }
+  },
+  {
+    "title": "Orange Floral Printed Salwar Suit",
+    "mode": "sell",
+    "price": 1800,
+    "size": "M",
+    "condition": "Like New",
+    "description": "Cotton salwar kameez in orange with a floral printed patiala salwar and dupatta. Light and comfortable for festivals.",
+    "category": "ethnic",
+    "photo": {
+      "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Shivani%20rajput%20in%20salwar.jpg?width=1200",
+      "page": "https://commons.wikimedia.org/wiki/File:Shivani_rajput_in_salwar.jpg",
+      "artist": "Shivani rajput",
+      "license": "CC BY-SA 4.0",
+      "source": "Wikimedia Commons"
+    }
+  },
+  {
+    "title": "Coral Chikankari Kurti",
+    "mode": "sell",
+    "price": 1400,
+    "size": "S",
+    "condition": "New",
+    "description": "Coral cotton kurti with white chikankari-style embroidery on the neckline and sleeves.",
+    "category": "ethnic",
+    "photo": {
+      "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Shalwar%20kameez%20(1710606).jpg?width=1200",
+      "page": "https://commons.wikimedia.org/wiki/File:Shalwar_kameez_(1710606).jpg",
+      "artist": "AddictionBazaar",
+      "license": "CC0",
+      "source": "Wikimedia Commons"
+    }
+  },
+  {
+    "title": "Coral & Gold Festive Silk Saree",
+    "mode": "both",
+    "price": 6500,
+    "rent": 700,
+    "size": "M",
+    "condition": "Good",
+    "description": "Festive silk saree in coral with gold zari border and buttis. Great for Diwali, pujas and family functions.",
+    "category": "ethnic",
+    "photo": {
+      "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Sari%20on%20mannequin%20for%20demo.jpg?width=1200",
+      "page": "https://commons.wikimedia.org/wiki/File:Sari_on_mannequin_for_demo.jpg",
+      "artist": "Suyash.dwivedi",
+      "license": "CC BY-SA 4.0",
+      "source": "Wikimedia Commons"
+    }
+  },
+  {
+    "title": "Red Bandhani Dupatta",
+    "mode": "sell",
+    "price": 950,
+    "size": "M",
+    "condition": "New",
+    "description": "Hand-tied bandhani dupatta in ivory with red dots and a red border. Lifts any plain kurta.",
+    "category": "ethnic",
+    "photo": {
+      "url": "https://commons.wikimedia.org/wiki/Special:FilePath/A%20Phulkari%20with%20traditional%20flower%20pattern%20on%20unworked%20background.jpg?width=1200",
+      "page": "https://commons.wikimedia.org/wiki/File:A_Phulkari_with_traditional_flower_pattern_on_unworked_background.jpg",
+      "artist": "Chiswick Chap",
+      "license": "CC BY-SA 4.0",
+      "source": "Wikimedia Commons"
+    }
+  },
+  {
+    "title": "White Embroidered Long Kurta",
+    "mode": "sell",
+    "price": 1600,
+    "size": "M",
+    "condition": "Like New",
+    "description": "Long white kurta with colourful thread embroidery down the front. Easy to dress up or down.",
+    "category": "ethnic",
+    "photo": {
+      "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Shalwar%20kameez%20(1710609).jpg?width=1200",
+      "page": "https://commons.wikimedia.org/wiki/File:Shalwar_kameez_(1710609).jpg",
+      "artist": "AddictionBazaar",
+      "license": "CC0",
+      "source": "Wikimedia Commons"
+    }
+  },
+  {
+    "title": "Yellow Embroidered Kurta",
+    "mode": "sell",
+    "price": 1300,
+    "size": "L",
+    "condition": "Good",
+    "description": "Bright yellow kurta with green embroidery, ideal for Haldi or a day festival.",
+    "category": "ethnic",
+    "photo": {
+      "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Shalwar%20kameez%20(1710604).jpg?width=1200",
+      "page": "https://commons.wikimedia.org/wiki/File:Shalwar_kameez_(1710604).jpg",
+      "artist": "AddictionBazaar",
+      "license": "CC0",
+      "source": "Wikimedia Commons"
+    }
+  },
+  {
+    "title": "Red Embroidered Party Saree",
+    "mode": "both",
+    "price": 7200,
+    "rent": 800,
+    "size": "M",
+    "condition": "Like New",
+    "description": "Red georgette saree with a wide embroidered gold panel and matching blouse. Made for sangeets and cocktail nights.",
+    "category": "party",
+    "photo": {
+      "url": "https://live.staticflickr.com/65535/49272257177_8b278c5623_b.jpg",
+      "page": "https://www.flickr.com/photos/186174811@N02/49272257177",
+      "artist": "shreedesigner12",
+      "license": "Public domain 1.0",
+      "source": "Flickr"
+    }
+  },
+  {
+    "title": "Brocade Jacket & Flared Skirt Set",
+    "mode": "both",
+    "price": 5600,
+    "rent": 650,
+    "size": "S",
+    "condition": "Like New",
+    "description": "Indo-western set: a rust brocade waist-length jacket over a flared charcoal skirt. Stands out at any party.",
+    "category": "party",
+    "photo": {
+      "url": "https://live.staticflickr.com/5568/31240943862_f365e099c2_b.jpg",
+      "page": "https://www.flickr.com/photos/148732679@N08/31240943862",
+      "artist": "Mahendra Dhameliya",
+      "license": "Public domain 1.0",
+      "source": "Flickr"
+    }
+  },
+  {
+    "title": "Teal Anarkali with Net Dupatta",
+    "mode": "both",
+    "price": 4800,
+    "rent": 550,
+    "size": "M",
+    "condition": "Good",
+    "description": "Flowy teal Anarkali with a gold yoke, churidar and sheer net dupatta. Twirl-ready for mehendi or festive parties.",
+    "category": "party",
+    "photo": {
+      "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Yogita%20Grover%2C%20Well%20Groomed%20Fashion%20Show%20(5420850558).jpg?width=1200",
+      "page": "https://commons.wikimedia.org/wiki/File:Yogita_Grover,_Well_Groomed_Fashion_Show_(5420850558).jpg",
+      "artist": "Brendan",
+      "license": "CC BY 2.0",
+      "source": "Wikimedia Commons"
+    }
+  },
+  {
+    "title": "Red Net Lace Saree",
+    "mode": "rent",
+    "rent": 600,
+    "size": "M",
+    "condition": "Good",
+    "description": "Lightweight red net saree with lace detailing. Easy to drape and comfortable all night.",
+    "category": "party",
+    "photo": {
+      "url": "https://commons.wikimedia.org/wiki/Special:FilePath/HF4718.jpg?width=1200",
+      "page": "https://commons.wikimedia.org/wiki/File:HF4718.jpg",
+      "artist": "OMPRAKSH123",
+      "license": "CC BY-SA 4.0",
+      "source": "Wikimedia Commons"
+    }
+  },
+  {
+    "title": "Maroon Sequin Saree",
+    "mode": "both",
+    "price": 6400,
+    "rent": 700,
+    "size": "M",
+    "condition": "Like New",
+    "description": "Maroon saree covered in tonal sequins with a matching blouse. Catches the light at evening receptions.",
+    "category": "party",
+    "photo": {
+      "url": "https://upload.wikimedia.org/wikipedia/commons/8/8a/Red_saree_look_for_girl.jpg",
+      "page": "https://commons.wikimedia.org/w/index.php?curid=131174464",
+      "artist": "Anaya designer",
+      "license": "CC BY-SA 4.0",
+      "source": "Wikimedia Commons"
+    }
+  },
+  {
+    "title": "Designer Striped Silk Saree",
+    "mode": "both",
+    "price": 16500,
+    "rent": 1800,
+    "size": "M",
+    "condition": "Like New",
+    "description": "Statement designer saree in orange and red stripes with an embroidered border. Pre-loved, carefully stored.",
+    "category": "designer",
+    "photo": {
+      "url": "https://live.staticflickr.com/8171/7892952246_7e21979592_b.jpg",
+      "page": "https://www.flickr.com/photos/86156086@N02/7892952246",
+      "artist": "1firstLady",
+      "license": "CC BY-SA 2.0",
+      "source": "Flickr"
+    }
+  },
+  {
+    "title": "Runway Blush Embroidered Lehenga",
+    "mode": "rent",
+    "rent": 4500,
+    "size": "S",
+    "condition": "Like New",
+    "description": "Fashion-week blush lehenga with all-over tonal embroidery and a statement necklace look. Rent the runway for your big night.",
+    "category": "designer",
+    "photo": {
+      "url": "https://commons.wikimedia.org/wiki/Special:FilePath/India%20Runway%20Week.JPG?width=1200",
+      "page": "https://commons.wikimedia.org/wiki/File:India_Runway_Week.JPG",
+      "artist": "IFFDOFFICIAL",
+      "license": "CC BY-SA 4.0",
+      "source": "Wikimedia Commons"
+    }
+  },
+  {
+    "title": "Embroidered Velvet Bandhgala Jacket",
+    "mode": "both",
+    "price": 24000,
+    "rent": 2600,
+    "size": "L",
+    "condition": "Like New",
+    "description": "Hand-embroidered rust and gold bandhgala jacket, tailored fit. Pair with ivory trousers for receptions.",
+    "category": "designer",
+    "photo": {
+      "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Bandhgala%20by%20Sabyasachi%20Mukherjee.jpg?width=1200",
+      "page": "https://commons.wikimedia.org/wiki/File:Bandhgala_by_Sabyasachi_Mukherjee.jpg",
+      "artist": "Stefan Ivanovich",
+      "license": "CC BY-SA 4.0",
+      "source": "Wikimedia Commons"
+    }
+  },
+  {
+    "title": "Floral Appliqué Cape Co-ord",
+    "mode": "rent",
+    "rent": 3200,
+    "size": "S",
+    "condition": "Like New",
+    "description": "Runway look with a sheer cape covered in 3D floral appliqué over an ivory tunic and dhoti pants.",
+    "category": "designer",
+    "photo": {
+      "url": "https://live.staticflickr.com/2893/31992266904_0e780d7889_b.jpg",
+      "page": "https://www.flickr.com/photos/144459366@N03/31992266904",
+      "artist": "metromela",
+      "license": "CC BY-SA 2.0",
+      "source": "Flickr"
+    }
+  },
+  {
+    "title": "Beige Linen Designer Co-ord",
+    "mode": "both",
+    "price": 9500,
+    "rent": 1200,
+    "size": "M",
+    "condition": "Like New",
+    "description": "Relaxed designer co-ord in beige linen: belted shirt dress over drop-crotch trousers. Effortless and very now.",
+    "category": "designer",
+    "photo": {
+      "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Collection%20-%201.jpg?width=1200",
+      "page": "https://commons.wikimedia.org/wiki/File:Collection_-_1.jpg",
+      "artist": "Samiya Khan 1301",
+      "license": "CC BY-SA 4.0",
+      "source": "Wikimedia Commons"
+    }
+  },
+  {
+    "title": "Cream Khadi Kurta",
+    "mode": "sell",
+    "price": 1200,
+    "size": "L",
+    "condition": "Like New",
+    "description": "Hand-spun cream khadi kurta with a band collar. Breathable for everyday wear and college.",
+    "category": "casual",
+    "photo": {
+      "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Eri%20Silk%20Handloom%20Kurta.jpg?width=1200",
+      "page": "https://commons.wikimedia.org/wiki/File:Eri_Silk_Handloom_Kurta.jpg",
+      "artist": "Gautam Daniel",
+      "license": "CC BY 4.0",
+      "source": "Wikimedia Commons"
+    }
+  },
+  {
+    "title": "Washed Denim Jacket",
+    "mode": "sell",
+    "price": 1500,
+    "size": "M",
+    "condition": "Good",
+    "description": "Light-wash denim jacket, worn-in and soft. Layers over a plain white tee for an easy casual look.",
+    "category": "casual",
+    "photo": {
+      "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Somrajmaity.jpg?width=1200",
+      "page": "https://commons.wikimedia.org/wiki/File:Somrajmaity.jpg",
+      "artist": "Zairah1992234",
+      "license": "CC BY-SA 4.0",
+      "source": "Wikimedia Commons"
+    }
+  },
+  {
+    "title": "White Logo Oversized Tee",
+    "mode": "sell",
+    "price": 700,
+    "size": "L",
+    "condition": "Like New",
+    "description": "Oversized white tee with logo taping on the sleeves and a small chest print.",
+    "category": "streetwear",
+    "photo": {
+      "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Tshirt%20oversized%20.%20Zakaria%20dahmani%20-%20Dahmavel%202020.jpg?width=1200",
+      "page": "https://commons.wikimedia.org/wiki/File:Tshirt_oversized_._Zakaria_dahmani_-_Dahmavel_2020.jpg",
+      "artist": "zakaria dahmani",
+      "license": "CC BY-SA 4.0",
+      "source": "Wikimedia Commons"
+    }
+  },
+  {
+    "title": "Black Skull Graphic Tee",
+    "mode": "sell",
+    "price": 650,
+    "size": "M",
+    "condition": "Good",
+    "description": "Black tee with a large skull and roses graphic. Goes with cargos and chunky sneakers.",
+    "category": "streetwear",
+    "photo": {
+      "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Zwart%20t-shirt%20met%20opdruk%20in%20wit%20en%20rood%20en%20%E2%80%9Cblood%20shall%20follow%20blood%E2%80%9D%2C%20objectnr%2086905-2.JPG?width=1200",
+      "page": "https://commons.wikimedia.org/wiki/File:Zwart_t-shirt_met_opdruk_in_wit_en_rood_en_%E2%80%9Cblood_shall_follow_blood%E2%80%9D,_objectnr_86905-2.JPG",
+      "artist": "Museum Rotterdam",
+      "license": "CC BY-SA 3.0",
+      "source": "Wikimedia Commons"
+    }
+  },
+  {
+    "title": "Vintage Print Graphic Tee",
+    "mode": "sell",
+    "price": 800,
+    "size": "L",
+    "condition": "Good",
+    "description": "Retro tee with blue graphic panels and script lettering. Thrifted vintage feel.",
+    "category": "streetwear",
+    "photo": {
+      "url": "https://commons.wikimedia.org/wiki/Special:FilePath/T-shirt%2C%20oversized%2C%20maat%20XL%2C%20Merk%20Ecko%20Unlimited%2C%20blauw%2C%20wit%20en%20grijs%20met%20opdruk%2C%20objectnr%2086904-3.JPG?width=1200",
+      "page": "https://commons.wikimedia.org/wiki/File:T-shirt,_oversized,_maat_XL,_Merk_Ecko_Unlimited,_blauw,_wit_en_grijs_met_opdruk,_objectnr_86904-3.JPG",
+      "artist": "Ecko Unlimited",
+      "license": "CC BY-SA 3.0",
+      "source": "Wikimedia Commons"
+    }
+  },
+  {
+    "title": "Beige Graphic Hoodie",
+    "mode": "sell",
+    "price": 1400,
+    "size": "M",
+    "condition": "Like New",
+    "description": "Cosy beige hoodie with a varsity-style graphic. Oversized fit, great for layering.",
+    "category": "streetwear",
+    "photo": {
+      "url": "https://commons.wikimedia.org/wiki/Special:FilePath/A%20American%20student%20and%20street%20style%20from%20Pull%20%26%20Bear.jpg?width=1200",
+      "page": "https://commons.wikimedia.org/wiki/File:A_American_student_and_street_style_from_Pull_%26_Bear.jpg",
+      "artist": "Peachyeung316",
+      "license": "CC BY-SA 4.0",
+      "source": "Wikimedia Commons"
+    }
+  },
+  {
+    "title": "Black Number Print Tee",
+    "mode": "sell",
+    "price": 600,
+    "size": "XL",
+    "condition": "Like New",
+    "description": "Heavyweight black tee with a bold white number print on the front.",
+    "category": "streetwear",
+    "photo": {
+      "url": "https://commons.wikimedia.org/wiki/Special:FilePath/T-shirt%2C%20zwart%2C%20ronde%20hals%20met%20korte%20mouwen%20en%20opdruk%20%E2%80%9C5314%E2%80%9D%2C%20objectnr%2086891.JPG?width=1200",
+      "page": "https://commons.wikimedia.org/wiki/File:T-shirt,_zwart,_ronde_hals_met_korte_mouwen_en_opdruk_%E2%80%9C5314%E2%80%9D,_objectnr_86891.JPG",
+      "artist": "B&C / Mart van Ginkel Textielbedrukking",
+      "license": "CC BY-SA 3.0",
+      "source": "Wikimedia Commons"
+    }
+  },
+  {
+    "title": "Beige Utility Jacket",
+    "mode": "sell",
+    "price": 2200,
+    "size": "M",
+    "condition": "Like New",
+    "description": "Boxy beige utility jacket with patch pockets. Layer it over hoodies or tees.",
+    "category": "streetwear",
+    "photo": {
+      "url": "https://commons.wikimedia.org/wiki/Special:FilePath/UNIQLO%202026-09-07%20Philippines%2005.jpg?width=1200",
+      "page": "https://commons.wikimedia.org/wiki/File:UNIQLO_2026-09-07_Philippines_05.jpg",
+      "artist": "P1898",
+      "license": "CC BY 4.0",
+      "source": "Wikimedia Commons"
+    }
+  }
+]

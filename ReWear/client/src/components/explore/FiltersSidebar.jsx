@@ -119,7 +119,7 @@ const FiltersSidebar = ({
             </motion.div>
 
             <div>
-              <h2 className="text-2xl font-black tracking-tight text-[#1f3a2e]">
+              <h2 className="text-2xl font-black tracking-tight text-[#2b1d14]">
                 Filters
               </h2>
 
@@ -371,7 +371,7 @@ const FiltersSidebar = ({
 
           onClick={handleApply}
 
-          className="relative mt-10 w-full overflow-hidden rounded-2xl bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 px-6 py-4 text-sm font-bold text-white shadow-[0_15px_40px_rgba(47,125,91,0.35)]"
+          className="relative mt-10 w-full overflow-hidden rounded-2xl bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 px-6 py-4 text-sm font-bold text-white shadow-[0_15px_40px_rgba(107,68,48,0.35)]"
         >
 
           {/* MOVING SHINE */}

@@ -240,11 +240,11 @@ const Dashboard = () => {
   // LOADING
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#f6f5f0] flex items-center justify-center">
+      <div className="min-h-screen bg-[#faf6ef] flex items-center justify-center">
 
         <div className="text-center">
 
-          <div className="w-12 h-12 border-4 border-[#1f3a2e]/20 border-t-[#1f3a2e] rounded-full animate-spin mx-auto" />
+          <div className="w-12 h-12 border-4 border-[#2b1d14]/20 border-t-[#2b1d14] rounded-full animate-spin mx-auto" />
 
           <p className="mt-4 text-gray-500">
             Loading dashboard...
@@ -257,7 +257,7 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#f6f5f0] py-8 sm:py-10">
+    <div className="min-h-screen bg-[#faf6ef] py-8 sm:py-10">
 
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
 
@@ -266,7 +266,7 @@ const Dashboard = () => {
 
           <div>
 
-            <h1 className="text-3xl sm:text-4xl font-semibold text-[#1f3a2e]">
+            <h1 className="text-3xl sm:text-4xl font-semibold text-[#2b1d14]">
               Dashboard
             </h1>
 
@@ -282,7 +282,7 @@ const Dashboard = () => {
               navigate("/sell")
             }
 
-            className="inline-flex items-center gap-2 bg-[#1f3a2e] text-white px-6 py-4 rounded-2xl font-medium hover:opacity-95 transition w-fit"
+            className="inline-flex items-center gap-2 bg-[#2b1d14] text-white px-6 py-4 rounded-2xl font-medium hover:opacity-95 transition w-fit"
           >
 
             <Plus size={18} />
@@ -313,7 +313,7 @@ const Dashboard = () => {
                   Products Listed
                 </p>
 
-                <h2 className="mt-3 text-4xl font-semibold text-[#1f3a2e]">
+                <h2 className="mt-3 text-4xl font-semibold text-[#2b1d14]">
                   {totalProducts}
                 </h2>
 
@@ -346,7 +346,7 @@ const Dashboard = () => {
                   Orders
                 </p>
 
-                <h2 className="mt-3 text-4xl font-semibold text-[#1f3a2e]">
+                <h2 className="mt-3 text-4xl font-semibold text-[#2b1d14]">
                   {totalOrders}
                 </h2>
 
@@ -379,7 +379,7 @@ const Dashboard = () => {
                   Earnings
                 </p>
 
-                <h2 className="mt-3 text-4xl font-semibold text-[#1f3a2e]">
+                <h2 className="mt-3 text-4xl font-semibold text-[#2b1d14]">
                   ₹ {totalEarnings}
                 </h2>
 
@@ -402,7 +402,7 @@ const Dashboard = () => {
 
           <div className="flex items-center justify-between mb-6">
 
-            <h2 className="text-2xl font-semibold text-[#1f3a2e]">
+            <h2 className="text-2xl font-semibold text-[#2b1d14]">
               My Listings
             </h2>
 
@@ -428,7 +428,7 @@ const Dashboard = () => {
 
               </div>
 
-              <h3 className="mt-6 text-2xl font-semibold text-[#1f3a2e]">
+              <h3 className="mt-6 text-2xl font-semibold text-[#2b1d14]">
                 No Products Listed
               </h3>
 
@@ -443,7 +443,7 @@ const Dashboard = () => {
                   navigate("/sell")
                 }
 
-                className="mt-8 inline-flex items-center gap-2 bg-[#1f3a2e] text-white px-6 py-4 rounded-2xl font-medium"
+                className="mt-8 inline-flex items-center gap-2 bg-[#2b1d14] text-white px-6 py-4 rounded-2xl font-medium"
               >
                 Start Selling
 
@@ -485,7 +485,7 @@ const Dashboard = () => {
                     />
 
                     {/* BADGE */}
-                    <div className="absolute top-4 left-4 px-3 py-1 rounded-full bg-white/90 backdrop-blur-md text-xs font-medium text-[#1f3a2e]">
+                    <div className="absolute top-4 left-4 px-3 py-1 rounded-full bg-white/90 backdrop-blur-md text-xs font-medium text-[#2b1d14]">
 
                       {p.status === "sold"
                         ? "Sold"
@@ -504,7 +504,7 @@ const Dashboard = () => {
                   {/* CONTENT */}
                   <div className="p-5">
 
-                    <h3 className="text-xl font-semibold text-[#1f3a2e] line-clamp-1">
+                    <h3 className="text-xl font-semibold text-[#2b1d14] line-clamp-1">
                       {p.title}
                     </h3>
 
@@ -520,7 +520,7 @@ const Dashboard = () => {
                           Price
                         </p>
 
-                        <h4 className="text-2xl font-semibold text-[#1f3a2e]">
+                        <h4 className="text-2xl font-semibold text-[#2b1d14]">
                           ₹{" "}
                           {p.price ||
                             p.rent}
@@ -586,7 +586,7 @@ const Dashboard = () => {
 
           <div className="flex items-center justify-between mb-6">
 
-            <h2 className="text-2xl font-semibold text-[#1f3a2e]">
+            <h2 className="text-2xl font-semibold text-[#2b1d14]">
               Recent Orders
             </h2>
 
@@ -607,7 +607,7 @@ const Dashboard = () => {
 
               <ShoppingBag className="mx-auto text-gray-400" size={42} />
 
-              <h3 className="mt-5 text-xl font-semibold text-[#1f3a2e]">
+              <h3 className="mt-5 text-xl font-semibold text-[#2b1d14]">
                 No Orders Yet
               </h3>
 
@@ -653,7 +653,7 @@ const Dashboard = () => {
 
                       <div>
 
-                        <h3 className="text-lg font-semibold text-[#1f3a2e]">
+                        <h3 className="text-lg font-semibold text-[#2b1d14]">
                           {firstItem?.title ||
                             "Order"}
                         </h3>
@@ -676,7 +676,7 @@ const Dashboard = () => {
                         Total
                       </p>
 
-                      <h3 className="mt-1 text-2xl font-semibold text-[#1f3a2e]">
+                      <h3 className="mt-1 text-2xl font-semibold text-[#2b1d14]">
                         ₹ {o.total}
                       </h3>
 

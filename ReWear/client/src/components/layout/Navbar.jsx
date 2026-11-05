@@ -7,17 +7,20 @@ import {
   Package,
   Plus,
   LogOut,
+  ListChecks,
+  ShieldCheck,
 } from "lucide-react";
 
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
 import Logo from "../ui/Logo";
+import NotificationBell from "./NotificationBell";
 
 
 const Navbar = () => {
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { user, logout, isAdmin } = useAuth();
 
   const [open, setOpen] = useState(false);
   const [mobileMenu, setMobileMenu] = useState(false);
@@ -107,6 +110,9 @@ const Navbar = () => {
               <Heart size={18} className="text-gray-700" />
             </NavLink>
 
+            {/* NOTIFICATIONS */}
+            <NotificationBell />
+
             {/* CART */}
             <NavLink
               to="/cart"
@@ -145,7 +151,7 @@ const Navbar = () => {
                       </p>
 
                       <p className="text-sm text-gray-500 mt-1">
-                        Welcome back 👋
+                        {isAdmin ? "Admin" : user.email}
                       </p>
                     </div>
 
@@ -162,6 +168,30 @@ const Navbar = () => {
                         <LayoutDashboard size={18} />
                         Dashboard
                       </button>
+
+                      <button
+                        onClick={() => {
+                          navigate("/seller/listings");
+                          setOpen(false);
+                        }}
+                        className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-100 transition duration-300 text-gray-700"
+                      >
+                        <ListChecks size={18} />
+                        My Listings
+                      </button>
+
+                      {isAdmin && (
+                        <button
+                          onClick={() => {
+                            navigate("/admin");
+                            setOpen(false);
+                          }}
+                          className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-100 transition duration-300 text-gray-700"
+                        >
+                          <ShieldCheck size={18} />
+                          Admin Panel
+                        </button>
+                      )}
 
                       <button
                         onClick={() => {

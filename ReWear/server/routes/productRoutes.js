@@ -1,22 +1,25 @@
 import express from "express";
-import Product from "../models/Product.js";
+import Product, { LIVE } from "../models/Product.js";
 import Upload from "../models/Upload.js";
-import protect from "../middleware/authMiddleware.js";
+import protect, { optionalAuth } from "../middleware/authMiddleware.js";
 import { validateProduct } from "../utils/validateProduct.js";
 import { CATEGORIES, SIZES, normalizeCategory } from "../utils/catalog.js";
 import { upcomingRentals } from "../utils/bookings.js";
 import { deleteImage } from "../utils/cloudinary.js";
+import { notifyAdmins } from "../utils/notify.js";
 
 const router = express.Router();
 
 const isOwner = (product, user) =>
-  product.user?.toString() === user._id.toString();
+  !!user && product.user?.toString() === user._id.toString();
+
+const isAdmin = (user) => user?.role === "admin";
 
 // Only what product cards need; just the first photo
 const CARD_FIELDS = "title price rent mode category size condition status user createdAt";
 
-const listQuery = (query) =>
-  query.select(CARD_FIELDS).slice("images", 1).lean();
+const listQuery = (query, extra = "") =>
+  query.select(`${CARD_FIELDS} ${extra}`).slice("images", 1).lean();
 
 const listParam = (value, allowed) =>
   typeof value === "string"
@@ -27,8 +30,40 @@ const escapeRegex = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 const toDay = (d) => (d ? new Date(d).toISOString().slice(0, 10) : undefined);
 
+// Every photo must have gone through /api/uploads (AI check) and belong to this seller.
+// Returns { error } or { images, aiNotes }.
+const checkImages = async (userId, images) => {
+  const unique = [...new Set(images)];
+  const uploads = await Upload.find({ user: userId, url: { $in: unique } }).lean();
+
+  if (uploads.length !== unique.length) {
+    return { error: "Please upload photos using the photo uploader" };
+  }
+
+  const aiNotes = [...new Set(uploads.map((u) => u.aiNote).filter(Boolean))];
+  return { images: unique, aiNotes };
+};
+
+const submitForReview = (product, aiNotes) => {
+  product.status = "pending";
+  product.review.aiFlagged = aiNotes.length > 0;
+  product.review.aiNotes = aiNotes;
+  product.review.rejectReason = undefined;
+  product.review.submittedAt = new Date();
+};
+
+const notifyNewSubmission = (product) =>
+  notifyAdmins({
+    type: "listing_submitted",
+    title: product.review.aiFlagged ? "Flagged listing needs review" : "New listing to review",
+    message: product.review.aiFlagged
+      ? `"${product.title}": ${product.review.aiNotes.join(" ")}`
+      : `"${product.title}" is waiting for approval.`,
+    link: "/admin/listings",
+  });
+
 //
-// BROWSE: filtering, sorting and paging happen in the database, not the browser
+// BROWSE: only approved (live) listings; filtering, sorting and paging happen in the database
 // GET /api/products?mode=sale|rent&search=&categories=party,wedding&sizes=M,L&maxPrice=5000&sort=new|low|high&page=1&limit=9
 //
 router.get("/", async (req, res) => {
@@ -36,7 +71,7 @@ router.get("/", async (req, res) => {
   const priceField = mode === "rent" ? "rent" : "price";
 
   const filter = {
-    status: { $ne: "sold" },
+    status: { $in: LIVE },
     mode: { $in: mode === "rent" ? ["rent", "both"] : ["sell", "sale", "both"] },
   };
 
@@ -90,17 +125,20 @@ router.get("/", async (req, res) => {
 });
 
 //
-// MY LISTINGS (dashboard), including sold ones
+// MY LISTINGS (seller), every status, with review feedback
 //
 router.get("/mine", protect, async (req, res) => {
   const products = await listQuery(
-    Product.find({ user: req.user._id }).sort({ createdAt: -1 })
+    Product.find({ user: req.user._id }).sort({ createdAt: -1 }),
+    "review.rejectReason review.aiFlagged review.everApproved review.submittedAt updatedAt"
   );
 
   res.json(products);
 });
 
-// CREATE
+//
+// CREATE: goes to the admin review queue, not straight to Explore
+//
 router.post("/", protect, async (req, res) => {
   const { error, data } = validateProduct(req.body);
 
@@ -108,33 +146,44 @@ router.post("/", protect, async (req, res) => {
     return res.status(400).json({ message: error });
   }
 
-  // Every photo must have passed moderation and belong to this seller
-  const uniqueImages = [...new Set(data.images)];
-  const approved = await Upload.countDocuments({
-    user: req.user._id,
-    url: { $in: uniqueImages },
-  });
-
-  if (approved !== uniqueImages.length) {
-    return res.status(400).json({ message: "Please upload photos using the photo uploader" });
+  const checked = await checkImages(req.user._id, data.images);
+  if (checked.error) {
+    return res.status(400).json({ message: checked.error });
   }
 
-  data.images = uniqueImages;
-
-  const product = await Product.create({
+  const product = new Product({
     ...data,
-    user: req.user._id
+    images: checked.images,
+    user: req.user._id,
+    review: {},
   });
+
+  submitForReview(product, checked.aiNotes);
+  await product.save();
+  notifyNewSubmission(product);
 
   res.status(201).json(product);
 });
 
-// ONE PRODUCT, plus the days it's already booked so the date picker can block them
-router.get("/:id", async (req, res) => {
+//
+// ONE PRODUCT, plus the days it's already booked so the date picker can block them.
+// Listings that aren't approved yet are only visible to their seller and admins.
+//
+router.get("/:id", optionalAuth, async (req, res) => {
   const product = await Product.findById(req.params.id).lean();
 
   if (!product) {
     return res.status(404).json({ message: "Product not found" });
+  }
+
+  const publicStatus = [...LIVE, "sold"].includes(product.status);
+  if (!publicStatus && !isOwner(product, req.user) && !isAdmin(req.user)) {
+    return res.status(404).json({ message: "Product not found" });
+  }
+
+  // Review details are only for the seller and admins
+  if (!isOwner(product, req.user) && !isAdmin(req.user)) {
+    delete product.review;
   }
 
   const bookings = (await upcomingRentals(product._id)).map((b) => ({
@@ -145,6 +194,101 @@ router.get("/:id", async (req, res) => {
   res.json({ ...product, bookings });
 });
 
+//
+// EDIT (seller). Price/rent/size/condition/availability changes on an approved listing
+// apply immediately; new photos, title, description or category go back for review.
+//
+router.put("/:id", protect, async (req, res) => {
+  const product = await Product.findById(req.params.id);
+
+  if (!product) {
+    return res.status(404).json({ message: "Not found" });
+  }
+
+  if (!isOwner(product, req.user)) {
+    return res.status(403).json({ message: "Not authorized" });
+  }
+
+  if (product.status === "sold") {
+    return res.status(400).json({ message: "Sold listings can't be edited" });
+  }
+
+  const { error, data } = validateProduct(req.body);
+  if (error) {
+    return res.status(400).json({ message: error });
+  }
+
+  const checked = await checkImages(req.user._id, data.images);
+  if (checked.error) {
+    return res.status(400).json({ message: checked.error });
+  }
+
+  const sameImages =
+    checked.images.length === product.images.length &&
+    checked.images.every((url, i) => url === product.images[i]);
+
+  const contentChanged =
+    !sameImages ||
+    data.title !== product.title ||
+    (data.description || "") !== (product.description || "") ||
+    data.category !== product.category;
+
+  Object.assign(product, { ...data, images: checked.images });
+
+  const needsReview =
+    contentChanged || !product.review?.everApproved || ["pending", "rejected"].includes(product.status);
+
+  if (needsReview) {
+    submitForReview(product, checked.aiNotes);
+  }
+
+  await product.save();
+
+  if (needsReview) {
+    notifyNewSubmission(product);
+  }
+
+  res.json({
+    product,
+    message: needsReview
+      ? "Changes saved and sent for review. Your listing will be visible again once an admin approves it."
+      : "Changes saved. They're live now.",
+  });
+});
+
+//
+// PAUSE / RELIST (seller)
+//
+router.patch("/:id/pause", protect, async (req, res) => {
+  const product = await Product.findById(req.params.id);
+
+  if (!product) return res.status(404).json({ message: "Not found" });
+  if (!isOwner(product, req.user)) return res.status(403).json({ message: "Not authorized" });
+
+  if (!LIVE.includes(product.status)) {
+    return res.status(400).json({ message: "Only live listings can be paused" });
+  }
+
+  product.status = "paused";
+  await product.save();
+  res.json(product);
+});
+
+router.patch("/:id/resume", protect, async (req, res) => {
+  const product = await Product.findById(req.params.id);
+
+  if (!product) return res.status(404).json({ message: "Not found" });
+  if (!isOwner(product, req.user)) return res.status(403).json({ message: "Not authorized" });
+
+  if (product.status !== "paused") {
+    return res.status(400).json({ message: "Only paused listings can be relisted" });
+  }
+
+  product.status = "live";
+  await product.save();
+  res.json(product);
+});
+
 router.delete("/:id", protect, async (req, res) => {
   const product = await Product.findById(req.params.id);
 
@@ -152,7 +296,7 @@ router.delete("/:id", protect, async (req, res) => {
     return res.status(404).json({ message: "Product not found" });
   }
 
-  if (!isOwner(product, req.user)) {
+  if (!isOwner(product, req.user) && !isAdmin(req.user)) {
     return res.status(403).json({ message: "Not authorized" });
   }
 
@@ -167,7 +311,7 @@ router.delete("/:id", protect, async (req, res) => {
   await product.deleteOne();
 
   // Remove its photos from Cloudinary too (don't fail the delete if that errors)
-  const uploads = await Upload.find({ user: req.user._id, url: { $in: product.images } });
+  const uploads = await Upload.find({ user: product.user, url: { $in: product.images } });
   await Promise.all(
     uploads.map((u) =>
       deleteImage(u.publicId).catch((err) =>
@@ -178,31 +322,6 @@ router.delete("/:id", protect, async (req, res) => {
   await Upload.deleteMany({ _id: { $in: uploads.map((u) => u._id) } });
 
   res.json({ message: "Product removed" });
-});
-
-router.put("/:id", protect, async (req, res) => {
-  const product = await Product.findById(req.params.id);
-
-  if (!product) {
-    return res.status(404).json({ message: "Not found" });
-  }
-
-  if (!isOwner(product, req.user)) {
-    return res.status(403).json({ message: "Not authorized" });
-  }
-
-  const { title } = req.body;
-
-  if (title !== undefined) {
-    if (typeof title !== "string" || !title.trim() || title.trim().length > 120) {
-      return res.status(400).json({ message: "Title must be 1-120 characters" });
-    }
-    product.title = title.trim();
-  }
-
-  const updated = await product.save();
-
-  res.json(updated);
 });
 
 export default router;

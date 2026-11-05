@@ -44,21 +44,30 @@ router.post("/", protect, uploadLimiter, async (req, res) => {
     return res.status(503).json({ message: "Photo checking is unavailable, please try again shortly" });
   }
 
-  if (!verdict.ok) {
-    console.warn("UPLOAD REJECTED:", req.user._id.toString(), verdict.reason, verdict.scores);
+  // The AI only blocks clearly explicit images by itself, so admins never have to see them.
+  // Anything else it's unsure about (e.g. "doesn't look like clothing") is uploaded with a flag,
+  // and an admin makes the final decision when reviewing the listing.
+  if (!verdict.ok && verdict.reason === "explicit") {
+    console.warn("UPLOAD BLOCKED:", req.user._id.toString(), verdict.reason, verdict.scores);
     return res.status(422).json({ message: verdict.message, reason: verdict.reason });
   }
 
   const { url, publicId } = await uploadImage(image);
+
+  // Written for the admin: what the AI actually saw
+  const aiNote = verdict.ok
+    ? null
+    : `May not show clothing. Closest match: "${verdict.scores.topLabel}" (clothing confidence ${Math.round(verdict.scores.clothing * 100)}%).`;
 
   await Upload.create({
     user: req.user._id,
     url,
     publicId,
     scores: verdict.scores,
+    aiNote,
   });
 
-  res.status(201).json({ url });
+  res.status(201).json({ url, aiFlagged: !!aiNote, aiNote });
 });
 
 export default router;

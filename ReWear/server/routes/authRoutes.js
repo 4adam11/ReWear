@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import User from "../models/User.js";
 import generateToken from "../utils/generateToken.js";
 import rateLimit from "../middleware/rateLimit.js";
+import protect from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
@@ -63,6 +64,7 @@ router.post("/register", authLimiter, async (req, res) => {
       _id: user._id,
       name: user.name,
       email: user.email,
+      role: user.role,
       token: generateToken(user._id)
     });
 
@@ -91,10 +93,15 @@ router.post("/login", authLimiter, async (req, res) => {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
+    if (user.blocked) {
+      return res.status(403).json({ message: "Your account has been blocked. Contact support." });
+    }
+
     res.json({
       _id: user._id,
       name: user.name,
       email: user.email,
+      role: user.role,
       token: generateToken(user._id)
     });
 
@@ -102,6 +109,13 @@ router.post("/login", authLimiter, async (req, res) => {
     console.error("LOGIN ERROR:", err.message);
     res.status(500).json({ message: "Server error" });
   }
+});
+
+// ================= CURRENT USER =================
+// Lets the site pick up role changes (e.g. made admin) without logging out
+router.get("/me", protect, (req, res) => {
+  const { _id, name, email, role } = req.user;
+  res.json({ _id, name, email, role });
 });
 
 export default router;

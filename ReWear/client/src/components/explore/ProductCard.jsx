@@ -195,7 +195,7 @@ const ProductCard = ({ product }) => {
 
           <div>
 
-            <p className="text-2xl font-black tracking-tight text-[#1f3a2e]">
+            <p className="text-2xl font-black tracking-tight text-[#2b1d14]">
 
               ₹ {product.price || product.rent}
 

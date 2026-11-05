@@ -117,7 +117,7 @@ const Footer = () => {
                 mt-5
                 text-2xl
                 font-bold
-                text-[#1f3a2e]
+                text-[#2b1d14]
               "
             >
               HaideryDynamics
