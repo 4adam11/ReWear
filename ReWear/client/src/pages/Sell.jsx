@@ -476,13 +476,13 @@ const Sell = () => {
                           <img
                             src={img.preview}
                             alt="preview"
-                            className={`w-full h-28 object-cover ${img.status === "ok"
+                            className={`w-full h-28 object-contain bg-cream ${img.status === "ok"
                                 ? ""
                                 : "opacity-40"
                               }`}
                           />
                         ) : (
-                          <div className="w-full h-28 bg-gray-100" />
+                          <div className="w-full h-28 bg-cream" />
                         )}
 
                         {/* CHECK STATUS */}
@@ -808,7 +808,7 @@ const Sell = () => {
 
                   alt="preview"
 
-                  className="w-full h-[400px] object-cover bg-gray-100"
+                  className="w-full h-[400px] object-contain bg-cream"
                 />
 
                 <div className="p-5">

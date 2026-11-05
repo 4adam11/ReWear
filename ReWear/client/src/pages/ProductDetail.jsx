@@ -216,7 +216,7 @@ const ProductDetail = () => {
             </div>
           )}
           <div className="flex-1 aspect-[4/5] rounded-lg overflow-hidden bg-cream border border-line">
-            <img src={thumb(activeImage, 900) || PLACEHOLDER_IMAGE} srcSet={photoSrcSet(activeImage, 900)} alt={product.title} className="w-full h-full object-cover" />
+            <img src={thumb(activeImage, 900) || PLACEHOLDER_IMAGE} srcSet={photoSrcSet(activeImage, 900)} alt={product.title} className="w-full h-full object-contain" />
           </div>
         </div>
 

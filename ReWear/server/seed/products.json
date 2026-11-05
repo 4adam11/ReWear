@@ -197,23 +197,6 @@
     }
   },
   {
-    "title": "Red Embroidered Party Saree",
-    "mode": "both",
-    "price": 7200,
-    "rent": 800,
-    "size": "M",
-    "condition": "Like New",
-    "description": "Red georgette saree with a wide embroidered gold panel and matching blouse. Made for sangeets and cocktail nights.",
-    "category": "party",
-    "photo": {
-      "url": "https://live.staticflickr.com/65535/49272257177_8b278c5623_b.jpg",
-      "page": "https://www.flickr.com/photos/186174811@N02/49272257177",
-      "artist": "shreedesigner12",
-      "license": "Public domain 1.0",
-      "source": "Flickr"
-    }
-  },
-  {
     "title": "Brocade Jacket & Flared Skirt Set",
     "mode": "both",
     "price": 5600,
@@ -244,39 +227,6 @@
       "page": "https://commons.wikimedia.org/wiki/File:Yogita_Grover,_Well_Groomed_Fashion_Show_(5420850558).jpg",
       "artist": "Brendan",
       "license": "CC BY 2.0",
-      "source": "Wikimedia Commons"
-    }
-  },
-  {
-    "title": "Red Net Lace Saree",
-    "mode": "rent",
-    "rent": 600,
-    "size": "M",
-    "condition": "Good",
-    "description": "Lightweight red net saree with lace detailing. Easy to drape and comfortable all night.",
-    "category": "party",
-    "photo": {
-      "url": "https://commons.wikimedia.org/wiki/Special:FilePath/HF4718.jpg?width=1200",
-      "page": "https://commons.wikimedia.org/wiki/File:HF4718.jpg",
-      "artist": "OMPRAKSH123",
-      "license": "CC BY-SA 4.0",
-      "source": "Wikimedia Commons"
-    }
-  },
-  {
-    "title": "Maroon Sequin Saree",
-    "mode": "both",
-    "price": 6400,
-    "rent": 700,
-    "size": "M",
-    "condition": "Like New",
-    "description": "Maroon saree covered in tonal sequins with a matching blouse. Catches the light at evening receptions.",
-    "category": "party",
-    "photo": {
-      "url": "https://upload.wikimedia.org/wikipedia/commons/8/8a/Red_saree_look_for_girl.jpg",
-      "page": "https://commons.wikimedia.org/w/index.php?curid=131174464",
-      "artist": "Anaya designer",
-      "license": "CC BY-SA 4.0",
       "source": "Wikimedia Commons"
     }
   },
