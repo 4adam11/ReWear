@@ -3,9 +3,12 @@ import mongoose from "mongoose";
 import Offer, { OFFER_HOURS } from "../models/Offer.js";
 import Product, { LIVE } from "../models/Product.js";
 import protect from "../middleware/authMiddleware.js";
+import rateLimit from "../middleware/rateLimit.js";
 import { notify } from "../utils/notify.js";
 
 const router = express.Router();
+
+const offerLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 30, message: "Too many offers, please try again later" });
 
 const ACTIVE = ["pending", "countered", "accepted"];
 const money = (n) => `₹${Number(n).toLocaleString("en-IN")}`;
@@ -32,7 +35,7 @@ export const findUsableOffer = async (offerId, buyerId, productId) => {
 //
 // MAKE AN OFFER (buyer)
 //
-router.post("/", protect, async (req, res) => {
+router.post("/", protect, offerLimiter, async (req, res) => {
   const { productId } = req.body;
   const amount = Math.round(Number(req.body.amount));
   const message = typeof req.body.message === "string" ? req.body.message.trim().slice(0, 300) : "";

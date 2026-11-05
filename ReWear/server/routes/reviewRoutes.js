@@ -4,9 +4,12 @@ import Review from "../models/Review.js";
 import Order from "../models/Order.js";
 import User from "../models/User.js";
 import protect from "../middleware/authMiddleware.js";
+import rateLimit from "../middleware/rateLimit.js";
 import { notify } from "../utils/notify.js";
 
 const router = express.Router();
+
+const reviewLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 20, message: "Too many reviews, please try again later" });
 
 // Recalculate a seller's average from all their reviews
 export const refreshSellerRating = async (sellerId) => {
@@ -23,7 +26,7 @@ export const refreshSellerRating = async (sellerId) => {
 //
 // RATE THE SELLER (buyer, once per completed order)
 //
-router.post("/", protect, async (req, res) => {
+router.post("/", protect, reviewLimiter, async (req, res) => {
   const { orderId } = req.body;
   const rating = Number(req.body.rating);
   const comment = typeof req.body.comment === "string" ? req.body.comment.trim().slice(0, 1000) : "";

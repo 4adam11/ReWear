@@ -5,8 +5,9 @@ import { Trash2 } from "lucide-react";
 
 import API from "../utils/api";
 import { useAuth } from "../context/AuthContext";
+import usePageTitle from "../hooks/usePageTitle";
 
-export const inputClass =
+const inputClass =
   "h-11 w-full px-3.5 rounded-md border border-[#d9cbb9] bg-white text-sm text-ink placeholder:text-[#a8998b] focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand/15 disabled:bg-[#f6f1ea] disabled:text-muted";
 
 const Field = ({ id, label, className = "", children }) => (
@@ -41,11 +42,12 @@ const SaveButton = ({ busy, children }) => (
   </button>
 );
 
-export const formatAddress = (a) => `${a.line}, ${a.city}, ${a.state} - ${a.pincode}`;
+const formatAddress = (a) => `${a.line}, ${a.city}, ${a.state} - ${a.pincode}`;
 
 const EMPTY_ADDRESS = { name: "", phone: "", line: "", city: "", state: "", pincode: "" };
 
 const Account = () => {
+  usePageTitle("Your account");
   const { user, authHeader, login } = useAuth();
   const [profile, setProfile] = useState(null);
   const [details, setDetails] = useState({ name: "", phone: "" });
@@ -91,7 +93,11 @@ const Account = () => {
   const savePassword = async (e) => {
     e.preventDefault();
     const res = await run("password", () => axios.patch(`${API}/users/me/password`, passwords, authHeader), "Password changed");
-    if (res) setPasswords({ currentPassword: "", newPassword: "" });
+    if (res) {
+      setPasswords({ currentPassword: "", newPassword: "" });
+      // Other devices are signed out; keep this one logged in with the new token
+      login({ ...user, token: res.data.token });
+    }
   };
 
   const addAddress = async (e) => {

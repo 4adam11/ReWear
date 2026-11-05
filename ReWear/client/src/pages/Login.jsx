@@ -6,6 +6,7 @@ import { Eye, EyeOff, ShieldCheck, Truck, CalendarDays } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import Logo from "../components/ui/Logo";
 import API from "../utils/api";
+import usePageTitle from "../hooks/usePageTitle";
 
 const POINTS = [
   { icon: ShieldCheck, text: "Every listing is reviewed by the ReWear team before it goes live" },
@@ -27,6 +28,7 @@ const inputClass =
   "h-11 w-full px-3.5 rounded-md border border-[#d9cbb9] bg-white text-sm text-ink placeholder:text-[#a8998b] focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand/15";
 
 const Login = () => {
+  usePageTitle("Log in or sign up");
   const navigate = useNavigate();
   const location = useLocation();
   const { login } = useAuth();
@@ -111,7 +113,7 @@ const Login = () => {
       </aside>
 
       {/* FORM */}
-      <main className="flex flex-col items-center justify-center px-4 py-10">
+      <div className="flex flex-col items-center justify-center px-4 py-10">
         <div className="w-full max-w-[400px]">
           <Link to="/" aria-label="ReWear home" className="lg:hidden inline-block mb-8">
             <Logo size={36} textClassName="text-xl font-bold text-ink" />
@@ -204,7 +206,7 @@ const Login = () => {
             </button>
           </p>
         </div>
-      </main>
+      </div>
     </div>
   );
 };

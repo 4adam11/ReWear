@@ -6,6 +6,7 @@ import Product, { LIVE } from "../models/Product.js";
 import Review from "../models/Review.js";
 import protect from "../middleware/authMiddleware.js";
 import rateLimit from "../middleware/rateLimit.js";
+import generateToken from "../utils/generateToken.js";
 
 const router = express.Router();
 
@@ -66,8 +67,8 @@ router.patch("/me/password", protect, rateLimit({ windowMs: 15 * 60 * 1000, max:
   const current = typeof req.body.currentPassword === "string" ? req.body.currentPassword.slice(0, 200) : "";
   const next = typeof req.body.newPassword === "string" ? req.body.newPassword.trim().slice(0, 200) : "";
 
-  if (next.length < 8) {
-    return res.status(400).json({ message: "Your new password needs at least 8 characters" });
+  if (next.length < 8 || next.length > 128) {
+    return res.status(400).json({ message: "Your new password needs 8 to 128 characters" });
   }
 
   const user = await User.findById(req.user._id);
@@ -76,8 +77,11 @@ router.patch("/me/password", protect, rateLimit({ windowMs: 15 * 60 * 1000, max:
   }
 
   user.password = await bcrypt.hash(next, 10);
+  user.passwordChangedAt = new Date();
   await user.save();
-  res.json({ message: "Password changed" });
+
+  // Other devices are signed out; this one gets a fresh token
+  res.json({ message: "Password changed", token: generateToken(user._id) });
 });
 
 router.post("/me/addresses", protect, async (req, res) => {

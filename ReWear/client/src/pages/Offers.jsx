@@ -7,7 +7,8 @@ import API from "../utils/api";
 import { useAuth } from "../context/AuthContext";
 import { thumb, PLACEHOLDER_IMAGE } from "../utils/image";
 import StatusBadge from "../components/ui/StatusBadge";
-import { money } from "../components/explore/ProductCard";
+import { money } from "../utils/format";
+import usePageTitle from "../hooks/usePageTitle";
 
 const btn = "h-9 px-3.5 rounded-md text-[13px] font-semibold disabled:opacity-50";
 
@@ -137,6 +138,7 @@ const OfferRow = ({ offer, side, onChange }) => {
 };
 
 const Offers = () => {
+  usePageTitle("Offers");
   const { authHeader } = useAuth();
   const [params, setParams] = useSearchParams();
   const tab = params.get("tab") === "received" ? "received" : "sent";

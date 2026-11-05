@@ -5,3 +5,25 @@
 body {
   @apply bg-paper text-ink font-sans antialiased;
 }
+
+/* Clear focus ring for keyboard users only */
+:focus-visible {
+  outline: 2px solid #6b4430;
+  outline-offset: 2px;
+}
+
+/* Respect "reduce motion" in the operating system */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Booking calendars in the brand colour */
+.rdrDayToday .rdrDayNumber span:after {
+  background: #6b4430;
+}

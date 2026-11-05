@@ -8,8 +8,9 @@ import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import { getItemPrice, toOrderItems } from "../utils/cart";
 import { thumb, PLACEHOLDER_IMAGE } from "../utils/image";
-import { money } from "../components/explore/ProductCard";
+import { money } from "../utils/format";
 import API from "../utils/api";
+import usePageTitle from "../hooks/usePageTitle";
 
 const PAYMENT_OPTIONS = [
   { id: "cod", label: "Cash on delivery", note: "Pay the courier when it arrives", icon: Banknote },
@@ -53,6 +54,7 @@ const checkAddress = (a) => {
 };
 
 const Checkout = () => {
+  usePageTitle("Checkout");
   const { state } = useLocation();
   const navigate = useNavigate();
   const { clearCart } = useCart();

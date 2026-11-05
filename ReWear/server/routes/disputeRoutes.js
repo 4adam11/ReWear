@@ -3,9 +3,12 @@ import mongoose from "mongoose";
 import Dispute, { DISPUTE_REASONS } from "../models/Dispute.js";
 import Order from "../models/Order.js";
 import protect from "../middleware/authMiddleware.js";
+import rateLimit from "../middleware/rateLimit.js";
 import { notify, notifyAdmins } from "../utils/notify.js";
 
 const router = express.Router();
+
+const reportLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 10, message: "Too many reports, please try again later" });
 
 const isRental = (order) => order.items.some((i) => i.mode === "rent");
 
@@ -14,7 +17,7 @@ const isRental = (order) => order.items.some((i) => i.mode === "rent");
 // Buyer: once the order has shipped (not received, damaged, not as described...)
 // Seller: a rental that hasn't come back
 //
-router.post("/", protect, async (req, res) => {
+router.post("/", protect, reportLimiter, async (req, res) => {
   const { orderId, reason } = req.body;
   const details = typeof req.body.details === "string" ? req.body.details.trim().slice(0, 1000) : "";
 

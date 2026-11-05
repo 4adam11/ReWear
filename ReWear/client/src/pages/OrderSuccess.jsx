@@ -2,7 +2,8 @@ import { Link, Navigate, useLocation } from "react-router-dom";
 import { CircleCheck } from "lucide-react";
 
 import { useAuth } from "../context/AuthContext";
-import { money } from "../components/explore/ProductCard";
+import { money } from "../utils/format";
+import usePageTitle from "../hooks/usePageTitle";
 
 const NEXT = [
   "The seller gets your order and accepts it.",
@@ -11,6 +12,7 @@ const NEXT = [
 ];
 
 const OrderSuccess = () => {
+  usePageTitle("Order placed");
   const { state } = useLocation();
   const { user } = useAuth();
   const orders = state?.orders;

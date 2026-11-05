@@ -7,7 +7,7 @@ import API from "../../utils/api";
 import { useAuth } from "../../context/AuthContext";
 import { Stars, StarPicker } from "../ui/Stars";
 
-export const DISPUTE_REASONS = {
+const DISPUTE_REASONS = {
   not_received: "Item not received",
   not_as_described: "Not as described",
   damaged: "Arrived damaged",

@@ -21,8 +21,10 @@ import { categoryLabel } from "../utils/catalog";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import { useWishlist } from "../context/WishListContext";
-import ProductCard, { money } from "../components/explore/ProductCard";
+import ProductCard from "../components/explore/ProductCard";
+import { money } from "../utils/format";
 import OfferBox from "../components/product/OfferBox";
+import usePageTitle from "../hooks/usePageTitle";
 import { RatingBadge, Stars } from "../components/ui/Stars";
 
 const PriceOption = ({ active, disabled, onClick, label, price, unit }) => (
@@ -67,6 +69,7 @@ const ProductDetail = () => {
   const [loading, setLoading] = useState(true);
   const [added, setAdded] = useState("");
   const [offer, setOffer] = useState(null);
+  usePageTitle(product?.title);
   const [dateRange, setDateRange] = useState([{ startDate: new Date(), endDate: new Date(), key: "selection" }]);
 
   useEffect(() => {

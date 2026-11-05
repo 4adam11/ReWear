@@ -24,6 +24,8 @@ const userSchema = new mongoose.Schema({
     default: "user"
   },
   phone: { type: String, maxlength: 15 },
+  // Tokens issued before this are rejected (set when the password changes)
+  passwordChangedAt: Date,
   // Saved delivery addresses (filled in at checkout)
   addresses: [{
     name: { type: String, required: true, maxlength: 100 },

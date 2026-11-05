@@ -23,7 +23,10 @@ export default defineConfig([
       },
     },
     rules: {
-      'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
+      // Capitalised names are components used in JSX (e.g. { icon: Icon })
+      'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]', argsIgnorePattern: '^[A-Z_]' }],
+      // Context files export their hook next to the provider
+      'react-refresh/only-export-components': ['warn', { allowExportNames: ['useAuth', 'useCart', 'useWishlist'] }],
     },
   },
 ])

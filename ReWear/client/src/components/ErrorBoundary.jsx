@@ -1,5 +1,6 @@
 import { Component } from "react";
 import { Link } from "react-router-dom";
+import usePageTitle from "../hooks/usePageTitle";
 
 // Shows a friendly message instead of a blank page if something on a page crashes
 export const ProblemPage = ({ title, text, action }) => (
@@ -10,7 +11,9 @@ export const ProblemPage = ({ title, text, action }) => (
   </div>
 );
 
-export const NotFound = () => (
+export const NotFound = () => {
+  usePageTitle("Page not found");
+  return (
   <ProblemPage
     title="We couldn't find that page"
     text="The link may be broken, or the page may have been removed."
@@ -20,7 +23,8 @@ export const NotFound = () => (
       </Link>
     }
   />
-);
+  );
+};
 
 class ErrorBoundary extends Component {
   state = { failed: false };

@@ -4,6 +4,7 @@ import { format } from "date-fns";
 
 import API from "../../utils/api";
 import { useAuth } from "../../context/AuthContext";
+import usePageTitle from "../../hooks/usePageTitle";
 
 const LABELS = {
   approve_listing: "Approved listing",
@@ -15,6 +16,7 @@ const LABELS = {
 };
 
 const AdminActivity = () => {
+  usePageTitle("Admin · Activity log");
   const { authHeader } = useAuth();
   const [logs, setLogs] = useState(null);
 

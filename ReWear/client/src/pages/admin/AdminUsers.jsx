@@ -6,8 +6,10 @@ import { Search } from "lucide-react";
 import API from "../../utils/api";
 import { useAuth } from "../../context/AuthContext";
 import StatusBadge from "../../components/ui/StatusBadge";
+import usePageTitle from "../../hooks/usePageTitle";
 
 const AdminUsers = () => {
+  usePageTitle("Admin · Users");
   const { authHeader } = useAuth();
   const [users, setUsers] = useState([]);
   const [search, setSearch] = useState("");

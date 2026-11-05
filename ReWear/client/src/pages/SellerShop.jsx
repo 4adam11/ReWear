@@ -7,19 +7,18 @@ import API from "../utils/api";
 import ProductCard from "../components/explore/ProductCard";
 import { Stars } from "../components/ui/Stars";
 import { NotFound } from "../components/ErrorBoundary";
+import usePageTitle from "../hooks/usePageTitle";
 
 const PER_PAGE = 12;
 
-const SellerShop = () => {
-  const { id } = useParams();
+const SellerShop = ({ id }) => {
   const [seller, setSeller] = useState(undefined);
   const [items, setItems] = useState({ items: [], total: 0, pages: 1 });
   const [page, setPage] = useState(1);
   const [tab, setTab] = useState("items");
+  usePageTitle(seller?.name ? `${seller.name}'s shop` : "Seller");
 
   useEffect(() => {
-    setSeller(undefined);
-    setPage(1);
     axios
       .get(`${API}/users/${id}/public`)
       .then(({ data }) => setSeller(data))
@@ -175,4 +174,10 @@ const SellerShop = () => {
   );
 };
 
-export default SellerShop;
+// A fresh shop (and its state) for each seller
+const SellerShopPage = () => {
+  const { id } = useParams();
+  return <SellerShop key={id} id={id} />;
+};
+
+export default SellerShopPage;

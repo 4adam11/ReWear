@@ -4,6 +4,7 @@ import crypto from "node:crypto";
 import Order, { ORDER_STATUSES } from "../models/Order.js";
 import Product, { LIVE } from "../models/Product.js";
 import protect from "../middleware/authMiddleware.js";
+import rateLimit from "../middleware/rateLimit.js";
 import { notify } from "../utils/notify.js";
 import Offer from "../models/Offer.js";
 import Review from "../models/Review.js";
@@ -19,6 +20,8 @@ import {
 } from "../utils/bookings.js";
 
 const router = express.Router();
+
+const orderLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 30, message: "Too many orders, please try again later" });
 
 // Promo codes live on the server so clients can't invent discounts
 const PROMO_CODES = {
@@ -200,7 +203,7 @@ router.post("/quote", protect, async (req, res) => {
 //
 // CREATE ORDERS: one per seller, like split shipments on Amazon/Flipkart
 //
-router.post("/", protect, async (req, res) => {
+router.post("/", protect, orderLimiter, async (req, res) => {
   const address = validateAddress(req.body.address);
   if (!address) {
     return res.status(400).json({ message: "Please enter a valid name, phone and address" });
@@ -284,6 +287,15 @@ router.post("/", protect, async (req, res) => {
       const offerIds = items.map((i) => i.offer).filter(Boolean);
       if (offerIds.length) {
         await Offer.updateMany({ _id: { $in: offerIds } }, { $set: { status: "used" } });
+      }
+
+      // Other buyers' open offers on items that just sold can't be used any more
+      const soldIds = items.filter((i) => i.mode === "sale").map((i) => i.product);
+      if (soldIds.length) {
+        await Offer.updateMany(
+          { product: { $in: soldIds }, status: { $in: ["pending", "countered", "accepted"] } },
+          { $set: { status: "expired" } }
+        );
       }
       return { status: 201, body: { checkoutId, orders } };
     } catch (err) {

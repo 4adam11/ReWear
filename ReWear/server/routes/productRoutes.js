@@ -152,6 +152,31 @@ router.get("/", async (req, res) => {
 });
 
 //
+// HOME PAGE in one request: newest items, rentals and a cover photo per category
+//
+router.get("/home", async (req, res) => {
+  const live = { status: { $in: LIVE } };
+
+  const [fresh, rentals, covers] = await Promise.all([
+    listQuery(Product.find(live).sort({ createdAt: -1 }).limit(10)),
+    listQuery(Product.find({ ...live, mode: { $in: ["rent", "both"] } }).sort({ createdAt: -1 }).limit(5)),
+    Product.aggregate([
+      { $match: { ...live, category: { $in: CATEGORIES } } },
+      { $sort: { createdAt: -1 } },
+      { $group: { _id: "$category", image: { $first: { $arrayElemAt: ["$images", 0] } } } },
+    ]),
+  ]);
+
+  // Rarely changes; let browsers reuse it for a minute
+  res.set("Cache-Control", "public, max-age=60");
+  res.json({
+    fresh: await withSellerNames(fresh),
+    rentals: await withSellerNames(rentals),
+    covers: Object.fromEntries(covers.map((c) => [c._id, c.image])),
+  });
+});
+
+//
 // MY LISTINGS (seller), every status, with review feedback
 //
 router.get("/mine", protect, async (req, res) => {

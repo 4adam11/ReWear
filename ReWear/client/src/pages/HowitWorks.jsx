@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import usePageTitle from "../hooks/usePageTitle";
 
 const BUYING = [
   { title: "Find an outfit", text: "Browse by occasion, size and price. Every listing has been reviewed by the ReWear team." },
@@ -37,8 +37,7 @@ const Steps = ({ title, steps }) => (
 );
 
 const HowItWorks = () => {
-  const { user } = useAuth();
-
+  usePageTitle("How it works");
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 flex flex-col gap-6">
       <div>

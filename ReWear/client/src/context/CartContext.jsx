@@ -87,37 +87,6 @@ export const CartProvider = ({ children }) => {
     );
   };
 
-  // UPDATE QUANTITY
-  const updateQuantity = (id, type) => {
-    setCartItems((prev) =>
-      prev.map((item) => {
-        if (
-          getItemId(item) !== id
-        ) {
-          return item;
-        }
-
-        // Second-hand items are one of a kind, so never more than 1
-        if (type === "inc") {
-          return item;
-        }
-
-        if (
-          type === "dec" &&
-          item.quantity > 1
-        ) {
-          return {
-            ...item,
-            quantity:
-              item.quantity - 1,
-          };
-        }
-
-        return item;
-      })
-    );
-  };
-
   // CLEAR
   const clearCart = () => {
     setCartItems([]);
@@ -129,7 +98,6 @@ export const CartProvider = ({ children }) => {
         cartItems,
         addToCart,
         removeFromCart,
-        updateQuantity,
         clearCart,
       }}
     >
@@ -148,7 +116,6 @@ export const useCart = () => {
       cartItems: [],
       addToCart: () => { },
       removeFromCart: () => { },
-      updateQuantity: () => { },
       clearCart: () => { },
     };
   }

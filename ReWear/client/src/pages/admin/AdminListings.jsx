@@ -9,6 +9,7 @@ import { useAuth } from "../../context/AuthContext";
 import { thumb, PLACEHOLDER_IMAGE } from "../../utils/image";
 import { categoryLabel } from "../../utils/catalog";
 import StatusBadge from "../../components/ui/StatusBadge";
+import usePageTitle from "../../hooks/usePageTitle";
 
 const TABS = [
   { key: "pending", label: "In review" },
@@ -218,6 +219,7 @@ const ListingReview = ({ item, onDone }) => {
 };
 
 const AdminListings = () => {
+  usePageTitle("Admin · Review queue");
   const { authHeader } = useAuth();
   const [params, setParams] = useSearchParams();
   const tab = params.get("status") || "pending";

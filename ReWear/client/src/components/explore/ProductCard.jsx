@@ -4,8 +4,7 @@ import { Heart } from "lucide-react";
 import { useWishlist } from "../../context/WishListContext";
 import { thumb, PLACEHOLDER_IMAGE } from "../../utils/image";
 import { RatingBadge } from "../ui/Stars";
-
-export const money = (n) => `₹${Number(n || 0).toLocaleString("en-IN")}`;
+import { money } from "../../utils/format";
 
 const canSell = (p) => ["sell", "sale", "both"].includes(p.mode) && p.price > 0;
 const canRent = (p) => ["rent", "both"].includes(p.mode) && p.rent > 0;

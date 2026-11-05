@@ -7,9 +7,11 @@ import { useWishlist } from "../context/WishListContext";
 import { getItemPrice, getCartKey } from "../utils/cart";
 import { thumb, PLACEHOLDER_IMAGE } from "../utils/image";
 import { categoryLabel } from "../utils/catalog";
-import { money } from "../components/explore/ProductCard";
+import { money } from "../utils/format";
+import usePageTitle from "../hooks/usePageTitle";
 
 const Cart = () => {
+  usePageTitle("Your bag");
   const navigate = useNavigate();
   const { cartItems = [], removeFromCart } = useCart();
   const { wishlist, toggleWishlist } = useWishlist();

@@ -3,8 +3,10 @@ import { Heart } from "lucide-react";
 
 import { useWishlist } from "../context/WishListContext";
 import ProductCard from "../components/explore/ProductCard";
+import usePageTitle from "../hooks/usePageTitle";
 
 const Wishlist = () => {
+  usePageTitle("Wishlist");
   const { wishlist } = useWishlist();
 
   return (

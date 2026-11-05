@@ -42,9 +42,9 @@ const AdminLayout = () => (
         </nav>
 
         {/* PAGE */}
-        <main className="flex-1 min-w-0 w-full">
+        <div className="flex-1 min-w-0 w-full">
           <Outlet />
-        </main>
+        </div>
 
       </div>
     </div>

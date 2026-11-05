@@ -13,6 +13,7 @@ export const getJwtSecret = () => {
 
 const generateToken = (id) => {
   return jwt.sign({ id }, getJwtSecret(), {
+    algorithm: "HS256",
     expiresIn: "7d"
   });
 };

@@ -5,11 +5,8 @@ import axios from "axios";
 import API from "../utils/api";
 import { CATEGORIES } from "../utils/catalog";
 import { thumb, PLACEHOLDER_IMAGE } from "../utils/image";
-import { useAuth } from "../context/AuthContext";
 import ProductCard from "../components/explore/ProductCard";
-
-const getProducts = (params) =>
-  axios.get(`${API}/products`, { params }).then(({ data }) => data.items || []).catch(() => []);
+import usePageTitle from "../hooks/usePageTitle";
 
 const STEPS = [
   { title: "Seller lists it", text: "Photos, size, condition and a sale or rental price." },
@@ -35,21 +32,24 @@ const CardRowSkeleton = ({ count }) =>
   [...Array(count)].map((_, i) => <div key={i} className="aspect-[3/5] rounded-lg bg-white border border-line animate-pulse" />);
 
 const Landing = () => {
-  const { user } = useAuth();
+  usePageTitle();
   const [fresh, setFresh] = useState(null);
   const [rentals, setRentals] = useState(null);
   const [covers, setCovers] = useState({});
 
+  // Everything the home page shows, in one request
   useEffect(() => {
-    getProducts({ mode: "all", limit: 10 }).then(setFresh);
-    getProducts({ mode: "rent", limit: 5 }).then(setRentals);
-
-    // One recent photo per occasion for the category tiles
-    CATEGORIES.forEach(({ value }) =>
-      getProducts({ mode: "all", categories: value, limit: 1 }).then(([p]) =>
-        setCovers((c) => ({ ...c, [value]: p?.images?.[0] || null }))
-      )
-    );
+    axios
+      .get(`${API}/products/home`)
+      .then(({ data }) => {
+        setFresh(data.fresh);
+        setRentals(data.rentals);
+        setCovers(data.covers);
+      })
+      .catch(() => {
+        setFresh([]);
+        setRentals([]);
+      });
   }, []);
 
   const heroImage = covers.wedding;

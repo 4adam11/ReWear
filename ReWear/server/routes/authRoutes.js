@@ -42,8 +42,12 @@ router.post("/register", authLimiter, async (req, res) => {
       return res.status(400).json({ message: "Invalid email" });
     }
 
-    if (password.length < 8) {
-      return res.status(400).json({ message: "Password must be at least 8 characters" });
+    if (password.length < 8 || password.length > 128) {
+      return res.status(400).json({ message: "Password must be 8 to 128 characters" });
+    }
+
+    if (cleanName.length > 100 || cleanEmail.length > 254) {
+      return res.status(400).json({ message: "Name or email is too long" });
     }
 
     const existingUser = await findByEmail(cleanEmail);
@@ -80,7 +84,7 @@ router.post("/login", authLimiter, async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    if (!isString(email) || !isString(password) || !email || !password) {
+    if (!isString(email) || !isString(password) || !email || !password || password.length > 128) {
       return res.status(400).json({ message: "Email & Password required" });
     }
 

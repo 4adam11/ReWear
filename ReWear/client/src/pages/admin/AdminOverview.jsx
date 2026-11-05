@@ -6,6 +6,7 @@ import { AlertTriangle, ArrowRight } from "lucide-react";
 import API from "../../utils/api";
 import { useAuth } from "../../context/AuthContext";
 import DayBars from "../../components/admin/DayBars";
+import usePageTitle from "../../hooks/usePageTitle";
 
 const Stat = ({ label, value, to, tone = "text-ink" }) => {
   const body = (
@@ -19,6 +20,7 @@ const Stat = ({ label, value, to, tone = "text-ink" }) => {
 };
 
 const AdminOverview = () => {
+  usePageTitle("Admin · Overview");
   const { authHeader } = useAuth();
   const [stats, setStats] = useState(null);
   const [charts, setCharts] = useState(null);

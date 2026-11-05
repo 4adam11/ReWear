@@ -20,6 +20,7 @@ import API from "../utils/api";
 import { resizeImage, thumb, PLACEHOLDER_IMAGE } from "../utils/image";
 import { CATEGORIES, SIZES, CONDITIONS } from "../utils/catalog";
 import { format } from "date-fns";
+import usePageTitle from "../hooks/usePageTitle";
 
 const MAX_IMAGES = 6;
 
@@ -30,6 +31,7 @@ const ACCEPTED_TYPES = [
 ];
 
 const Sell = () => {
+  usePageTitle("List an item");
   const navigate = useNavigate();
 
   // /sell/:id edits an existing listing; /sell creates a new one
@@ -118,7 +120,6 @@ const Sell = () => {
         }
       })
       .catch(() => setError("Could not load this listing"));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editId]);
 
   // INPUT
@@ -559,7 +560,7 @@ const Sell = () => {
 
                   value={form.title}
 
-                  className="w-full mt-2 border border-line rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#2b1d14]"
+                  className="w-full mt-2 border border-line rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand/15"
 
                   onChange={
                     handleChange
@@ -581,7 +582,7 @@ const Sell = () => {
                   placeholder="Fabric, fit, how many times it was worn, any marks or alterations…"
                   value={form.description}
                   onChange={handleChange}
-                  className="w-full mt-2 border border-line rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#2b1d14]"
+                  className="w-full mt-2 border border-line rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand/15"
                 />
 
               </div>
@@ -701,7 +702,7 @@ const Sell = () => {
 
                     value={form.price}
 
-                    className="w-full mt-2 border border-line rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#2b1d14]"
+                    className="w-full mt-2 border border-line rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand/15"
 
                     onChange={
                       handleChange
@@ -728,7 +729,7 @@ const Sell = () => {
 
                     value={form.rent}
 
-                    className="w-full mt-2 mb-5 border border-line rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#2b1d14]"
+                    className="w-full mt-2 mb-5 border border-line rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand/15"
 
                     onChange={
                       handleChange
@@ -736,10 +737,16 @@ const Sell = () => {
                   />
 
                   {/* CALENDAR */}
-                  <div className="border border-line rounded-lg overflow-hidden">
+                  <p className="text-sm font-medium text-ink">When can it be rented?</p>
+                  <p className="mt-0.5 mb-2 text-xs text-muted">
+                    Pick the dates you're happy to lend it out. Leave a single day selected to allow any dates.
+                  </p>
+                  <div className="border border-line rounded-lg overflow-hidden flex justify-center">
 
                     <DateRange
                       ranges={dateRange}
+                      rangeColors={["#6b4430"]}
+                      minDate={new Date()}
 
                       onChange={(
                         item

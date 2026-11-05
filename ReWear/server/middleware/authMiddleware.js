@@ -15,7 +15,7 @@ const authenticate = async (req) => {
   let decoded;
 
   try {
-    decoded = jwt.verify(token, getJwtSecret());
+    decoded = jwt.verify(token, getJwtSecret(), { algorithms: ["HS256"] });
   } catch {
     return { error: { status: 401, message: "Your session has expired, please log in again" } };
   }
@@ -29,6 +29,11 @@ const authenticate = async (req) => {
 
   if (user.blocked) {
     return { error: { status: 403, message: "Your account has been blocked. Contact support." } };
+  }
+
+  // Changing the password signs out every other session
+  if (user.passwordChangedAt && decoded.iat * 1000 < user.passwordChangedAt.getTime() - 1000) {
+    return { error: { status: 401, message: "Your password was changed, please log in again" } };
   }
 
   return { user };

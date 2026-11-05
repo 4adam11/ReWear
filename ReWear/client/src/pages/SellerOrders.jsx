@@ -7,8 +7,11 @@ import API from "../utils/api";
 import { useAuth } from "../context/AuthContext";
 import { thumb, PLACEHOLDER_IMAGE } from "../utils/image";
 import StatusBadge from "../components/ui/StatusBadge";
-import OrderProgress, { isRentalOrder } from "../components/orders/OrderProgress";
+import OrderProgress from "../components/orders/OrderProgress";
+import { isRentalOrder } from "../utils/orders";
+import { money } from "../utils/format";
 import { ProblemBox, DisputeBanner } from "../components/orders/OrderExtras";
+import usePageTitle from "../hooks/usePageTitle";
 
 const TABS = [
   { key: "confirmed", label: "New" },
@@ -22,7 +25,6 @@ const TABS = [
 
 const COURIERS = ["Delhivery", "Blue Dart", "DTDC", "Ekart", "India Post", "Self delivery"];
 
-const money = (n) => `₹${(n || 0).toLocaleString("en-IN")}`;
 const statusOf = (o) => (o.status === "placed" ? "confirmed" : o.status);
 
 const SaleCard = ({ order, onUpdate }) => {
@@ -269,6 +271,7 @@ const SaleCard = ({ order, onUpdate }) => {
 };
 
 const SellerOrders = () => {
+  usePageTitle("Orders to fulfil");
   const { authHeader } = useAuth();
   const [orders, setOrders] = useState([]);
   const [tab, setTab] = useState("confirmed");

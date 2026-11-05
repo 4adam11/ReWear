@@ -208,7 +208,6 @@ const CategoryBar = () => {
 };
 
 const Navbar = () => {
-  const { user } = useAuth();
   const { cartItems } = useCart();
   const { wishlist } = useWishlist();
 

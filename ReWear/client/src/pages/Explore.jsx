@@ -5,7 +5,9 @@ import { SlidersHorizontal, X, ChevronLeft, ChevronRight } from "lucide-react";
 
 import API from "../utils/api";
 import { CATEGORIES, SIZES, categoryLabel } from "../utils/catalog";
-import ProductCard, { money } from "../components/explore/ProductCard";
+import ProductCard from "../components/explore/ProductCard";
+import usePageTitle from "../hooks/usePageTitle";
+import { money } from "../utils/format";
 
 const PER_PAGE = 12;
 const PRICE_MAX = 20000;
@@ -117,6 +119,8 @@ const Explore = () => {
         : mode === "rent" ? "Rent an outfit"
           : mode === "sale" ? "Buy pre-loved"
             : "All fashion";
+
+  usePageTitle(search ? `"${search}"` : heading);
 
   // Active filter chips
   const chips = [

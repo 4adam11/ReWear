@@ -6,7 +6,7 @@ import { HandCoins } from "lucide-react";
 
 import API from "../../utils/api";
 import { useAuth } from "../../context/AuthContext";
-import { money } from "../explore/ProductCard";
+import { money } from "../../utils/format";
 
 // "Make an offer" on an item for sale, and the state of the buyer's current offer
 const OfferBox = ({ product, offer, setOffer }) => {

@@ -8,8 +8,11 @@ import API from "../utils/api";
 import { useAuth } from "../context/AuthContext";
 import { thumb, PLACEHOLDER_IMAGE } from "../utils/image";
 import StatusBadge from "../components/ui/StatusBadge";
-import OrderProgress, { isRentalOrder } from "../components/orders/OrderProgress";
+import OrderProgress from "../components/orders/OrderProgress";
+import { isRentalOrder } from "../utils/orders";
+import { money } from "../utils/format";
 import { ReviewBox, ProblemBox, DisputeBanner } from "../components/orders/OrderExtras";
+import usePageTitle from "../hooks/usePageTitle";
 
 const PAYMENT = { card: "Card", upi: "UPI", cod: "Cash on delivery" };
 
@@ -25,8 +28,6 @@ const TIMELINE_LABEL = {
   completed: "Completed",
   cancelled: "Cancelled",
 };
-
-const money = (n) => `₹${(n || 0).toLocaleString("en-IN")}`;
 
 const OrderCard = ({ order, onUpdate }) => {
   const { authHeader } = useAuth();
@@ -234,6 +235,7 @@ const FILTERS = [
 ];
 
 const Orders = () => {
+  usePageTitle("My orders");
   const { authHeader } = useAuth();
   const [orders, setOrders] = useState([]);
   const [filter, setFilter] = useState("all");

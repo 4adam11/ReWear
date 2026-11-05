@@ -1,7 +1,6 @@
+import { isRentalOrder } from "../../utils/orders";
 import { format } from "date-fns";
 import { Check } from "lucide-react";
-
-export const isRentalOrder = (order) => (order.items || []).some((i) => i.mode === "rent");
 
 const steps = (order) =>
   isRentalOrder(order)

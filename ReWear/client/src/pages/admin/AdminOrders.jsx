@@ -5,10 +5,12 @@ import { format } from "date-fns";
 import API from "../../utils/api";
 import { useAuth } from "../../context/AuthContext";
 import StatusBadge from "../../components/ui/StatusBadge";
+import usePageTitle from "../../hooks/usePageTitle";
 
 const PAYMENT = { card: "Card", upi: "UPI", cod: "Cash on delivery" };
 
 const AdminOrders = () => {
+  usePageTitle("Admin · Orders");
   const { authHeader } = useAuth();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);

@@ -27,5 +27,7 @@ const offerSchema = new mongoose.Schema({
 offerSchema.index({ buyer: 1, createdAt: -1 });
 offerSchema.index({ seller: 1, status: 1, createdAt: -1 });
 offerSchema.index({ product: 1, buyer: 1, status: 1 });
+// Expiring accepted offers that were never used
+offerSchema.index({ status: 1, expiresAt: 1 });
 
 export default mongoose.model("Offer", offerSchema);

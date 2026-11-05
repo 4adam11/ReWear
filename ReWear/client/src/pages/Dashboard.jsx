@@ -8,7 +8,8 @@ import API from "../utils/api";
 import { useAuth } from "../context/AuthContext";
 import { thumb, PLACEHOLDER_IMAGE } from "../utils/image";
 import StatusBadge from "../components/ui/StatusBadge";
-import { money } from "../components/explore/ProductCard";
+import { money } from "../utils/format";
+import usePageTitle from "../hooks/usePageTitle";
 
 const statusOf = (o) => (o.status === "placed" ? "confirmed" : o.status);
 
@@ -51,6 +52,7 @@ const Row = ({ to, image, title, sub, badge }) => (
 const Empty = ({ children }) => <p className="px-5 py-8 text-sm text-muted text-center">{children}</p>;
 
 const Dashboard = () => {
+  usePageTitle("Dashboard");
   const { user, authHeader } = useAuth();
   const [data, setData] = useState(null);
 

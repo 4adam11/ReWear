@@ -4,9 +4,9 @@ import { format } from "date-fns";
 
 import API from "../../utils/api";
 import { useAuth } from "../../context/AuthContext";
+import { money } from "../../utils/format";
 import StatusBadge from "../../components/ui/StatusBadge";
-
-const money = (n) => `₹${(n || 0).toLocaleString("en-IN")}`;
+import usePageTitle from "../../hooks/usePageTitle";
 
 const DisputeCard = ({ dispute, onResolved }) => {
   const { authHeader } = useAuth();
@@ -116,6 +116,7 @@ const DisputeCard = ({ dispute, onResolved }) => {
 };
 
 const AdminDisputes = () => {
+  usePageTitle("Admin · Problem reports");
   const { authHeader } = useAuth();
   const [tab, setTab] = useState("open");
   const [disputes, setDisputes] = useState(null);

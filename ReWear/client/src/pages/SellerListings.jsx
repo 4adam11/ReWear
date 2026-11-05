@@ -9,6 +9,7 @@ import { useAuth } from "../context/AuthContext";
 import { thumb, PLACEHOLDER_IMAGE } from "../utils/image";
 import { categoryLabel } from "../utils/catalog";
 import StatusBadge from "../components/ui/StatusBadge";
+import usePageTitle from "../hooks/usePageTitle";
 
 const TABS = [
   { key: "all", label: "All" },
@@ -114,6 +115,7 @@ const statusNote = (p) => {
 };
 
 const SellerListings = () => {
+  usePageTitle("My listings");
   const { authHeader } = useAuth();
   const [listings, setListings] = useState([]);
   const [tab, setTab] = useState("all");
