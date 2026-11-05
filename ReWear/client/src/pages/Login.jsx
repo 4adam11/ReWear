@@ -1,437 +1,210 @@
 import { useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
-
-import {
-  useNavigate,
-} from "react-router-dom";
-
-import {
-  ArrowRight,
-} from "lucide-react";
-
-import {
-  motion,
-} from "framer-motion";
+import { Eye, EyeOff, ShieldCheck, Truck, CalendarDays } from "lucide-react";
 
 import { useAuth } from "../context/AuthContext";
-import { LogoMark } from "../components/ui/Logo";
-
+import Logo from "../components/ui/Logo";
 import API from "../utils/api";
 
+const POINTS = [
+  { icon: ShieldCheck, text: "Every listing is reviewed by the ReWear team before it goes live" },
+  { icon: CalendarDays, text: "Rent for your dates, with booked days blocked for everyone else" },
+  { icon: Truck, text: "Track every order from the seller to your door" },
+];
+
+const Field = ({ id, label, hint, children }) => (
+  <div className="flex flex-col gap-1.5">
+    <label htmlFor={id} className="text-sm font-medium">
+      {label}
+    </label>
+    {children}
+    {hint && <p className="text-xs text-muted">{hint}</p>}
+  </div>
+);
+
+const inputClass =
+  "h-11 w-full px-3.5 rounded-md border border-[#d9cbb9] bg-white text-sm text-ink placeholder:text-[#a8998b] focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand/15";
+
 const Login = () => {
-  const navigate =
-    useNavigate();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { login } = useAuth();
 
-  const { login } =
-    useAuth();
+  const [isRegister, setIsRegister] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [form, setForm] = useState({ name: "", email: "", password: "" });
 
-  const [
-    isRegister,
-    setIsRegister,
-  ] = useState(false);
+  // Where to go afterwards: the page that sent them here, else the shop
+  const from = location.state?.from || "/explore";
 
-  const [
-    loading,
-    setLoading,
-  ] = useState(false);
-
-  const [error, setError] =
-    useState("");
-
-  const [form, setForm] =
-    useState({
-      name: "",
-      email: "",
-      password: "",
-    });
-
-  // INPUT
   const handleChange = (e) => {
-    setForm({
-      ...form,
-      [e.target.name]:
-        e.target.value,
-    });
-
+    setForm({ ...form, [e.target.name]: e.target.value });
     setError("");
   };
 
-  // SUBMIT
-  const submitHandler = async (
-    e
-  ) => {
+  const switchMode = (register) => {
+    setIsRegister(register);
+    setError("");
+  };
+
+  const submitHandler = async (e) => {
     e.preventDefault();
 
     const payload = {
       name: form.name.trim(),
-      email:
-        form.email.trim(),
-      password:
-        form.password.trim(),
+      email: form.email.trim(),
+      password: form.password.trim(),
     };
 
-    if (
-      !payload.email ||
-      !payload.password ||
-      (isRegister &&
-        !payload.name)
-    ) {
-      setError(
-        "Please fill all fields"
-      );
+    if (!payload.email || !payload.password || (isRegister && !payload.name)) {
+      setError("Please fill in every field");
+      return;
+    }
 
+    if (isRegister && payload.password.length < 8) {
+      setError("Your password needs at least 8 characters");
       return;
     }
 
     try {
       setLoading(true);
-
       setError("");
 
-      const url = isRegister
-        ? `${API}/auth/register`
-        : `${API}/auth/login`;
-
-      const body = isRegister
-        ? payload
-        : {
-          email:
-            payload.email,
-          password:
-            payload.password,
-        };
-
-      const { data } =
-        await axios.post(
-          url,
-          body
-        );
+      const { data } = await axios.post(
+        `${API}/auth/${isRegister ? "register" : "login"}`,
+        isRegister ? payload : { email: payload.email, password: payload.password }
+      );
 
       login(data);
-
-      navigate("/explore");
+      navigate(from, { replace: true });
     } catch (err) {
-      console.error(err);
-
-      setError(
-        err.response?.data
-          ?.message ||
-        "Server error"
-      );
+      setError(err.response?.data?.message || "We couldn't reach the server. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-black">
+    <div className="min-h-screen bg-paper grid lg:grid-cols-2">
+      {/* BRAND PANEL */}
+      <aside className="hidden lg:flex flex-col justify-between bg-ink text-paper p-12">
+        <Link to="/" aria-label="ReWear home">
+          <Logo size={40} textClassName="text-2xl font-bold text-paper" />
+        </Link>
 
-      {/* BACKGROUND IMAGE */}
-      <motion.img
-        initial={{
-          scale: 1.03,
-        }}
+        <div className="max-w-md">
+          <h2 className="text-3xl font-bold leading-tight tracking-tight">Buy or rent pre-loved Indian fashion.</h2>
+          <ul className="mt-8 flex flex-col gap-5">
+            {POINTS.map(({ icon: Icon, text }) => (
+              <li key={text} className="flex gap-3 text-[15px] leading-relaxed text-[#e3d5c4]">
+                <Icon size={20} className="text-[#e8c39e] flex-shrink-0 mt-0.5" />
+                {text}
+              </li>
+            ))}
+          </ul>
+        </div>
 
-        animate={{
-          scale: 1,
-        }}
+        <p className="text-xs text-[#bfae9c]">Academic project · Medicaps University, Indore</p>
+      </aside>
 
-        transition={{
-          duration: 1.2,
-        }}
+      {/* FORM */}
+      <main className="flex flex-col items-center justify-center px-4 py-10">
+        <div className="w-full max-w-[400px]">
+          <Link to="/" aria-label="ReWear home" className="lg:hidden inline-block mb-8">
+            <Logo size={36} textClassName="text-xl font-bold text-ink" />
+          </Link>
 
-        src="https://res.cloudinary.com/dygzp2lyy/image/upload/v1774164438/rewear-login-bg_otosam.png"
+          <h1 className="text-2xl font-bold tracking-tight">{isRegister ? "Create your account" : "Welcome back"}</h1>
+          <p className="mt-1 text-sm text-muted">
+            {isRegister ? "Start buying, renting and selling on ReWear." : "Log in to continue to ReWear."}
+          </p>
 
-        alt="fashion"
-
-        className="
-  absolute
-  inset-0
-  w-full
-  h-full
-  object-cover
-  object-center
-"
-      />
-
-      {/* DARK OVERLAY */}
-      <div className="absolute inset-0 bg-black/45" />
-
-      {/* CONTENT */}
-      <div
-        className="
-          relative
-          z-10
-          min-h-screen
-          flex
-          items-center
-          justify-center
-          lg:justify-end
-          px-6
-          lg:px-24
-        "
-      >
-
-        {/* FORM ONLY */}
-        <motion.div
-          initial={{
-            opacity: 0,
-            y: 40,
-          }}
-
-          animate={{
-            opacity: 1,
-            y: 0,
-          }}
-
-          transition={{
-            duration: 0.6,
-          }}
-
-          className="
-            w-full
-            max-w-[430px]
-          "
-        >
-
-          {/* BRAND */}
-          <div className="mb-10">
-
-            <h1 className="text-5xl font-semibold text-white tracking-tight inline-flex items-center gap-4">
-              <LogoMark size={52} />
-              ReWear
-
-
-            </h1>
-
-            <p className="mt-3 text-gray-300 text-lg">
-              Fashion beyond one wear.
-            </p>
-
+          <div role="tablist" aria-label="Log in or sign up" className="mt-6 grid grid-cols-2 p-1 rounded-md bg-[#efe6da]">
+            {[
+              [false, "Log in"],
+              [true, "Create account"],
+            ].map(([register, label]) => (
+              <button
+                key={label}
+                type="button"
+                role="tab"
+                aria-selected={isRegister === register}
+                onClick={() => switchMode(register)}
+                className={`h-9 rounded text-sm font-semibold transition ${isRegister === register ? "bg-white text-ink shadow-sm" : "text-muted hover:text-ink"}`}
+              >
+                {label}
+              </button>
+            ))}
           </div>
 
-          {/* ERROR */}
-          {error && (
-            <div
-              className="
-                mb-5
-                bg-red-500/15
-                border
-                border-red-500/20
-                text-red-200
-                text-sm
-                px-4
-                py-3
-                rounded-2xl
-                backdrop-blur-md
-              "
-            >
-              {error}
-            </div>
-          )}
-
-          {/* FORM */}
-          <form
-            onSubmit={
-              submitHandler
-            }
-
-            className="space-y-5"
-          >
-
-            {/* NAME */}
+          <form onSubmit={submitHandler} noValidate className="mt-6 flex flex-col gap-4">
             {isRegister && (
-              <div>
-
-                <label className="text-sm text-gray-200">
-                  Full Name
-                </label>
-
-                <input
-                  name="name"
-
-                  placeholder="John Doe"
-
-                  value={form.name}
-
-                  onChange={
-                    handleChange
-                  }
-
-                  className="
-                    w-full
-                    mt-2
-                    bg-white/10
-                    backdrop-blur-md
-                    border
-                    border-white/10
-                    text-white
-                    placeholder:text-gray-400
-                    rounded-2xl
-                    px-5
-                    py-4
-                    focus:outline-none
-                    focus:ring-2
-                    focus:ring-pink-400
-                  "
-                />
-
-              </div>
+              <Field id="name" label="Full name">
+                <input id="name" name="name" autoComplete="name" value={form.name} onChange={handleChange} className={inputClass} />
+              </Field>
             )}
 
-            {/* EMAIL */}
-            <div>
-
-              <label className="text-sm text-gray-200">
-                Email Address
-              </label>
-
+            <Field id="email" label="Email">
               <input
+                id="email"
                 name="email"
-
                 type="email"
-
-                placeholder="john@example.com"
-
+                autoComplete="email"
                 value={form.email}
-
-                onChange={
-                  handleChange
-                }
-
-                className="
-                  w-full
-                  mt-2
-                  bg-white/10
-                  backdrop-blur-md
-                  border
-                  border-white/10
-                  text-white
-                  placeholder:text-gray-400
-                  rounded-2xl
-                  px-5
-                  py-4
-                  focus:outline-none
-                  focus:ring-2
-                  focus:ring-pink-400
-                "
+                onChange={handleChange}
+                placeholder="you@example.com"
+                className={inputClass}
               />
+            </Field>
 
-            </div>
+            <Field id="password" label="Password" hint={isRegister ? "At least 8 characters." : undefined}>
+              <div className="relative">
+                <input
+                  id="password"
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  autoComplete={isRegister ? "new-password" : "current-password"}
+                  value={form.password}
+                  onChange={handleChange}
+                  className={`${inputClass} pr-11`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  className="absolute right-1 top-1 w-9 h-9 flex items-center justify-center text-muted hover:text-ink"
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+            </Field>
 
-            {/* PASSWORD */}
-            <div>
+            {error && (
+              <p role="alert" className="rounded-md bg-red-50 border border-red-200 px-3.5 py-2.5 text-sm text-red-800">
+                {error}
+              </p>
+            )}
 
-              <label className="text-sm text-gray-200">
-                Password
-              </label>
-
-              <input
-                name="password"
-
-                type="password"
-
-                placeholder="••••••••"
-
-                value={form.password}
-
-                onChange={
-                  handleChange
-                }
-
-                className="
-                  w-full
-                  mt-2
-                  bg-white/10
-                  backdrop-blur-md
-                  border
-                  border-white/10
-                  text-white
-                  placeholder:text-gray-400
-                  rounded-2xl
-                  px-5
-                  py-4
-                  focus:outline-none
-                  focus:ring-2
-                  focus:ring-pink-400
-                "
-              />
-
-            </div>
-
-            {/* BUTTON */}
             <button
               type="submit"
-
               disabled={loading}
-
-              className="
-                w-full
-                mt-2
-                bg-brand
-                hover:bg-brand-dark
-                text-white
-                py-4
-                rounded-2xl
-                font-medium
-                flex
-                items-center
-                justify-center
-                gap-2
-                hover:opacity-95
-                transition
-                shadow-xl
-              "
+              className="mt-1 h-11 rounded-md bg-brand text-white text-sm font-semibold hover:bg-brand-dark disabled:opacity-60"
             >
-
-              {loading
-                ? "Please wait..."
-                : isRegister
-                  ? "Create Account"
-                  : "Login"}
-
-              {!loading && (
-                <ArrowRight
-                  size={18}
-                />
-              )}
-
+              {loading ? "Please wait…" : isRegister ? "Create account" : "Log in"}
             </button>
-
           </form>
 
-          {/* SWITCH */}
-          <div className="mt-8">
-
-            <button
-              onClick={() => {
-                setIsRegister(
-                  !isRegister
-                );
-
-                setError("");
-              }}
-
-              className="
-                text-sm
-                text-gray-300
-                hover:text-white
-                transition
-              "
-            >
-
-              {isRegister
-                ? "Already have an account? Login"
-                : "New here? Create an account"}
-
+          <p className="mt-6 text-sm text-muted text-center">
+            {isRegister ? "Already have an account? " : "New to ReWear? "}
+            <button type="button" onClick={() => switchMode(!isRegister)} className="font-semibold text-brand hover:underline">
+              {isRegister ? "Log in" : "Create an account"}
             </button>
-
-          </div>
-
-        </motion.div>
-
-      </div>
-
+          </p>
+        </div>
+      </main>
     </div>
   );
 };

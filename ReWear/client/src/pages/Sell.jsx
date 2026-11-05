@@ -349,18 +349,18 @@ const Sell = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#faf6ef] py-8 sm:py-10">
+    <div className="py-6">
 
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6">
 
         {/* HEADER */}
         <div className="mb-8">
 
-          <h1 className="text-3xl sm:text-4xl font-semibold text-[#2b1d14]">
-            {editId ? "Edit Listing" : "List Your Product"}
+          <h1 className="text-[26px] font-bold tracking-tight text-ink">
+            {editId ? "Edit listing" : "List an item"}
           </h1>
 
-          <p className="mt-2 text-sm text-gray-500">
+          <p className="mt-2 text-sm text-muted">
             {editId
               ? "Price changes go live straight away. New photos or details are re-checked by an admin."
               : "Upload your fashion item for sale or rent. An admin reviews every listing before it goes live."}
@@ -370,7 +370,7 @@ const Sell = () => {
 
         {/* ERROR */}
         {error && (
-          <div className="mb-6 bg-red-50 border border-red-200 text-red-500 text-sm px-4 py-3 rounded-xl">
+          <div className="mb-6 bg-red-50 border border-red-200 text-red-800 text-sm px-4 py-3 rounded-lg">
             {error}
           </div>
         )}
@@ -382,13 +382,13 @@ const Sell = () => {
           <div className="space-y-6">
 
             {/* MODE */}
-            <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
+            <div className="bg-white border border-line rounded-lg p-5">
 
               <p className="text-sm font-medium text-gray-700 mb-4">
-                Listing Type
+                How do you want to list it?
               </p>
 
-              <div className="flex bg-gray-100 rounded-xl p-1">
+              <div className="grid grid-cols-3 bg-[#efe6da] rounded-md p-1">
 
                 {[
                   "sell",
@@ -402,12 +402,10 @@ const Sell = () => {
                       setMode(m)
                     }
 
-                    className={`flex-1 py-3 rounded-lg text-sm font-medium capitalize transition ${mode === m
-                        ? "bg-[#2b1d14] text-white"
-                        : "text-gray-500"
+                    className={`h-9 rounded text-sm font-semibold transition ${mode === m ? "bg-white text-ink" : "text-muted hover:text-ink"
                       }`}
                   >
-                    {m}
+                    {m === "sell" ? "Sell" : m === "rent" ? "Rent" : "Sell and rent"}
                   </button>
                 ))}
 
@@ -416,23 +414,23 @@ const Sell = () => {
             </div>
 
             {/* UPLOAD */}
-            <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
+            <div className="bg-white border border-line rounded-lg p-5">
 
               <div className="flex items-center gap-2 mb-5">
 
                 <ImagePlus
                   size={20}
-                  className="text-[#2b1d14]"
+                  className="text-ink"
                 />
 
-                <h2 className="text-lg font-medium text-[#2b1d14]">
-                  Upload Photos
+                <h2 className="text-lg font-medium text-ink">
+                  Photos
                 </h2>
 
               </div>
 
               {/* DROPZONE */}
-              <label className="border-2 border-dashed border-gray-200 rounded-2xl p-8 flex flex-col items-center justify-center text-center cursor-pointer hover:border-[#2b1d14] transition">
+              <label className="border-2 border-dashed border-line rounded-lg p-8 flex flex-col items-center justify-center text-center cursor-pointer hover:border-brand transition">
 
                 <Upload
                   size={28}
@@ -467,9 +465,9 @@ const Sell = () => {
                     (img) => (
                       <div
                         key={img.id}
-                        className={`relative rounded-xl overflow-hidden border ${img.status === "rejected"
+                        className={`relative rounded-lg overflow-hidden border ${img.status === "rejected"
                             ? "border-red-300"
-                            : "border-gray-100"
+                            : "border-line"
                           }`}
                       >
 
@@ -547,21 +545,21 @@ const Sell = () => {
             </div>
 
             {/* DETAILS */}
-            <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm space-y-5">
+            <div className="bg-white border border-line rounded-lg p-5 space-y-5">
 
               <div>
 
                 <label className="text-sm font-medium text-gray-700">
-                  Product Title
+                  Title
                 </label>
 
                 <input
                   name="title"
-                  placeholder="Off White Hoodie"
+                  placeholder="e.g. Red Banarasi silk saree"
 
                   value={form.title}
 
-                  className="w-full mt-2 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#2b1d14]"
+                  className="w-full mt-2 border border-line rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#2b1d14]"
 
                   onChange={
                     handleChange
@@ -583,7 +581,7 @@ const Sell = () => {
                   placeholder="Fabric, fit, how many times it was worn, any marks or alterations…"
                   value={form.description}
                   onChange={handleChange}
-                  className="w-full mt-2 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#2b1d14]"
+                  className="w-full mt-2 border border-line rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#2b1d14]"
                 />
 
               </div>
@@ -611,7 +609,7 @@ const Sell = () => {
                       })
                     }
 
-                    className="w-full mt-2 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none"
+                    className="w-full mt-2 border border-line rounded-lg px-4 py-3 text-sm focus:outline-none"
                   >
                     {CATEGORIES.map((c) => (
                       <option key={c.value} value={c.value}>
@@ -639,7 +637,7 @@ const Sell = () => {
                       handleChange
                     }
 
-                    className="w-full mt-2 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none"
+                    className="w-full mt-2 border border-line rounded-lg px-4 py-3 text-sm focus:outline-none"
                   >
                     {SIZES.map((s) => (
                       <option key={s} value={s}>
@@ -669,7 +667,7 @@ const Sell = () => {
                       handleChange
                     }
 
-                    className="w-full mt-2 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none"
+                    className="w-full mt-2 border border-line rounded-lg px-4 py-3 text-sm focus:outline-none"
                   >
                     {CONDITIONS.map((c) => (
                       <option key={c} value={c}>
@@ -689,21 +687,21 @@ const Sell = () => {
             {(mode === "sell" ||
               mode === "both" ||
               mode === "sale") && (
-                <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
+                <div className="bg-white border border-line rounded-lg p-5">
 
                   <label className="text-sm font-medium text-gray-700">
-                    Selling Price
+                    Sale price (₹)
                   </label>
 
                   <input
                     name="price"
-                    placeholder="₹ 2500"
+                    placeholder="e.g. 2500"
 
                     type="number"
 
                     value={form.price}
 
-                    className="w-full mt-2 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#2b1d14]"
+                    className="w-full mt-2 border border-line rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#2b1d14]"
 
                     onChange={
                       handleChange
@@ -716,21 +714,21 @@ const Sell = () => {
             {/* RENT */}
             {(mode === "rent" ||
               mode === "both") && (
-                <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
+                <div className="bg-white border border-line rounded-lg p-5">
 
                   <label className="text-sm font-medium text-gray-700">
-                    Rent Per Day
+                    Rent per day (₹)
                   </label>
 
                   <input
                     name="rent"
-                    placeholder="₹ 300"
+                    placeholder="e.g. 300"
 
                     type="number"
 
                     value={form.rent}
 
-                    className="w-full mt-2 mb-5 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#2b1d14]"
+                    className="w-full mt-2 mb-5 border border-line rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#2b1d14]"
 
                     onChange={
                       handleChange
@@ -738,7 +736,7 @@ const Sell = () => {
                   />
 
                   {/* CALENDAR */}
-                  <div className="border border-gray-200 rounded-2xl overflow-hidden">
+                  <div className="border border-line rounded-lg overflow-hidden">
 
                     <DateRange
                       ranges={dateRange}
@@ -763,7 +761,7 @@ const Sell = () => {
 
               onClick={handleSubmit}
 
-              className="w-full bg-[#2b1d14] text-white py-4 rounded-xl font-medium hover:opacity-95 transition shadow-sm"
+              className="w-full bg-brand text-white py-4 rounded-lg font-medium hover:opacity-95 transition"
             >
               {loading
                 ? "Saving..."
@@ -777,23 +775,23 @@ const Sell = () => {
           {/* RIGHT */}
           <div className="lg:sticky lg:top-24">
 
-            <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
+            <div className="bg-white border border-line rounded-lg p-5">
 
               <div className="flex items-center gap-2 mb-5">
 
                 <Shirt
                   size={20}
-                  className="text-[#2b1d14]"
+                  className="text-ink"
                 />
 
-                <h2 className="text-lg font-medium text-[#2b1d14]">
-                  Live Preview
+                <h2 className="text-lg font-medium text-ink">
+                  Preview
                 </h2>
 
               </div>
 
               {/* CARD */}
-              <div className="border border-gray-100 rounded-2xl overflow-hidden">
+              <div className="border border-line rounded-lg overflow-hidden">
 
                 <img
                   src={
@@ -808,12 +806,12 @@ const Sell = () => {
 
                 <div className="p-5">
 
-                  <h3 className="text-xl font-medium text-[#2b1d14]">
+                  <h3 className="text-xl font-medium text-ink">
                     {form.title ||
-                      "Product Title"}
+                      "Your item title"}
                   </h3>
 
-                  <p className="mt-2 text-sm text-gray-500 capitalize">
+                  <p className="mt-2 text-sm text-muted capitalize">
                     {form.category} •{" "}
                     {form.size}
                   </p>
@@ -822,11 +820,11 @@ const Sell = () => {
 
                     <div>
 
-                      <p className="text-sm text-gray-500">
+                      <p className="text-sm text-muted">
                         Price
                       </p>
 
-                      <p className="text-2xl font-semibold text-[#2b1d14]">
+                      <p className="text-2xl font-semibold text-ink">
                         ₹{" "}
                         {form.price ||
                           form.rent ||

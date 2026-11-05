@@ -47,8 +47,8 @@ const AdminUsers = () => {
     <div className="space-y-5">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-900">Users</h1>
-          <p className="mt-1 text-sm text-gray-500">Block accounts that break the rules. Their live listings are hidden too.</p>
+          <h1 className="text-2xl font-semibold text-ink">Users</h1>
+          <p className="mt-1 text-sm text-muted">Block accounts that break the rules. Their live listings are hidden too.</p>
         </div>
 
         <form
@@ -63,17 +63,17 @@ const AdminUsers = () => {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search name or email"
-            className="w-full pl-9 pr-3 py-2 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-200"
+            className="w-full pl-9 pr-3 py-2 rounded-lg border border-line bg-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-200"
           />
         </form>
       </div>
 
       {error && <p className="text-sm text-red-600">{error}</p>}
 
-      <div className="bg-white border border-gray-200 rounded-xl overflow-x-auto">
+      <div className="bg-white border border-line rounded-lg overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="text-left text-gray-500 border-b border-gray-200">
+            <tr className="text-left text-muted border-b border-line">
               <th className="px-4 py-3 font-medium">Name</th>
               <th className="px-4 py-3 font-medium">Email</th>
               <th className="px-4 py-3 font-medium">Joined</th>
@@ -91,12 +91,12 @@ const AdminUsers = () => {
               </tr>
             ) : users.length === 0 ? (
               <tr>
-                <td colSpan={7} className="px-4 py-10 text-center text-gray-500">No users found.</td>
+                <td colSpan={7} className="px-4 py-10 text-center text-muted">No users found.</td>
               </tr>
             ) : (
               users.map((u) => (
                 <tr key={u._id} className="hover:bg-gray-50">
-                  <td className="px-4 py-3 font-medium text-gray-900">{u.name}</td>
+                  <td className="px-4 py-3 font-medium text-ink">{u.name}</td>
                   <td className="px-4 py-3 text-gray-600">{u.email}</td>
                   <td className="px-4 py-3 text-gray-600 whitespace-nowrap">{format(new Date(u.createdAt), "d MMM yyyy")}</td>
                   <td className="px-4 py-3 text-right tabular-nums">{u.listings}</td>
@@ -104,7 +104,7 @@ const AdminUsers = () => {
                   <td className="px-4 py-3">
                     <div className="flex gap-1">
                       {u.role === "admin" && <StatusBadge status="admin" />}
-                      {u.blocked ? <StatusBadge status="blocked" /> : <span className="text-xs text-gray-500">Active</span>}
+                      {u.blocked ? <StatusBadge status="blocked" /> : <span className="text-xs text-muted">Active</span>}
                     </div>
                   </td>
                   <td className="px-4 py-3 text-right">
@@ -112,7 +112,7 @@ const AdminUsers = () => {
                       <button
                         onClick={() => toggleBlock(u)}
                         className={`px-3 py-1.5 rounded-md text-xs font-medium border transition ${u.blocked
-                          ? "border-gray-200 text-gray-700 hover:bg-gray-50"
+                          ? "border-line text-gray-700 hover:bg-gray-50"
                           : "border-red-200 text-red-700 hover:bg-red-50"
                           }`}
                       >

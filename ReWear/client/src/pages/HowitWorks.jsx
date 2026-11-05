@@ -58,7 +58,7 @@ const HowItWorks = () => {
           Start shopping
         </Link>
         <Link
-          to={user ? "/sell" : "/login"}
+          to="/sell"
           className="inline-flex items-center h-11 px-5 rounded-md border border-ink text-sm font-semibold hover:bg-cream"
         >
           List an item

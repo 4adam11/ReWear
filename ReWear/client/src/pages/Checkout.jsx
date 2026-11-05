@@ -1,573 +1,333 @@
-import { useLocation, useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
-
-import {
-  ArrowLeft,
-  CreditCard,
-  Wallet,
-  Truck,
-  Tag,
-  ShieldCheck,
-} from "lucide-react";
+import { format, parseISO } from "date-fns";
+import { Banknote, CreditCard, Smartphone, Lock } from "lucide-react";
 
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import { getItemPrice, toOrderItems } from "../utils/cart";
-
+import { thumb, PLACEHOLDER_IMAGE } from "../utils/image";
+import { money } from "../components/explore/ProductCard";
 import API from "../utils/api";
+
+const PAYMENT_OPTIONS = [
+  { id: "cod", label: "Cash on delivery", note: "Pay the courier when it arrives", icon: Banknote },
+  // Enabled once the payment gateway is connected
+  { id: "upi", label: "UPI", note: "Coming soon", icon: Smartphone, disabled: true },
+  { id: "card", label: "Debit or credit card", note: "Coming soon", icon: CreditCard, disabled: true },
+];
+
+const inputClass =
+  "h-11 w-full px-3.5 rounded-md border border-[#d9cbb9] bg-white text-sm text-ink placeholder:text-[#a8998b] focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand/15";
+
+const Field = ({ id, label, error, className = "", children }) => (
+  <div className={`flex flex-col gap-1.5 ${className}`}>
+    <label htmlFor={id} className="text-sm font-medium">
+      {label}
+    </label>
+    {children}
+    {error && <p className="text-xs text-red-700">{error}</p>}
+  </div>
+);
+
+const Step = ({ n, title, children }) => (
+  <section className="bg-white border border-line rounded-lg">
+    <h2 className="flex items-center gap-3 px-5 py-4 border-b border-[#efe6da] text-base font-bold">
+      <span className="w-7 h-7 rounded-full bg-[#f1e6d8] text-brand text-sm flex items-center justify-center">{n}</span>
+      {title}
+    </h2>
+    <div className="p-5">{children}</div>
+  </section>
+);
+
+const checkAddress = (a) => {
+  const errors = {};
+  if (!a.name.trim()) errors.name = "Enter the name of the person receiving it";
+  if (!/^[6-9]\d{9}$/.test(a.phone.replace(/\s/g, ""))) errors.phone = "Enter a 10-digit mobile number";
+  if (a.line.trim().length < 8) errors.line = "Enter the house number, street and area";
+  if (!a.city.trim()) errors.city = "Enter your city";
+  if (!a.state.trim()) errors.state = "Enter your state";
+  if (!/^\d{6}$/.test(a.pincode.trim())) errors.pincode = "Enter a 6-digit pincode";
+  return errors;
+};
 
 const Checkout = () => {
   const { state } = useLocation();
-
   const navigate = useNavigate();
-
   const { clearCart } = useCart();
+  const { user, authHeader } = useAuth();
 
-  const { user } = useAuth();
-
-  // Hooks must run before any early return
   const items = state?.items || [];
 
   const [promo, setPromo] = useState("");
-
-  const [appliedPromo, setAppliedPromo] =
-    useState("");
-
+  const [appliedPromo, setAppliedPromo] = useState("");
+  const [promoMessage, setPromoMessage] = useState("");
   const [quote, setQuote] = useState(null);
-
-  const [paymentMethod, setPaymentMethod] =
-    useState("card");
-
-  const [loading, setLoading] =
-    useState(false);
-
+  const [paymentMethod, setPaymentMethod] = useState("cod");
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-
+  const [fieldErrors, setFieldErrors] = useState({});
   const [address, setAddress] = useState({
-    name: "",
+    name: user?.name || "",
     phone: "",
-    address: "",
+    line: "",
+    city: "",
+    state: "",
+    pincode: "",
   });
 
-  const authHeader = {
-    headers: {
-      Authorization: `Bearer ${user?.token}`,
-    },
-  };
-
-  // ASK THE SERVER FOR THE REAL TOTAL
   const fetchQuote = (promoCode) =>
-    axios.post(
-      `${API}/orders/quote`,
-      {
-        items: toOrderItems(items),
-        promoCode,
-      },
-      authHeader
-    );
+    axios.post(`${API}/orders/quote`, { items: toOrderItems(items), promoCode }, authHeader);
 
+  // The server works out the real total
   useEffect(() => {
     if (!items.length || !user) return;
 
     fetchQuote(appliedPromo)
       .then(({ data }) => setQuote(data))
-      .catch((err) =>
-        setError(
-          err.response?.data?.message ||
-          "Could not calculate total"
-        )
-      );
+      .catch((err) => setError(err.response?.data?.message || "We couldn't work out the total. Please try again."));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state, user, appliedPromo]);
 
   if (!items.length) {
     return (
-      <div className="min-h-screen bg-[#faf6ef] flex items-center justify-center px-4">
-        <div className="bg-white border border-gray-100 rounded-2xl p-8 shadow-sm text-center max-w-md w-full">
-          <h2 className="text-2xl font-semibold text-[#2b1d14]">
-            No checkout data found
-          </h2>
-
-          <p className="mt-3 text-gray-500 text-sm">
-            Your cart seems empty.
-          </p>
-
-          <button
-            onClick={() => navigate("/explore")}
-            className="mt-6 px-6 py-3 rounded-xl bg-brand hover:bg-brand-dark text-white font-medium shadow-md hover:opacity-90 transition"
-          >
-            Explore Products
-          </button>
-        </div>
+      <div className="max-w-md mx-auto px-4 py-24 text-center">
+        <h1 className="text-2xl font-bold">Nothing to check out</h1>
+        <p className="mt-2 text-sm text-muted">Add something to your bag first.</p>
+        <Link to="/explore" className="mt-6 inline-flex items-center h-11 px-5 rounded-md bg-brand text-white text-sm font-semibold hover:bg-brand-dark">
+          Continue shopping
+        </Link>
       </div>
     );
   }
 
-  // TOTAL (local estimate until the server quote arrives)
-  const estimate = items.reduce(
-    (acc, item) =>
-      acc +
-      getItemPrice(item) *
-      (item.quantity || 1),
-    0
-  );
-
+  const subtotal = quote?.subtotal ?? items.reduce((acc, item) => acc + getItemPrice(item), 0);
   const discount = quote?.discount || 0;
+  const total = quote?.total ?? subtotal;
 
-  const finalAmount =
-    quote?.total ?? estimate;
+  const set = (key) => (e) => {
+    setAddress({ ...address, [key]: e.target.value });
+    setFieldErrors({ ...fieldErrors, [key]: undefined });
+  };
 
-  // APPLY PROMO (validated by the server)
   const applyPromo = async () => {
     const code = promo.trim().toUpperCase();
+    if (!code) return;
 
     try {
       const { data } = await fetchQuote(code);
 
       if (!data.promoValid) {
-        alert("Invalid Promo Code");
+        setPromoMessage("That code isn't valid");
         setAppliedPromo("");
         return;
       }
 
       setAppliedPromo(code);
       setQuote(data);
+      setPromoMessage(`${code} applied: you save ${money(data.discount)}`);
     } catch (err) {
-      setError(
-        err.response?.data?.message ||
-        "Could not apply promo code"
-      );
+      setPromoMessage(err.response?.data?.message || "Could not apply the code");
     }
   };
 
-  // PAYMENT
-  const handlePayment = async () => {
-    if (!user) {
-      alert("Please login first");
+  const placeOrder = async () => {
+    const errors = checkAddress(address);
+    setFieldErrors(errors);
 
-      navigate("/login");
-
+    if (Object.keys(errors).length) {
+      setError("Please fix the delivery address");
+      document.getElementById("delivery")?.scrollIntoView({ behavior: "smooth" });
       return;
     }
-
-    if (
-      !address.name ||
-      !address.phone ||
-      !address.address
-    ) {
-      setError(
-        "Please fill all address fields"
-      );
-
-      return;
-    }
-
-    if (!window.confirm("Confirm Order?"))
-      return;
 
     try {
       setLoading(true);
+      setError("");
 
-      // No total sent: the server prices the order itself
-      await axios.post(
+      // No total is sent: the server prices the order itself
+      const { data } = await axios.post(
         `${API}/orders`,
         {
           items: toOrderItems(items),
           promoCode: appliedPromo,
           paymentMethod,
-          address,
+          address: {
+            name: address.name.trim(),
+            phone: address.phone.replace(/\s/g, ""),
+            address: `${address.line.trim()}, ${address.city.trim()}, ${address.state.trim()} - ${address.pincode.trim()}`,
+          },
         },
         authHeader
       );
 
       clearCart();
-
-      navigate("/success");
+      navigate("/success", { replace: true, state: { orders: data.orders, paymentMethod } });
     } catch (err) {
-      console.error(err);
-
-      setError(
-        err.response?.data?.message ||
-        "Payment failed"
-      );
+      setError(err.response?.data?.message || "We couldn't place your order. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#faf6ef] py-8 sm:py-10">
-
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
-
-        {/* TOP BAR */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5 mb-8">
-
-          {/* BACK */}
-          <button
-            onClick={() => navigate(-1)}
-            className="inline-flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-indigo-600 transition"
-          >
-            <ArrowLeft size={18} />
-            Back
-          </button>
-
-          {/* TITLE */}
-          <div className="text-center">
-            <h1 className="text-3xl sm:text-4xl font-semibold text-[#2b1d14]">
-              Checkout
-            </h1>
-
-            <p className="mt-2 text-sm text-gray-500">
-              Complete your order securely
-            </p>
-          </div>
-
-          {/* TRUST */}
-          <div className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-gray-100 shadow-sm text-sm font-medium text-gray-600">
-            <ShieldCheck
-              size={18}
-              className="text-green-500"
-            />
-
-            Secure Checkout
-          </div>
-
-        </div>
-
-        {/* ERROR */}
-        {error && (
-          <div className="mb-6 bg-red-50 border border-red-200 text-red-500 text-sm px-4 py-3 rounded-xl">
-            {error}
-          </div>
-        )}
-
-        {/* MAIN GRID */}
-        <div className="grid xl:grid-cols-[1.5fr_0.8fr] gap-8 items-start">
-
-          {/* LEFT */}
-          <div className="space-y-6">
-
-            {/* ITEMS */}
-            <div className="bg-white border border-gray-100 rounded-2xl p-5 sm:p-6 shadow-sm">
-
-              <h2 className="text-xl font-semibold text-[#2b1d14] mb-6">
-                Order Items
-              </h2>
-
-              <div className="space-y-4">
-
-                {items.map((item, i) => (
-                  <div
-                    key={i}
-                    className="flex flex-col sm:flex-row gap-4 border border-gray-100 rounded-2xl p-4"
-                  >
-
-                    {/* IMAGE */}
-                    <img
-                      src={
-                        item.image ||
-                        item.images?.[0]
-                      }
-
-                      alt={item.title}
-
-                      className="w-full sm:w-28 h-[220px] sm:h-32 rounded-xl object-cover bg-gray-100"
-                    />
-
-                    {/* DETAILS */}
-                    <div className="flex-1 flex flex-col justify-between">
-
-                      <div>
-                        <h3 className="text-lg font-medium text-gray-900">
-                          {item.title}
-                        </h3>
-
-                        <p className="mt-1 text-sm text-gray-500 capitalize">
-                          {item.category}
-                        </p>
-                      </div>
-
-                      <div className="flex items-center justify-between mt-5">
-
-                        <div className="text-sm text-gray-500">
-                          Qty:{" "}
-                          {item.quantity || 1}
-                        </div>
-
-                        <div className="text-xl font-semibold text-[#2b1d14]">
-                          ₹{" "}
-                          {getItemPrice(item) *
-                            (item.quantity || 1)}
-                        </div>
-
-                      </div>
-
-                    </div>
-
-                  </div>
-                ))}
-
-              </div>
-
-            </div>
-
-            {/* ADDRESS */}
-            <div className="bg-white border border-gray-100 rounded-2xl p-5 sm:p-6 shadow-sm">
-
-              <h2 className="text-xl font-semibold text-[#2b1d14] mb-6">
-                Shipping Address
-              </h2>
-
-              <div className="space-y-4">
-
-                <input
-                  type="text"
-
-                  placeholder="Full Name"
-
-                  className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-
-                  onChange={(e) =>
-                    setAddress({
-                      ...address,
-                      name: e.target.value,
-                    })
-                  }
-                />
-
-                <input
-                  type="text"
-
-                  placeholder="Phone Number"
-
-                  className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-
-                  onChange={(e) =>
-                    setAddress({
-                      ...address,
-                      phone: e.target.value,
-                    })
-                  }
-                />
-
-                <textarea
-                  rows={4}
-
-                  placeholder="Full Address"
-
-                  className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-indigo-500"
-
-                  onChange={(e) =>
-                    setAddress({
-                      ...address,
-                      address: e.target.value,
-                    })
-                  }
-                />
-
-              </div>
-
-            </div>
-
-            {/* PAYMENT */}
-            <div className="bg-white border border-gray-100 rounded-2xl p-5 sm:p-6 shadow-sm">
-
-              <h2 className="text-xl font-semibold text-[#2b1d14] mb-6">
-                Payment Method
-              </h2>
-
-              <div className="grid sm:grid-cols-3 gap-4">
-
-                {[
-                  {
-                    id: "card",
-                    label: "Card",
-                    icon: CreditCard,
-                  },
-
-                  {
-                    id: "upi",
-                    label: "UPI",
-                    icon: Wallet,
-                  },
-
-                  {
-                    id: "cod",
-                    label: "Cash on Delivery",
-                    icon: Truck,
-                  },
-                ].map((method) => {
-                  const Icon = method.icon;
-
-                  const active =
-                    paymentMethod === method.id;
-
-                  return (
-                    <button
-                      key={method.id}
-
-                      onClick={() =>
-                        setPaymentMethod(
-                          method.id
-                        )
-                      }
-
-                      className={`border rounded-2xl p-5 text-left transition ${active
-                          ? "border-indigo-500 bg-indigo-50"
-                          : "border-gray-200 hover:border-indigo-300"
-                        }`}
-                    >
-
-                      <Icon
-                        size={24}
-                        className={
-                          active
-                            ? "text-indigo-600"
-                            : "text-gray-600"
-                        }
-                      />
-
-                      <p className="mt-4 text-sm font-medium text-gray-800">
-                        {method.label}
-                      </p>
-
-                    </button>
-                  );
-                })}
-
-              </div>
-
-              {/* Until a payment gateway is connected, online payments aren't actually charged */}
-              {paymentMethod !== "cod" && (
-                <p className="mt-4 text-sm text-gray-500">
-                  Online payment isn't connected yet, so no money will be charged. Your order is still confirmed and sent to the seller.
-                </p>
-              )}
-
-            </div>
-
-            {/* PROMO */}
-            <div className="bg-white border border-gray-100 rounded-2xl p-5 sm:p-6 shadow-sm">
-
-              <div className="flex items-center gap-2 mb-5">
-
-                <Tag
-                  size={20}
-                  className="text-indigo-500"
-                />
-
-                <h2 className="text-xl font-semibold text-[#2b1d14]">
-                  Promo Code
-                </h2>
-
-              </div>
-
-              <div className="flex flex-col sm:flex-row gap-4">
-
-                <input
-                  value={promo}
-
-                  onChange={(e) =>
-                    setPromo(e.target.value)
-                  }
-
-                  placeholder="Enter promo code"
-
-                  className="flex-1 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                />
-
-                <button
-                  onClick={applyPromo}
-
-                  className="px-6 py-3 rounded-xl bg-brand hover:bg-brand-dark text-white text-sm font-medium shadow-md hover:opacity-90 transition"
-                >
-                  Apply
-                </button>
-
-              </div>
-
-            </div>
-
-          </div>
-
-          {/* RIGHT */}
-          <div className="xl:sticky xl:top-24">
-
-            <div className="bg-white border border-gray-100 rounded-2xl p-5 sm:p-6 shadow-sm">
-
-              <h2 className="text-2xl font-semibold text-[#2b1d14]">
-                Order Summary
-              </h2>
-
-              <div className="mt-6 space-y-4">
-
-                {items.map((item, i) => (
-                  <div
-                    key={i}
-                    className="flex items-center justify-between text-sm"
-                  >
-
-                    <span className="text-gray-600">
-                      {item.title}
-                    </span>
-
-                    <span className="font-medium text-gray-900">
-                      ₹{" "}
-                      {getItemPrice(item) *
-                        (item.quantity || 1)}
-                    </span>
-
-                  </div>
-                ))}
-
-                {discount > 0 && (
-                  <div className="flex items-center justify-between text-sm text-green-600 font-medium">
-
-                    <span>Discount</span>
-
-                    <span>-₹ {discount}</span>
-
-                  </div>
-                )}
-
-              </div>
-
-              <div className="my-6 border-t border-gray-100"></div>
-
-              <div className="flex items-center justify-between">
-
-                <span className="text-lg font-medium text-gray-600">
-                  Total
-                </span>
-
-                <span className="text-3xl font-semibold text-[#2b1d14]">
-                  ₹ {finalAmount}
-                </span>
-
-              </div>
-
-              <button
-                disabled={loading}
-
-                onClick={handlePayment}
-
-                className="w-full mt-8 bg-brand hover:bg-brand-dark text-white py-4 rounded-xl font-medium shadow-md hover:opacity-90 transition disabled:opacity-60"
-              >
-                {loading
-                  ? "Processing..."
-                  : `Pay ₹ ${finalAmount}`}
-              </button>
-
-            </div>
-
-          </div>
-
-        </div>
-
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
+        <h1 className="text-[26px] font-bold tracking-tight">Checkout</h1>
+        <span className="inline-flex items-center gap-1.5 text-[13px] text-muted">
+          <Lock size={14} />
+          Prices are checked on our server before the order is placed
+        </span>
       </div>
 
+      {error && (
+        <p role="alert" className="mb-5 rounded-md bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-800">
+          {error}
+        </p>
+      )}
+
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px] items-start">
+        <div className="flex flex-col gap-5">
+          <div id="delivery">
+            <Step n="1" title="Delivery address">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Field id="a-name" label="Full name" error={fieldErrors.name}>
+                  <input id="a-name" autoComplete="name" value={address.name} onChange={set("name")} className={inputClass} />
+                </Field>
+                <Field id="a-phone" label="Mobile number" error={fieldErrors.phone}>
+                  <input id="a-phone" type="tel" inputMode="numeric" autoComplete="tel-national" maxLength={11} value={address.phone} onChange={set("phone")} placeholder="10-digit number" className={inputClass} />
+                </Field>
+                <Field id="a-line" label="House no., street and area" error={fieldErrors.line} className="sm:col-span-2">
+                  <input id="a-line" autoComplete="street-address" value={address.line} onChange={set("line")} className={inputClass} />
+                </Field>
+                <Field id="a-city" label="City" error={fieldErrors.city}>
+                  <input id="a-city" autoComplete="address-level2" value={address.city} onChange={set("city")} className={inputClass} />
+                </Field>
+                <div className="grid grid-cols-2 gap-4">
+                  <Field id="a-state" label="State" error={fieldErrors.state}>
+                    <input id="a-state" autoComplete="address-level1" value={address.state} onChange={set("state")} className={inputClass} />
+                  </Field>
+                  <Field id="a-pin" label="Pincode" error={fieldErrors.pincode}>
+                    <input id="a-pin" inputMode="numeric" autoComplete="postal-code" maxLength={6} value={address.pincode} onChange={set("pincode")} className={inputClass} />
+                  </Field>
+                </div>
+              </div>
+            </Step>
+          </div>
+
+          <Step n="2" title="Payment">
+            <div role="radiogroup" aria-label="Payment method" className="flex flex-col gap-2.5">
+              {PAYMENT_OPTIONS.map(({ id, label, note, icon: Icon, disabled }) => {
+                const active = paymentMethod === id;
+                return (
+                  <label
+                    key={id}
+                    className={`flex items-center gap-3.5 px-4 py-3 rounded-md border ${active ? "border-brand bg-cream" : "border-line"} ${disabled ? "opacity-55 cursor-not-allowed" : "cursor-pointer hover:border-brand"}`}
+                  >
+                    <input
+                      type="radio"
+                      name="payment"
+                      value={id}
+                      checked={active}
+                      disabled={disabled}
+                      onChange={() => setPaymentMethod(id)}
+                      className="w-4 h-4 accent-[#6b4430]"
+                    />
+                    <Icon size={20} className="text-brand" />
+                    <span className="flex-1">
+                      <span className="block text-sm font-semibold">{label}</span>
+                      <span className="block text-xs text-muted">{note}</span>
+                    </span>
+                  </label>
+                );
+              })}
+            </div>
+          </Step>
+
+          <Step n="3" title="Review items">
+            <ul className="divide-y divide-[#efe6da]">
+              {items.map((item, i) => (
+                <li key={i} className="py-3 first:pt-0 last:pb-0 flex gap-4">
+                  <img
+                    src={thumb(item.image || item.images?.[0], 200) || PLACEHOLDER_IMAGE}
+                    alt=""
+                    className="w-16 h-20 rounded-md object-cover bg-cream border border-line flex-shrink-0"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold truncate">{item.title}</p>
+                    <p className="mt-0.5 text-[13px] text-muted">
+                      {item.mode === "rent" && item.rentStart
+                        ? `Rental · ${format(parseISO(item.rentStart), "d MMM")} – ${format(parseISO(item.rentEnd), "d MMM yyyy")}`
+                        : "Purchase"}
+                      {item.size ? ` · Size ${item.size}` : ""}
+                    </p>
+                  </div>
+                  <p className="text-sm font-semibold whitespace-nowrap">{money(getItemPrice(item))}</p>
+                </li>
+              ))}
+            </ul>
+          </Step>
+        </div>
+
+        {/* SUMMARY */}
+        <aside className="bg-white border border-line rounded-lg p-5 lg:sticky lg:top-32 flex flex-col gap-4">
+          <h2 className="text-base font-bold">Order summary</h2>
+
+          <div className="flex gap-2">
+            <label htmlFor="promo" className="sr-only">
+              Promo code
+            </label>
+            <input
+              id="promo"
+              value={promo}
+              onChange={(e) => {
+                setPromo(e.target.value);
+                setPromoMessage("");
+              }}
+              placeholder="Promo code"
+              className={`${inputClass} uppercase`}
+            />
+            <button type="button" onClick={applyPromo} className="h-11 px-4 rounded-md border border-ink text-sm font-semibold hover:bg-cream">
+              Apply
+            </button>
+          </div>
+          {promoMessage && <p className={`-mt-2 text-xs ${appliedPromo ? "text-[#3f6b4a]" : "text-red-700"}`}>{promoMessage}</p>}
+
+          <dl className="flex flex-col gap-2 text-sm border-t border-[#efe6da] pt-4">
+            <div className="flex justify-between">
+              <dt className="text-muted">Items ({items.length})</dt>
+              <dd>{money(subtotal)}</dd>
+            </div>
+            {discount > 0 && (
+              <div className="flex justify-between text-[#3f6b4a]">
+                <dt>Discount</dt>
+                <dd>−{money(discount)}</dd>
+              </div>
+            )}
+            <div className="flex justify-between">
+              <dt className="text-muted">Delivery</dt>
+              <dd>Free</dd>
+            </div>
+            <div className="flex justify-between text-base font-bold border-t border-[#efe6da] pt-3 mt-1">
+              <dt>Total</dt>
+              <dd>{money(total)}</dd>
+            </div>
+          </dl>
+
+          <button
+            type="button"
+            disabled={loading || !quote}
+            onClick={placeOrder}
+            className="h-12 rounded-md bg-brand text-white font-semibold hover:bg-brand-dark disabled:opacity-50"
+          >
+            {loading ? "Placing order…" : `Place order · ${money(total)}`}
+          </button>
+          <p className="text-xs text-muted leading-relaxed">
+            The seller has to accept your order before it ships. You can cancel any time before it's shipped.
+          </p>
+        </aside>
+      </div>
     </div>
   );
 };

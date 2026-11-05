@@ -218,7 +218,7 @@ const Navbar = () => {
         <SearchBar />
 
         <nav aria-label="Account" className="flex items-center gap-0.5 ml-auto md:ml-0">
-          <HeaderIcon icon={Plus} label="Sell" to={user ? "/sell" : "/login"} />
+          <HeaderIcon icon={Plus} label="Sell" to="/sell" />
           <HeaderIcon icon={Heart} label="Wishlist" to="/wishlist" count={wishlist.length} />
           <NotificationBell />
           <HeaderIcon icon={ShoppingBag} label="Bag" to="/cart" count={cartItems.length} />

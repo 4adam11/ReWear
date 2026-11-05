@@ -60,7 +60,7 @@ const OrderProgress = ({ order }) => {
               {done && <Check size={14} strokeWidth={3} />}
             </span>
 
-            <span className={`mt-1.5 text-[11px] sm:text-xs text-center ${done ? "text-gray-900 font-medium" : "text-gray-400"}`}>
+            <span className={`mt-1.5 text-[11px] sm:text-xs text-center ${done ? "text-ink font-medium" : "text-gray-400"}`}>
               {LABELS[step]}
             </span>
             {time && <span className="text-[10px] text-gray-400">{time}</span>}

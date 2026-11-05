@@ -1,21 +1,52 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { useAuth } from "./AuthContext";
 import { getCartKey } from "../utils/cart";
 
 const CartContext = createContext();
 
+const storageKey = (userId) => `rewear-cart:${userId || "guest"}`;
+
+const loadCart = (userId) => {
+  try {
+    const items = JSON.parse(localStorage.getItem(storageKey(userId)));
+    return Array.isArray(items) ? items : [];
+  } catch {
+    return [];
+  }
+};
+
+// Only what the bag and checkout need (the server re-checks prices anyway)
+const FIELDS = ["_id", "title", "category", "size", "condition", "price", "rent", "mode", "total", "rentStart", "rentEnd", "quantity"];
+
+const saveCart = (userId, items) => {
+  try {
+    const slim = items.map((item) => ({
+      ...Object.fromEntries(FIELDS.filter((k) => item[k] !== undefined).map((k) => [k, item[k]])),
+      images: item.images?.slice(0, 1),
+    }));
+    localStorage.setItem(storageKey(userId), JSON.stringify(slim));
+  } catch {
+    // Storage full or blocked: the bag still works for this visit
+  }
+};
+
 export const CartProvider = ({ children }) => {
   const { user } = useAuth();
 
-  const [cartItems, setCartItems] = useState([]);
+  // Each account (and logged-out visitors) has its own bag, kept across page reloads
+  const [cartItems, setCartItems] = useState(() => loadCart(user?._id));
 
-  // EMPTY THE CART WHEN A DIFFERENT USER LOGS IN OR OUT
+  // Switch to the other person's bag when a different user logs in or out
   const [owner, setOwner] = useState(user?._id);
 
   if (owner !== user?._id) {
     setOwner(user?._id);
-    setCartItems([]);
+    setCartItems(loadCart(user?._id));
   }
+
+  useEffect(() => {
+    saveCart(owner, cartItems);
+  }, [owner, cartItems]);
 
   // GET SAFE ID (product + buy/rent + dates)
   const getItemId = getCartKey;

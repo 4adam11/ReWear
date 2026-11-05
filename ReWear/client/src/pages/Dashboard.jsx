@@ -1,698 +1,191 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
-
-import {
-  Package,
-  ShoppingBag,
-  Wallet,
-  Trash2,
-  Pencil,
-  ArrowRight,
-  Plus,
-} from "lucide-react";
-
-import { motion } from "framer-motion";
+import { format } from "date-fns";
+import { Plus, ChevronRight } from "lucide-react";
 
 import API from "../utils/api";
+import { useAuth } from "../context/AuthContext";
 import { thumb, PLACEHOLDER_IMAGE } from "../utils/image";
+import StatusBadge from "../components/ui/StatusBadge";
+import { money } from "../components/explore/ProductCard";
+
+const statusOf = (o) => (o.status === "placed" ? "confirmed" : o.status);
+
+const Stat = ({ label, value, to, note }) => (
+  <Link to={to} className="bg-white border border-line rounded-lg p-4 hover:border-brand transition-colors">
+    <p className="text-[13px] text-muted">{label}</p>
+    <p className="mt-1 text-2xl font-bold">{value}</p>
+    {note && <p className="mt-0.5 text-xs text-muted">{note}</p>}
+  </Link>
+);
+
+const Panel = ({ title, to, linkText, children }) => (
+  <section className="bg-white border border-line rounded-lg">
+    <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#efe6da]">
+      <h2 className="text-base font-bold">{title}</h2>
+      {to && (
+        <Link to={to} className="text-[13px] font-semibold text-brand hover:underline">
+          {linkText}
+        </Link>
+      )}
+    </div>
+    {children}
+  </section>
+);
+
+const Row = ({ to, image, title, sub, badge }) => (
+  <li>
+    <Link to={to} className="flex items-center gap-3.5 px-5 py-3 hover:bg-cream">
+      <img src={thumb(image, 120) || PLACEHOLDER_IMAGE} alt="" className="w-11 h-14 rounded object-cover bg-cream border border-line flex-shrink-0" />
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-semibold truncate">{title}</p>
+        <p className="text-xs text-muted truncate">{sub}</p>
+      </div>
+      {badge}
+      <ChevronRight size={16} className="text-muted flex-shrink-0" />
+    </Link>
+  </li>
+);
+
+const Empty = ({ children }) => <p className="px-5 py-8 text-sm text-muted text-center">{children}</p>;
 
 const Dashboard = () => {
-  const navigate = useNavigate();
+  const { user, authHeader } = useAuth();
+  const [data, setData] = useState(null);
 
-  const [products, setProducts] =
-    useState([]);
-
-  const [orders, setOrders] =
-    useState([]);
-
-  const [sales, setSales] =
-    useState([]);
-
-  const [loading, setLoading] =
-    useState(true);
-
-  // USER
-  const stored = JSON.parse(
-    localStorage.getItem("user")
-  );
-
-  const userId =
-    stored?._id ||
-    stored?.user?._id;
-
-  const token = stored?.token;
-
-  // LOGIN CHECK
   useEffect(() => {
-    if (!token) {
-      navigate("/login");
-    }
-  }, [token, navigate]);
+    Promise.all([
+      axios.get(`${API}/products/mine`, authHeader),
+      axios.get(`${API}/orders`, authHeader),
+      axios.get(`${API}/orders/sales`, authHeader),
+    ])
+      .then(([p, o, s]) => setData({ listings: p.data, purchases: o.data, sales: s.data }))
+      .catch(() => setData({ listings: [], purchases: [], sales: [], failed: true }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  // FETCH DATA
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const config = {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        };
-
-        const [
-          productRes,
-          orderRes,
-          salesRes,
-        ] = await Promise.all([
-          // Only your own listings (not every product on the site)
-          axios.get(
-            `${API}/products/mine`,
-            config
-          ),
-
-          axios.get(
-            `${API}/orders`,
-            config
-          ),
-
-          axios.get(
-            `${API}/orders/sales`,
-            config
-          ),
-        ]);
-
-        // PRODUCTS
-        const myProducts =
-          productRes.data;
-
-        // ORDERS
-        const myOrders =
-          orderRes.data.filter(
-            (o) => {
-              const uid =
-                typeof o.user ===
-                  "object"
-                  ? o.user?._id
-                  : o.user;
-
-              return (
-                String(uid) ===
-                String(userId)
-              );
-            }
-          );
-
-        setProducts(myProducts);
-        setOrders(myOrders);
-        setSales(salesRes.data);
-      } catch (err) {
-        console.error(
-          "Dashboard error:",
-          err
-        );
-
-        if (
-          err.response?.status ===
-          401
-        ) {
-          localStorage.removeItem(
-            "user"
-          );
-
-          navigate("/login");
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (token && userId) {
-      fetchData();
-    }
-  }, [
-    token,
-    userId,
-    navigate,
-  ]);
-
-  // DELETE
-  const handleDelete = async (
-    id
-  ) => {
-    const confirmDelete =
-      window.confirm(
-        "Delete this product?"
-      );
-
-    if (!confirmDelete) return;
-
-    try {
-      await axios.delete(
-        `${API}/products/${id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      setProducts((prev) =>
-        prev.filter(
-          (p) => p._id !== id
-        )
-      );
-    } catch (err) {
-      console.error(
-        "Delete error:",
-        err.response?.data ||
-        err.message
-      );
-
-      alert(
-        err.response?.data?.message ||
-        "Delete failed"
-      );
-    }
-  };
-
-  // EDIT
-  const handleEdit = (
-    product
-  ) => {
-    const newTitle = prompt(
-      "Edit product title",
-      product.title
-    );
-
-    if (!newTitle) return;
-
-    axios
-      .put(
-        `${API}/products/${product._id}`,
-        {
-          title: newTitle,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      )
-
-      .then(() => {
-        setProducts((prev) =>
-          prev.map((p) =>
-            p._id ===
-              product._id
-              ? {
-                ...p,
-                title: newTitle,
-              }
-              : p
-          )
-        );
-      })
-
-      .catch((err) => {
-        console.error(err);
-
-        alert("Update failed");
-      });
-  };
-
-  // STATS
-  const totalProducts =
-    products.length;
-
-  const totalOrders =
-    orders.length;
-
-  // Money from other people buying/renting your listings
-  // (not what you spent on your own orders)
-  const totalEarnings =
-    sales.reduce((acc, s) => {
-      return (
-        acc + (s.earnings || 0)
-      );
-    }, 0);
-
-  // LOADING
-  if (loading) {
+  if (!data) {
     return (
-      <div className="min-h-screen bg-[#faf6ef] flex items-center justify-center">
-
-        <div className="text-center">
-
-          <div className="w-12 h-12 border-4 border-[#2b1d14]/20 border-t-[#2b1d14] rounded-full animate-spin mx-auto" />
-
-          <p className="mt-4 text-gray-500">
-            Loading dashboard...
-          </p>
-
-        </div>
-
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 grid gap-4 sm:grid-cols-4">
+        {[...Array(4)].map((_, i) => (
+          <div key={i} className="h-24 rounded-lg bg-white border border-line animate-pulse" />
+        ))}
       </div>
     );
   }
 
+  const { listings, purchases, sales } = data;
+  const live = listings.filter((p) => ["live", "available"].includes(p.status));
+  const pending = listings.filter((p) => p.status === "pending");
+  const rejected = listings.filter((p) => p.status === "rejected");
+  const toAct = sales.filter((o) => ["confirmed", "accepted"].includes(statusOf(o)));
+  const earnings = sales.filter((o) => o.status !== "cancelled").reduce((sum, o) => sum + (o.earnings || 0), 0);
+
   return (
-    <div className="min-h-screen bg-[#faf6ef] py-8 sm:py-10">
-
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
-
-        {/* HEADER */}
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-
-          <div>
-
-            <h1 className="text-3xl sm:text-4xl font-semibold text-[#2b1d14]">
-              Dashboard
-            </h1>
-
-            <p className="mt-2 text-gray-500">
-              Welcome back,{" "}
-              {stored?.name}
-            </p>
-
-          </div>
-
-          <button
-            onClick={() =>
-              navigate("/sell")
-            }
-
-            className="inline-flex items-center gap-2 bg-[#2b1d14] text-white px-6 py-4 rounded-2xl font-medium hover:opacity-95 transition w-fit"
-          >
-
-            <Plus size={18} />
-
-            List Product
-
-          </button>
-
-        </div>
-
-        {/* STATS */}
-        <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-5">
-
-          {/* PRODUCTS */}
-          <motion.div
-            whileHover={{
-              y: -4,
-            }}
-
-            className="bg-white border border-gray-100 rounded-3xl p-6 shadow-sm"
-          >
-
-            <div className="flex items-start justify-between">
-
-              <div>
-
-                <p className="text-sm text-gray-500">
-                  Products Listed
-                </p>
-
-                <h2 className="mt-3 text-4xl font-semibold text-[#2b1d14]">
-                  {totalProducts}
-                </h2>
-
-              </div>
-
-              <div className="w-14 h-14 rounded-2xl bg-indigo-50 flex items-center justify-center">
-
-                <Package className="text-indigo-600" />
-
-              </div>
-
-            </div>
-
-          </motion.div>
-
-          {/* ORDERS */}
-          <motion.div
-            whileHover={{
-              y: -4,
-            }}
-
-            className="bg-white border border-gray-100 rounded-3xl p-6 shadow-sm"
-          >
-
-            <div className="flex items-start justify-between">
-
-              <div>
-
-                <p className="text-sm text-gray-500">
-                  Orders
-                </p>
-
-                <h2 className="mt-3 text-4xl font-semibold text-[#2b1d14]">
-                  {totalOrders}
-                </h2>
-
-              </div>
-
-              <div className="w-14 h-14 rounded-2xl bg-pink-50 flex items-center justify-center">
-
-                <ShoppingBag className="text-pink-500" />
-
-              </div>
-
-            </div>
-
-          </motion.div>
-
-          {/* EARNINGS */}
-          <motion.div
-            whileHover={{
-              y: -4,
-            }}
-
-            className="bg-white border border-gray-100 rounded-3xl p-6 shadow-sm"
-          >
-
-            <div className="flex items-start justify-between">
-
-              <div>
-
-                <p className="text-sm text-gray-500">
-                  Earnings
-                </p>
-
-                <h2 className="mt-3 text-4xl font-semibold text-[#2b1d14]">
-                  ₹ {totalEarnings}
-                </h2>
-
-              </div>
-
-              <div className="w-14 h-14 rounded-2xl bg-green-50 flex items-center justify-center">
-
-                <Wallet className="text-green-600" />
-
-              </div>
-
-            </div>
-
-          </motion.div>
-
-        </div>
-
-        {/* MY LISTINGS */}
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 flex flex-col gap-6">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-
-          <div className="flex items-center justify-between mb-6">
-
-            <h2 className="text-2xl font-semibold text-[#2b1d14]">
-              My Listings
-            </h2>
-
-            {products.length >
-              0 && (
-                <div className="text-sm text-gray-500">
-                  {
-                    products.length
-                  }{" "}
-                  products
-                </div>
-              )}
-
-          </div>
-
-          {products.length ===
-            0 ? (
-            <div className="bg-white border border-gray-100 rounded-3xl py-20 px-6 text-center shadow-sm">
-
-              <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center mx-auto">
-
-                <Package className="text-gray-500" />
-
-              </div>
-
-              <h3 className="mt-6 text-2xl font-semibold text-[#2b1d14]">
-                No Products Listed
-              </h3>
-
-              <p className="mt-3 text-gray-500">
-                Start selling your
-                fashion products on
-                ReWear.
-              </p>
-
-              <button
-                onClick={() =>
-                  navigate("/sell")
-                }
-
-                className="mt-8 inline-flex items-center gap-2 bg-[#2b1d14] text-white px-6 py-4 rounded-2xl font-medium"
-              >
-                Start Selling
-
-                <ArrowRight size={18} />
-
-              </button>
-
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
-
-              {products.map((p) => (
-                <motion.div
-                  key={p._id}
-
-                  whileHover={{
-                    y: -6,
-                  }}
-
-                  className="bg-white border border-gray-100 rounded-3xl overflow-hidden shadow-sm hover:shadow-md transition"
-                >
-
-                  {/* IMAGE */}
-                  <div className="relative overflow-hidden">
-
-                    <img
-                      src={
-                        thumb(p.images?.[0]) ||
-                        PLACEHOLDER_IMAGE
-                      }
-
-                      alt={p.title}
-
-                      loading="lazy"
-
-                      decoding="async"
-
-                      className="h-[320px] w-full object-cover hover:scale-105 transition duration-500"
-                    />
-
-                    {/* BADGE */}
-                    <div className="absolute top-4 left-4 px-3 py-1 rounded-full bg-white/90 backdrop-blur-md text-xs font-medium text-[#2b1d14]">
-
-                      {p.status === "sold"
-                        ? "Sold"
-                        : p.mode ===
-                          "rent"
-                          ? "For Rent"
-                          : p.mode ===
-                            "both"
-                            ? "Rent + Sale"
-                            : "For Sale"}
-
-                    </div>
-
-                  </div>
-
-                  {/* CONTENT */}
-                  <div className="p-5">
-
-                    <h3 className="text-xl font-semibold text-[#2b1d14] line-clamp-1">
-                      {p.title}
-                    </h3>
-
-                    <p className="mt-2 text-gray-500 capitalize">
-                      {p.category}
-                    </p>
-
-                    <div className="mt-5 flex items-center justify-between">
-
-                      <div>
-
-                        <p className="text-sm text-gray-500">
-                          Price
-                        </p>
-
-                        <h4 className="text-2xl font-semibold text-[#2b1d14]">
-                          ₹{" "}
-                          {p.price ||
-                            p.rent}
-                        </h4>
-
-                      </div>
-
-                      <div className="px-3 py-1.5 rounded-full bg-gray-100 text-xs font-medium text-gray-600">
-                        {p.condition}
-                      </div>
-
-                    </div>
-
-                    {/* ACTIONS */}
-                    <div className="mt-6 flex items-center gap-3">
-
-                      <button
-                        onClick={() =>
-                          handleEdit(
-                            p
-                          )
-                        }
-
-                        className="flex-1 inline-flex items-center justify-center gap-2 border border-gray-200 py-3 rounded-xl text-sm font-medium hover:bg-gray-50 transition"
-                      >
-
-                        <Pencil size={15} />
-
-                        Edit
-
-                      </button>
-
-                      <button
-                        onClick={() =>
-                          handleDelete(
-                            p._id
-                          )
-                        }
-
-                        className="flex-1 inline-flex items-center justify-center gap-2 bg-red-50 text-red-500 py-3 rounded-xl text-sm font-medium hover:bg-red-100 transition"
-                      >
-
-                        <Trash2 size={15} />
-
-                        Delete
-
-                      </button>
-
-                    </div>
-
-                  </div>
-
-                </motion.div>
-              ))}
-
-            </div>
-          )}
-
+          <h1 className="text-[26px] font-bold tracking-tight">Hi, {user?.name?.split(" ")[0]}</h1>
+          <p className="text-sm text-muted">Your shop and orders at a glance.</p>
         </div>
-
-        {/* ORDERS */}
-        <div>
-
-          <div className="flex items-center justify-between mb-6">
-
-            <h2 className="text-2xl font-semibold text-[#2b1d14]">
-              Recent Orders
-            </h2>
-
-            {orders.length > 0 && (
-              <div className="text-sm text-gray-500">
-                {
-                  orders.length
-                }{" "}
-                orders
-              </div>
-            )}
-
-          </div>
-
-          {orders.length ===
-            0 ? (
-            <div className="bg-white border border-gray-100 rounded-3xl py-16 px-6 text-center shadow-sm">
-
-              <ShoppingBag className="mx-auto text-gray-400" size={42} />
-
-              <h3 className="mt-5 text-xl font-semibold text-[#2b1d14]">
-                No Orders Yet
-              </h3>
-
-              <p className="mt-2 text-gray-500">
-                Orders will appear
-                here after purchases.
-              </p>
-
-            </div>
-          ) : (
-            <div className="space-y-4">
-
-              {orders.map((o) => {
-                const firstItem =
-                  o.items?.[0];
-
-                return (
-                  <div
-                    key={o._id}
-
-                    className="bg-white border border-gray-100 rounded-3xl p-5 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5"
-                  >
-
-                    {/* LEFT */}
-                    <div className="flex items-center gap-4">
-
-                      <div className="w-20 h-20 rounded-2xl overflow-hidden bg-gray-100">
-
-                        <img
-                          src={
-                            thumb(firstItem?.images?.[0] || firstItem?.image, 200) ||
-                            PLACEHOLDER_IMAGE
-                          }
-
-                          alt={
-                            firstItem?.title
-                          }
-
-                          className="w-full h-full object-cover"
-                        />
-
-                      </div>
-
-                      <div>
-
-                        <h3 className="text-lg font-semibold text-[#2b1d14]">
-                          {firstItem?.title ||
-                            "Order"}
-                        </h3>
-
-                        <p className="mt-1 text-sm text-gray-500">
-                          Order ID: #
-                          {o._id
-                            .slice(-6)
-                            .toUpperCase()}
-                        </p>
-
-                      </div>
-
-                    </div>
-
-                    {/* RIGHT */}
-                    <div className="text-left sm:text-right">
-
-                      <p className="text-sm text-gray-500">
-                        Total
-                      </p>
-
-                      <h3 className="mt-1 text-2xl font-semibold text-[#2b1d14]">
-                        ₹ {o.total}
-                      </h3>
-
-                    </div>
-
-                  </div>
-                );
-              })}
-
-            </div>
-          )}
-
-        </div>
-
+        <Link to="/sell" className="inline-flex items-center gap-2 h-11 px-5 rounded-md bg-brand text-white text-sm font-semibold hover:bg-brand-dark">
+          <Plus size={17} />
+          List an item
+        </Link>
       </div>
 
+      {data.failed && (
+        <p role="alert" className="rounded-md bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-800">
+          Some of your details couldn't be loaded. Please refresh the page.
+        </p>
+      )}
+
+      <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
+        <Stat label="Live listings" value={live.length} to="/seller/listings" />
+        <Stat label="Waiting for review" value={pending.length} to="/seller/listings" note={rejected.length ? `${rejected.length} need changes` : undefined} />
+        <Stat label="Orders to fulfil" value={toAct.length} to="/seller/orders" />
+        <Stat label="Earnings" value={money(earnings)} to="/seller/orders" note="From orders not cancelled" />
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-2 items-start">
+        <Panel title="Needs your attention" to="/seller/orders" linkText="All sales">
+          {toAct.length === 0 && rejected.length === 0 ? (
+            <Empty>Nothing to do right now.</Empty>
+          ) : (
+            <ul className="divide-y divide-[#efe6da]">
+              {toAct.slice(0, 5).map((o) => (
+                <Row
+                  key={o._id}
+                  to="/seller/orders"
+                  image={o.items[0]?.image}
+                  title={o.items.map((i) => i.title).join(", ")}
+                  sub={`${statusOf(o) === "confirmed" ? "Accept this order" : "Ship this order"} · ${o.buyer || "Buyer"} · ${money(o.earnings)}`}
+                  badge={<StatusBadge status={statusOf(o)} />}
+                />
+              ))}
+              {rejected.slice(0, 3).map((p) => (
+                <Row
+                  key={p._id}
+                  to={`/sell/${p._id}`}
+                  image={p.images?.[0]}
+                  title={p.title}
+                  sub={p.review?.rejectReason ? `Rejected: ${p.review.rejectReason}` : "Rejected by an admin. Edit and resubmit."}
+                  badge={<StatusBadge status="rejected" />}
+                />
+              ))}
+            </ul>
+          )}
+        </Panel>
+
+        <Panel title="Your recent orders" to="/orders" linkText="All orders">
+          {purchases.length === 0 ? (
+            <Empty>
+              You haven't ordered anything yet.{" "}
+              <Link to="/explore" className="font-semibold text-brand hover:underline">
+                Start shopping
+              </Link>
+            </Empty>
+          ) : (
+            <ul className="divide-y divide-[#efe6da]">
+              {purchases.slice(0, 5).map((o) => (
+                <Row
+                  key={o._id}
+                  to="/orders"
+                  image={o.items[0]?.image}
+                  title={o.items.map((i) => i.title).join(", ")}
+                  sub={`${format(new Date(o.createdAt), "d MMM yyyy")} · ${money(o.total)}`}
+                  badge={<StatusBadge status={statusOf(o)} />}
+                />
+              ))}
+            </ul>
+          )}
+        </Panel>
+      </div>
+
+      <Panel title="Your listings" to="/seller/listings" linkText="Manage listings">
+        {listings.length === 0 ? (
+          <Empty>
+            You haven't listed anything yet.{" "}
+            <Link to="/sell" className="font-semibold text-brand hover:underline">
+              List your first item
+            </Link>
+          </Empty>
+        ) : (
+          <ul className="divide-y divide-[#efe6da]">
+            {listings.slice(0, 5).map((p) => (
+              <Row
+                key={p._id}
+                to={`/product/${p._id}`}
+                image={p.images?.[0]}
+                title={p.title}
+                sub={[p.price > 0 && money(p.price), p.rent > 0 && `${money(p.rent)}/day`].filter(Boolean).join(" · ")}
+                badge={<StatusBadge status={p.status === "available" ? "live" : p.status} />}
+              />
+            ))}
+          </ul>
+        )}
+      </Panel>
     </div>
   );
 };

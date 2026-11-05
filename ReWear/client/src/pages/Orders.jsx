@@ -47,23 +47,23 @@ const OrderCard = ({ order, onUpdate }) => {
   };
 
   return (
-    <article className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+    <article className="bg-white border border-line rounded-lg overflow-hidden">
 
       {/* HEADER */}
-      <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-3 bg-gray-50 border-b border-gray-200 text-sm">
+      <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-3 bg-gray-50 border-b border-line text-sm">
         <div className="flex flex-wrap gap-x-6 gap-y-1 text-gray-600">
           <span>
-            Ordered <span className="text-gray-900">{format(new Date(order.createdAt), "d MMM yyyy")}</span>
+            Ordered <span className="text-ink">{format(new Date(order.createdAt), "d MMM yyyy")}</span>
           </span>
           <span>
-            Total <span className="text-gray-900 font-medium">{money(order.total)}</span>
+            Total <span className="text-ink font-medium">{money(order.total)}</span>
           </span>
           <span>
-            Sold by <span className="text-gray-900">{order.seller?.name || "a ReWear seller"}</span>
+            Sold by <span className="text-ink">{order.seller?.name || "a ReWear seller"}</span>
           </span>
         </div>
 
-        <span className="font-mono text-xs text-gray-500">#{order._id.slice(-6).toUpperCase()}</span>
+        <span className="font-mono text-xs text-muted">#{order._id.slice(-6).toUpperCase()}</span>
       </div>
 
       <div className="p-5 space-y-5">
@@ -71,8 +71,8 @@ const OrderCard = ({ order, onUpdate }) => {
         {/* STATUS */}
         <div className="flex flex-wrap items-center gap-2">
           <StatusBadge status={status} />
-          {rental && <span className="text-xs text-gray-500">Rental</span>}
-          <span className="text-xs text-gray-500">· {PAYMENT[order.paymentMethod]}</span>
+          {rental && <span className="text-xs text-muted">Rental</span>}
+          <span className="text-xs text-muted">· {PAYMENT[order.paymentMethod]}</span>
         </div>
 
         {status === "cancelled" ? (
@@ -101,12 +101,12 @@ const OrderCard = ({ order, onUpdate }) => {
                   src={thumb(item.image || item.images?.[0], 200) || PLACEHOLDER_IMAGE}
                   alt={item.title}
                   loading="lazy"
-                  className="w-16 h-20 rounded-lg object-cover border border-gray-200"
+                  className="w-16 h-20 rounded-lg object-cover border border-line"
                 />
               </Link>
 
               <div className="flex-1 min-w-0">
-                <Link to={`/product/${item.product}`} className="font-medium text-gray-900 hover:underline">
+                <Link to={`/product/${item.product}`} className="font-medium text-ink hover:underline">
                   {item.title || "Item"}
                 </Link>
                 <p className="text-sm text-gray-600">
@@ -116,7 +116,7 @@ const OrderCard = ({ order, onUpdate }) => {
                 </p>
               </div>
 
-              <p className="text-sm font-medium text-gray-900 whitespace-nowrap">{money(item.lineTotal)}</p>
+              <p className="text-sm font-medium text-ink whitespace-nowrap">{money(item.lineTotal)}</p>
             </li>
           ))}
         </ul>
@@ -135,7 +135,7 @@ const OrderCard = ({ order, onUpdate }) => {
             <button
               disabled={busy}
               onClick={() => act("deliver")}
-              className="px-4 py-2 rounded-lg bg-gray-900 text-white text-sm font-medium hover:bg-gray-800 disabled:opacity-40"
+              className="px-4 py-2 rounded-lg bg-brand text-white text-sm font-medium hover:bg-brand-dark disabled:opacity-40"
             >
               I've received it
             </button>
@@ -145,7 +145,7 @@ const OrderCard = ({ order, onUpdate }) => {
             <button
               disabled={busy}
               onClick={() => act("complete", "Is everything as described? This completes the order.")}
-              className="px-4 py-2 rounded-lg bg-gray-900 text-white text-sm font-medium hover:bg-gray-800 disabled:opacity-40"
+              className="px-4 py-2 rounded-lg bg-brand text-white text-sm font-medium hover:bg-brand-dark disabled:opacity-40"
             >
               Everything's fine, complete order
             </button>
@@ -163,7 +163,7 @@ const OrderCard = ({ order, onUpdate }) => {
 
           <button
             onClick={() => setOpen(!open)}
-            className="ml-auto inline-flex items-center gap-1 text-sm text-gray-600 hover:text-gray-900"
+            className="ml-auto inline-flex items-center gap-1 text-sm text-gray-600 hover:text-ink"
           >
             {open ? "Hide details" : "Order details"}
             {open ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
@@ -171,14 +171,14 @@ const OrderCard = ({ order, onUpdate }) => {
         </div>
 
         {open && (
-          <div className="grid sm:grid-cols-2 gap-5 border-t border-gray-100 pt-4 text-sm">
+          <div className="grid sm:grid-cols-2 gap-5 border-t border-line pt-4 text-sm">
             <div>
-              <p className="font-medium text-gray-900">Delivery address</p>
+              <p className="font-medium text-ink">Delivery address</p>
               <p className="mt-1 text-gray-600">{order.address?.name}</p>
               <p className="text-gray-600">{order.address?.address}</p>
               <p className="text-gray-600">{order.address?.phone}</p>
 
-              <p className="mt-4 font-medium text-gray-900">Payment</p>
+              <p className="mt-4 font-medium text-ink">Payment</p>
               <p className="mt-1 text-gray-600">
                 Items {money(order.subtotal)}
                 {order.discount > 0 && ` · Discount −${money(order.discount)}`} · Total {money(order.total)}
@@ -186,14 +186,14 @@ const OrderCard = ({ order, onUpdate }) => {
             </div>
 
             <div>
-              <p className="font-medium text-gray-900">History</p>
+              <p className="font-medium text-ink">History</p>
               <ol className="mt-2 space-y-2">
                 {(order.timeline || []).map((t, i) => (
                   <li key={i} className="flex gap-3">
                     <span className="mt-1.5 w-2 h-2 rounded-full bg-gray-400 flex-shrink-0" />
                     <div>
-                      <p className="text-gray-900">{TIMELINE_LABEL[t.status] || t.status}</p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-ink">{TIMELINE_LABEL[t.status] || t.status}</p>
+                      <p className="text-xs text-muted">
                         {format(new Date(t.at), "d MMM yyyy, HH:mm")}
                         {t.note ? ` · ${t.note}` : ""}
                       </p>
@@ -239,20 +239,20 @@ const Orders = () => {
   );
 
   return (
-    <div className="min-h-screen bg-[#faf6ef]">
+    <div className="min-h-screen bg-paper">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-5">
 
         <div>
-          <h1 className="text-2xl font-semibold text-gray-900">My orders</h1>
-          <p className="mt-1 text-sm text-gray-500">Track deliveries, rentals and returns.</p>
+          <h1 className="text-2xl font-semibold text-ink">My orders</h1>
+          <p className="mt-1 text-sm text-muted">Track deliveries, rentals and returns.</p>
         </div>
 
-        <div className="flex gap-1 overflow-x-auto bg-white border border-gray-200 rounded-lg p-1 w-fit max-w-full">
+        <div className="flex gap-1 overflow-x-auto bg-white border border-line rounded-lg p-1 w-fit max-w-full">
           {FILTERS.map((f) => (
             <button
               key={f.key}
               onClick={() => setFilter(f.key)}
-              className={`px-3 py-1.5 rounded-md text-sm font-medium whitespace-nowrap transition ${filter === f.key ? "bg-gray-900 text-white" : "text-gray-600 hover:bg-gray-50"}`}
+              className={`px-3 py-1.5 rounded-md text-sm font-medium whitespace-nowrap transition ${filter === f.key ? "bg-brand text-white" : "text-gray-600 hover:bg-gray-50"}`}
             >
               {f.label}
             </button>
@@ -264,13 +264,13 @@ const Orders = () => {
         {loading ? (
           <div className="space-y-3">
             {[1, 2].map((i) => (
-              <div key={i} className="h-56 rounded-xl bg-white border border-gray-200 animate-pulse" />
+              <div key={i} className="h-56 rounded-lg bg-white border border-line animate-pulse" />
             ))}
           </div>
         ) : shown.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-gray-300 bg-white py-16 text-center">
+          <div className="rounded-lg border border-dashed border-gray-300 bg-white py-16 text-center">
             <ShoppingBag className="mx-auto text-gray-400" size={28} />
-            <p className="mt-3 text-gray-900 font-medium">No orders here</p>
+            <p className="mt-3 text-ink font-medium">No orders here</p>
             <Link to="/explore" className="mt-2 inline-block text-sm text-indigo-700 hover:underline">
               Browse pre-loved fashion
             </Link>

@@ -80,9 +80,9 @@ const NotificationBell = () => {
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-3 w-80 rounded-xl border border-gray-200 bg-white shadow-xl overflow-hidden z-50">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
-            <p className="text-sm font-semibold text-gray-900">Notifications</p>
+        <div className="absolute right-0 mt-3 w-80 rounded-lg border border-line bg-white overflow-hidden z-50">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-line">
+            <p className="text-sm font-semibold text-ink">Notifications</p>
 
             {data.unread > 0 && (
               <button onClick={markAll} className="text-xs font-medium text-indigo-600 hover:underline">
@@ -92,20 +92,20 @@ const NotificationBell = () => {
           </div>
 
           {data.items.length === 0 ? (
-            <p className="px-4 py-8 text-sm text-gray-500 text-center">You're all caught up.</p>
+            <p className="px-4 py-8 text-sm text-muted text-center">You're all caught up.</p>
           ) : (
             <ul className="max-h-96 overflow-y-auto divide-y divide-gray-100">
               {data.items.map((n) => (
                 <li key={n._id}>
                   <button
                     onClick={() => openItem(n)}
-                    className={`w-full text-left px-4 py-3 hover:bg-gray-50 transition ${n.read ? "" : "bg-indigo-50/50"}`}
+                    className={`w-full text-left px-4 py-3 hover:bg-gray-50 transition ${n.read ? "" : "bg-cream"}`}
                   >
                     <div className="flex items-start gap-2">
                       {!n.read && <span className="mt-1.5 w-2 h-2 rounded-full bg-pink-600 flex-shrink-0" />}
 
                       <div className="min-w-0">
-                        <p className="text-sm font-medium text-gray-900">{n.title}</p>
+                        <p className="text-sm font-medium text-ink">{n.title}</p>
                         {n.message && <p className="mt-0.5 text-xs text-gray-600 line-clamp-2">{n.message}</p>}
                         <p className="mt-1 text-[11px] text-gray-400">
                           {formatDistanceToNow(new Date(n.createdAt), { addSuffix: true })}

@@ -98,7 +98,7 @@ const Landing = () => {
             List in a few minutes. Set a sale price, a rental price per day, or both, and change it whenever you like.
           </p>
           <Link
-            to={user ? "/sell" : "/login"}
+            to="/sell"
             className="self-start mt-1 inline-flex items-center h-11 px-5 rounded-md bg-brand text-white text-sm font-semibold hover:bg-brand-dark"
           >
             Start selling

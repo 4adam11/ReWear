@@ -6,10 +6,10 @@ import { AlertTriangle, ArrowRight } from "lucide-react";
 import API from "../../utils/api";
 import { useAuth } from "../../context/AuthContext";
 
-const Stat = ({ label, value, to, tone = "text-gray-900" }) => {
+const Stat = ({ label, value, to, tone = "text-ink" }) => {
   const body = (
-    <div className="bg-white border border-gray-200 rounded-xl p-5 h-full hover:border-gray-300 transition">
-      <p className="text-sm text-gray-500">{label}</p>
+    <div className="bg-white border border-line rounded-lg p-5 h-full hover:border-gray-300 transition">
+      <p className="text-sm text-muted">{label}</p>
       <p className={`mt-2 text-3xl font-semibold tabular-nums ${tone}`}>{value}</p>
     </div>
   );
@@ -31,21 +31,21 @@ const AdminOverview = () => {
   }, []);
 
   if (error) return <p className="text-sm text-red-600">{error}</p>;
-  if (!stats) return <div className="h-40 rounded-xl bg-white border border-gray-200 animate-pulse" />;
+  if (!stats) return <div className="h-40 rounded-lg bg-white border border-line animate-pulse" />;
 
   const { listings } = stats;
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold text-gray-900">Overview</h1>
-        <p className="mt-1 text-sm text-gray-500">What needs your attention today.</p>
+        <h1 className="text-2xl font-semibold text-ink">Overview</h1>
+        <p className="mt-1 text-sm text-muted">What needs your attention today.</p>
       </div>
 
       {listings.pending > 0 && (
         <Link
           to="/admin/listings"
-          className="flex items-center justify-between gap-4 rounded-xl border border-amber-200 bg-amber-50 px-5 py-4 text-amber-800 hover:bg-amber-100 transition"
+          className="flex items-center justify-between gap-4 rounded-lg border border-amber-200 bg-amber-50 px-5 py-4 text-amber-800 hover:bg-amber-100 transition"
         >
           <span className="flex items-center gap-3 text-sm font-medium">
             <AlertTriangle size={18} />

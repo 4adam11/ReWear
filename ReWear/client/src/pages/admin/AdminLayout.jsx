@@ -9,10 +9,10 @@ const LINKS = [
 ];
 
 const AdminLayout = () => (
-  <div className="min-h-screen bg-[#faf6ef]">
+  <div className="min-h-screen bg-paper">
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-      <div className="flex items-center gap-2 text-sm text-gray-500 mb-6">
+      <div className="flex items-center gap-2 text-sm text-muted mb-6">
         <ShieldCheck size={16} />
         Admin panel
       </div>
@@ -20,7 +20,7 @@ const AdminLayout = () => (
       <div className="flex flex-col lg:flex-row gap-6 items-start">
 
         {/* SIDEBAR */}
-        <nav className="w-full lg:w-56 flex-shrink-0 bg-white border border-gray-200 rounded-xl p-2 flex lg:flex-col gap-1 overflow-x-auto lg:sticky lg:top-24">
+        <nav className="w-full lg:w-56 flex-shrink-0 bg-white border border-line rounded-lg p-2 flex lg:flex-col gap-1 overflow-x-auto lg:sticky lg:top-24">
           {LINKS.map(({ to, label, icon: Icon, end }) => (
             <NavLink
               key={to}
@@ -29,7 +29,7 @@ const AdminLayout = () => (
               className={({ isActive }) =>
                 `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium whitespace-nowrap transition ${isActive
                   ? "bg-indigo-50 text-indigo-700"
-                  : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                  : "text-gray-600 hover:bg-gray-50 hover:text-ink"
                 }`
               }
             >

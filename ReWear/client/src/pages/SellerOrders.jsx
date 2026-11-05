@@ -54,21 +54,21 @@ const SaleCard = ({ order, onUpdate }) => {
   };
 
   return (
-    <article className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-      <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-3 bg-gray-50 border-b border-gray-200 text-sm">
+    <article className="bg-white border border-line rounded-lg overflow-hidden">
+      <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-3 bg-gray-50 border-b border-line text-sm">
         <div className="flex flex-wrap items-center gap-x-6 gap-y-1 text-gray-600">
           <StatusBadge status={status} />
           <span>
             {format(new Date(order.createdAt), "d MMM yyyy, HH:mm")}
           </span>
           <span>
-            Buyer <span className="text-gray-900">{order.buyer || "—"}</span>
+            Buyer <span className="text-ink">{order.buyer || "—"}</span>
           </span>
           <span>
-            You earn <span className="text-gray-900 font-medium">{money(order.earnings)}</span>
+            You earn <span className="text-ink font-medium">{money(order.earnings)}</span>
           </span>
         </div>
-        <span className="font-mono text-xs text-gray-500">#{order._id.slice(-6).toUpperCase()}</span>
+        <span className="font-mono text-xs text-muted">#{order._id.slice(-6).toUpperCase()}</span>
       </div>
 
       <div className="p-5 grid md:grid-cols-[1fr_260px] gap-6">
@@ -89,17 +89,17 @@ const SaleCard = ({ order, onUpdate }) => {
                   src={thumb(item.image, 200) || PLACEHOLDER_IMAGE}
                   alt={item.title}
                   loading="lazy"
-                  className="w-14 h-16 rounded-lg object-cover border border-gray-200 flex-shrink-0"
+                  className="w-14 h-16 rounded-lg object-cover border border-line flex-shrink-0"
                 />
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium text-gray-900 truncate">{item.title}</p>
+                  <p className="font-medium text-ink truncate">{item.title}</p>
                   <p className="text-sm text-gray-600">
                     {item.mode === "rent"
                       ? `Rental ${format(new Date(item.rentStart), "d MMM")} – ${format(new Date(item.rentEnd), "d MMM")}`
                       : "Sale"}
                   </p>
                 </div>
-                <p className="text-sm text-gray-900 whitespace-nowrap">{money(item.lineTotal)}</p>
+                <p className="text-sm text-ink whitespace-nowrap">{money(item.lineTotal)}</p>
               </li>
             ))}
           </ul>
@@ -113,23 +113,23 @@ const SaleCard = ({ order, onUpdate }) => {
 
           {/* WHAT TO DO NEXT */}
           {status === "delivered" && !rental && (
-            <p className="text-sm text-gray-500">Waiting for the buyer to confirm everything is as described.</p>
+            <p className="text-sm text-muted">Waiting for the buyer to confirm everything is as described.</p>
           )}
           {status === "delivered" && rental && (
-            <p className="text-sm text-gray-500">Due back by {format(returnBy, "d MMM yyyy")}. Confirm once you have it.</p>
+            <p className="text-sm text-muted">Due back by {format(returnBy, "d MMM yyyy")}. Confirm once you have it.</p>
           )}
 
           {error && <p className="text-sm text-red-600">{error}</p>}
 
           {/* SHIP FORM */}
           {form === "ship" && (
-            <div className="rounded-lg border border-gray-200 p-4 space-y-3">
-              <p className="text-sm font-medium text-gray-900">Shipping details</p>
+            <div className="rounded-lg border border-line p-4 space-y-3">
+              <p className="text-sm font-medium text-ink">Shipping details</p>
               <div className="flex flex-wrap gap-3">
                 <select
                   value={courier}
                   onChange={(e) => setCourier(e.target.value)}
-                  className="rounded-lg border border-gray-200 px-3 py-2 text-sm bg-white"
+                  className="rounded-lg border border-line px-3 py-2 text-sm bg-white"
                 >
                   {COURIERS.map((c) => (
                     <option key={c}>{c}</option>
@@ -139,18 +139,18 @@ const SaleCard = ({ order, onUpdate }) => {
                   value={tracking}
                   onChange={(e) => setTracking(e.target.value)}
                   placeholder={courier === "Self delivery" ? "e.g. Hand-delivered" : "Tracking number"}
-                  className="flex-1 min-w-[180px] rounded-lg border border-gray-200 px-3 py-2 text-sm"
+                  className="flex-1 min-w-[180px] rounded-lg border border-line px-3 py-2 text-sm"
                 />
               </div>
               <div className="flex gap-2">
                 <button
                   disabled={busy || !tracking.trim()}
                   onClick={() => act("ship", { courier, trackingNumber: tracking })}
-                  className="px-4 py-2 rounded-lg bg-gray-900 text-white text-sm font-medium disabled:opacity-40"
+                  className="px-4 py-2 rounded-lg bg-brand text-white text-sm font-medium disabled:opacity-40"
                 >
                   Mark as shipped
                 </button>
-                <button onClick={() => setForm(null)} className="px-4 py-2 rounded-lg border border-gray-200 text-sm">
+                <button onClick={() => setForm(null)} className="px-4 py-2 rounded-lg border border-line text-sm">
                   Cancel
                 </button>
               </div>
@@ -159,16 +159,16 @@ const SaleCard = ({ order, onUpdate }) => {
 
           {/* DECLINE FORM */}
           {form === "decline" && (
-            <div className="rounded-lg border border-gray-200 p-4 space-y-3">
-              <p className="text-sm font-medium text-gray-900">Why can't you fulfil this order?</p>
-              <p className="text-xs text-gray-500 -mt-2">The buyer will see this, and the item goes back on sale.</p>
+            <div className="rounded-lg border border-line p-4 space-y-3">
+              <p className="text-sm font-medium text-ink">Why can't you fulfil this order?</p>
+              <p className="text-xs text-muted -mt-2">The buyer will see this, and the item goes back on sale.</p>
               <textarea
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
                 rows={2}
                 maxLength={500}
                 placeholder="e.g. Found a stain while packing"
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm"
+                className="w-full rounded-lg border border-line px-3 py-2 text-sm"
               />
               <div className="flex gap-2">
                 <button
@@ -178,7 +178,7 @@ const SaleCard = ({ order, onUpdate }) => {
                 >
                   Cancel order
                 </button>
-                <button onClick={() => setForm(null)} className="px-4 py-2 rounded-lg border border-gray-200 text-sm">
+                <button onClick={() => setForm(null)} className="px-4 py-2 rounded-lg border border-line text-sm">
                   Back
                 </button>
               </div>
@@ -189,7 +189,7 @@ const SaleCard = ({ order, onUpdate }) => {
         {/* ADDRESS + ACTIONS */}
         <div className="space-y-4">
           <div className="rounded-lg bg-gray-50 p-3 text-sm">
-            <p className="flex items-center gap-1.5 font-medium text-gray-900">
+            <p className="flex items-center gap-1.5 font-medium text-ink">
               <MapPin size={14} />
               Ship to
             </p>
@@ -214,7 +214,7 @@ const SaleCard = ({ order, onUpdate }) => {
               {status === "accepted" && (
                 <button
                   onClick={() => setForm("ship")}
-                  className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-gray-900 text-white text-sm font-medium hover:bg-gray-800"
+                  className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-brand text-white text-sm font-medium hover:bg-brand-dark"
                 >
                   <Truck size={16} />
                   Mark as shipped
@@ -225,7 +225,7 @@ const SaleCard = ({ order, onUpdate }) => {
                 <button
                   disabled={busy}
                   onClick={() => act("deliver")}
-                  className="px-4 py-2 rounded-lg bg-gray-900 text-white text-sm font-medium hover:bg-gray-800 disabled:opacity-40"
+                  className="px-4 py-2 rounded-lg bg-brand text-white text-sm font-medium hover:bg-brand-dark disabled:opacity-40"
                 >
                   Mark as delivered
                 </button>
@@ -235,7 +235,7 @@ const SaleCard = ({ order, onUpdate }) => {
                 <button
                   disabled={busy}
                   onClick={() => window.confirm("Confirm the outfit has been returned to you?") && act("return")}
-                  className="px-4 py-2 rounded-lg bg-gray-900 text-white text-sm font-medium hover:bg-gray-800 disabled:opacity-40"
+                  className="px-4 py-2 rounded-lg bg-brand text-white text-sm font-medium hover:bg-brand-dark disabled:opacity-40"
                 >
                   Confirm return
                 </button>
@@ -276,19 +276,19 @@ const SellerOrders = () => {
   const shown = orders.filter((o) => statusOf(o) === tab);
 
   return (
-    <div className="min-h-screen bg-[#faf6ef]">
+    <div className="min-h-screen bg-paper">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-5">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-900">Orders to fulfil</h1>
-          <p className="mt-1 text-sm text-gray-500">Accept new orders, ship them with tracking, and confirm rental returns.</p>
+          <h1 className="text-2xl font-semibold text-ink">Orders to fulfil</h1>
+          <p className="mt-1 text-sm text-muted">Accept new orders, ship them with tracking, and confirm rental returns.</p>
         </div>
 
-        <div className="flex gap-1 overflow-x-auto bg-white border border-gray-200 rounded-lg p-1 w-fit max-w-full">
+        <div className="flex gap-1 overflow-x-auto bg-white border border-line rounded-lg p-1 w-fit max-w-full">
           {TABS.map((t) => (
             <button
               key={t.key}
               onClick={() => setTab(t.key)}
-              className={`px-3 py-1.5 rounded-md text-sm font-medium whitespace-nowrap transition ${tab === t.key ? "bg-gray-900 text-white" : "text-gray-600 hover:bg-gray-50"}`}
+              className={`px-3 py-1.5 rounded-md text-sm font-medium whitespace-nowrap transition ${tab === t.key ? "bg-brand text-white" : "text-gray-600 hover:bg-gray-50"}`}
             >
               {t.label}
               <span className={`ml-1.5 ${counts[t.key] && ["confirmed", "accepted"].includes(t.key) && tab !== t.key ? "text-pink-700 font-semibold" : "opacity-70"}`}>
@@ -299,11 +299,11 @@ const SellerOrders = () => {
         </div>
 
         {loading ? (
-          <div className="h-48 rounded-xl bg-white border border-gray-200 animate-pulse" />
+          <div className="h-48 rounded-lg bg-white border border-line animate-pulse" />
         ) : shown.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-gray-300 bg-white py-16 text-center">
-            <p className="text-gray-900 font-medium">Nothing here</p>
-            <p className="mt-1 text-sm text-gray-500">
+          <div className="rounded-lg border border-dashed border-gray-300 bg-white py-16 text-center">
+            <p className="text-ink font-medium">Nothing here</p>
+            <p className="mt-1 text-sm text-muted">
               {tab === "confirmed" ? "No new orders right now." : "No orders in this stage."}
             </p>
           </div>

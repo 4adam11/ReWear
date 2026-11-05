@@ -62,7 +62,7 @@ const PriceEditor = ({ product, onSaved, onClose }) => {
   };
 
   return (
-    <form onSubmit={save} className="mt-3 flex flex-wrap items-end gap-3 rounded-lg border border-gray-200 bg-gray-50 p-3">
+    <form onSubmit={save} className="mt-3 flex flex-wrap items-end gap-3 rounded-lg border border-line bg-gray-50 p-3">
       {canSell(product) && (
         <label className="text-xs text-gray-600">
           Selling price (₹)
@@ -71,7 +71,7 @@ const PriceEditor = ({ product, onSaved, onClose }) => {
             min="1"
             value={price}
             onChange={(e) => setPrice(e.target.value)}
-            className="mt-1 block w-32 rounded-md border border-gray-200 bg-white px-2.5 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-200"
+            className="mt-1 block w-32 rounded-md border border-line bg-white px-2.5 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-200"
           />
         </label>
       )}
@@ -84,15 +84,15 @@ const PriceEditor = ({ product, onSaved, onClose }) => {
             min="1"
             value={rent}
             onChange={(e) => setRent(e.target.value)}
-            className="mt-1 block w-32 rounded-md border border-gray-200 bg-white px-2.5 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-200"
+            className="mt-1 block w-32 rounded-md border border-line bg-white px-2.5 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-200"
           />
         </label>
       )}
 
-      <button disabled={busy} className="px-3 py-1.5 rounded-md bg-gray-900 text-white text-sm font-medium disabled:opacity-40">
+      <button disabled={busy} className="px-3 py-1.5 rounded-md bg-brand text-white text-sm font-medium disabled:opacity-40">
         {busy ? "Saving…" : "Save price"}
       </button>
-      <button type="button" onClick={onClose} className="px-3 py-1.5 rounded-md border border-gray-200 bg-white text-sm text-gray-700">
+      <button type="button" onClick={onClose} className="px-3 py-1.5 rounded-md border border-line bg-white text-sm text-gray-700">
         Cancel
       </button>
 
@@ -156,20 +156,20 @@ const SellerListings = () => {
   const shown = listings.filter((p) => inTab(p, tab));
 
   return (
-    <div className="min-h-screen bg-[#faf6ef]">
+    <div className="min-h-screen bg-paper">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-5">
 
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
           <div>
-            <h1 className="text-2xl font-semibold text-gray-900">My listings</h1>
-            <p className="mt-1 text-sm text-gray-500">
+            <h1 className="text-2xl font-semibold text-ink">My listings</h1>
+            <p className="mt-1 text-sm text-muted">
               Change prices any time. New photos or details are checked by an admin before going live.
             </p>
           </div>
 
           <Link
             to="/sell"
-            className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-gray-900 text-white text-sm font-medium hover:bg-gray-800"
+            className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-brand text-white text-sm font-medium hover:bg-brand-dark"
           >
             <Plus size={16} />
             New listing
@@ -183,12 +183,12 @@ const SellerListings = () => {
           </div>
         )}
 
-        <div className="flex gap-1 overflow-x-auto bg-white border border-gray-200 rounded-lg p-1 w-fit max-w-full">
+        <div className="flex gap-1 overflow-x-auto bg-white border border-line rounded-lg p-1 w-fit max-w-full">
           {TABS.map((t) => (
             <button
               key={t.key}
               onClick={() => setTab(t.key)}
-              className={`px-3 py-1.5 rounded-md text-sm font-medium whitespace-nowrap transition ${tab === t.key ? "bg-gray-900 text-white" : "text-gray-600 hover:bg-gray-50"}`}
+              className={`px-3 py-1.5 rounded-md text-sm font-medium whitespace-nowrap transition ${tab === t.key ? "bg-brand text-white" : "text-gray-600 hover:bg-gray-50"}`}
             >
               {t.label}
               <span className="ml-1.5 opacity-70">{counts[t.key]}</span>
@@ -197,16 +197,16 @@ const SellerListings = () => {
         </div>
 
         {loading ? (
-          <div className="h-40 rounded-xl bg-white border border-gray-200 animate-pulse" />
+          <div className="h-40 rounded-lg bg-white border border-line animate-pulse" />
         ) : shown.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-gray-300 bg-white py-16 text-center">
-            <p className="text-gray-900 font-medium">No listings here</p>
-            <p className="mt-1 text-sm text-gray-500">
+          <div className="rounded-lg border border-dashed border-gray-300 bg-white py-16 text-center">
+            <p className="text-ink font-medium">No listings here</p>
+            <p className="mt-1 text-sm text-muted">
               {listings.length === 0 ? "List your first item to start selling." : "Nothing in this tab right now."}
             </p>
           </div>
         ) : (
-          <ul className="bg-white border border-gray-200 rounded-xl divide-y divide-gray-100">
+          <ul className="bg-white border border-line rounded-lg divide-y divide-gray-100">
             {shown.map((p) => {
               const note = statusNote(p);
 
@@ -216,7 +216,7 @@ const SellerListings = () => {
                     src={thumb(p.images?.[0], 200) || PLACEHOLDER_IMAGE}
                     alt={p.title}
                     loading="lazy"
-                    className="w-20 h-24 rounded-lg object-cover border border-gray-200 flex-shrink-0"
+                    className="w-20 h-24 rounded-lg object-cover border border-line flex-shrink-0"
                   />
 
                   <div className="flex-1 min-w-0">
@@ -227,7 +227,7 @@ const SellerListings = () => {
                       </span>
                     </div>
 
-                    <p className="mt-1.5 font-medium text-gray-900 truncate">{p.title}</p>
+                    <p className="mt-1.5 font-medium text-ink truncate">{p.title}</p>
                     <p className="text-sm text-gray-600">
                       {canSell(p) && p.price ? `₹${p.price.toLocaleString("en-IN")}` : ""}
                       {canSell(p) && canRent(p) && p.price && p.rent ? " · " : ""}
@@ -236,7 +236,7 @@ const SellerListings = () => {
                     </p>
 
                     {note && (
-                      <p className={`mt-1.5 text-sm ${p.status === "rejected" ? "text-red-700" : "text-gray-500"}`}>{note}</p>
+                      <p className={`mt-1.5 text-sm ${p.status === "rejected" ? "text-red-700" : "text-muted"}`}>{note}</p>
                     )}
 
                     {editingPrice === p._id && (
@@ -257,7 +257,7 @@ const SellerListings = () => {
                     <div className="flex sm:flex-col flex-wrap gap-2 sm:w-36 flex-shrink-0">
                       <button
                         onClick={() => setEditingPrice(p._id)}
-                        className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md border border-gray-200 text-sm text-gray-700 hover:bg-gray-50"
+                        className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md border border-line text-sm text-gray-700 hover:bg-gray-50"
                       >
                         <IndianRupee size={14} />
                         Edit price
@@ -265,7 +265,7 @@ const SellerListings = () => {
 
                       <Link
                         to={`/sell/${p._id}`}
-                        className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md border border-gray-200 text-sm text-gray-700 hover:bg-gray-50"
+                        className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md border border-line text-sm text-gray-700 hover:bg-gray-50"
                       >
                         <Pencil size={14} />
                         {p.status === "rejected" ? "Fix & resubmit" : "Edit details"}
@@ -274,7 +274,7 @@ const SellerListings = () => {
                       {isLive(p) && (
                         <button
                           onClick={() => pause(p)}
-                          className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md border border-gray-200 text-sm text-gray-700 hover:bg-gray-50"
+                          className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md border border-line text-sm text-gray-700 hover:bg-gray-50"
                         >
                           <Pause size={14} />
                           Pause
@@ -284,7 +284,7 @@ const SellerListings = () => {
                       {p.status === "paused" && (
                         <button
                           onClick={() => resume(p)}
-                          className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md border border-gray-200 text-sm text-gray-700 hover:bg-gray-50"
+                          className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md border border-line text-sm text-gray-700 hover:bg-gray-50"
                         >
                           <Play size={14} />
                           Relist
@@ -304,7 +304,7 @@ const SellerListings = () => {
                   {p.status === "sold" && (
                     <Link
                       to={`/product/${p._id}`}
-                      className="inline-flex items-center gap-1.5 self-start text-sm text-gray-600 hover:text-gray-900"
+                      className="inline-flex items-center gap-1.5 self-start text-sm text-gray-600 hover:text-ink"
                     >
                       <ExternalLink size={14} />
                       View

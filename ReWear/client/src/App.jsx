@@ -1,5 +1,5 @@
 import { lazy, Suspense } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import MainLayout from "./components/layout/MainLayout";
 
 import Landing from "./pages/Landing";
@@ -7,6 +7,7 @@ import ScrollToTop from "./components/ui/ScrolltoTop";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminRoute from "./components/AdminRoute";
+import ErrorBoundary, { NotFound } from "./components/ErrorBoundary";
 
 // Each page is downloaded only when it's first visited, so the home page
 // doesn't wait for the calendar, checkout, dashboard, etc.
@@ -35,6 +36,12 @@ const PageLoader = () => (
   </div>
 );
 
+// Resets the crash screen when the user moves to another page
+const PageBoundary = ({ children }) => {
+  const { pathname } = useLocation();
+  return <ErrorBoundary resetKey={pathname}>{children}</ErrorBoundary>;
+};
+
 function App() {
   return (
     <Router>
@@ -43,6 +50,7 @@ function App() {
       <ScrollToTop/>
 
       <MainLayout>
+        <PageBoundary>
         <Suspense fallback={<PageLoader />}>
         <Routes>
 
@@ -151,8 +159,12 @@ function App() {
             }
           />
 
+          <Route path="*" element={<NotFound />} />
+
+
         </Routes>
         </Suspense>
+        </PageBoundary>
       </MainLayout>
 
     </Router>
