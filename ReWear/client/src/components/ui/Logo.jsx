@@ -1,11 +1,6 @@
-import { useId } from "react";
-
 // ReWear mark: a "pre-loved" thrift price tag with a heart.
 // Same drawing as public/favicon.svg (the browser-tab icon), so they always match.
 export const LogoMark = ({ size = 36, className = "" }) => {
-  // Unique id so several logos on one page don't clash
-  const uid = useId().replace(/:/g, "");
-
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -15,15 +10,7 @@ export const LogoMark = ({ size = 36, className = "" }) => {
       className={className}
       aria-hidden="true"
     >
-      <defs>
-        <linearGradient id={`${uid}-bg`} x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#5a3826" />
-          <stop offset="0.55" stopColor="#8b5e3c" />
-          <stop offset="1" stopColor="#c0834f" />
-        </linearGradient>
-      </defs>
-
-      <rect width="64" height="64" rx="18" fill={`url(#${uid}-bg)`} />
+      <rect width="64" height="64" rx="18" fill="#6b4430" />
 
       {/* STRING */}
       <path
@@ -53,7 +40,7 @@ export const LogoMark = ({ size = 36, className = "" }) => {
 // Mark + wordmark, as used in the navbar and footer
 const Logo = ({ size = 36, textClassName = "" }) => (
   <span className="inline-flex items-center gap-2.5">
-    <LogoMark size={size} className="flex-shrink-0 drop-shadow-sm" />
+    <LogoMark size={size} className="flex-shrink-0 " />
     <span className={textClassName}>ReWear</span>
   </span>
 );

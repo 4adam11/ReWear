@@ -95,7 +95,7 @@ const Checkout = () => {
 
           <button
             onClick={() => navigate("/explore")}
-            className="mt-6 px-6 py-3 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-medium shadow-md hover:opacity-90 transition"
+            className="mt-6 px-6 py-3 rounded-xl bg-brand hover:bg-brand-dark text-white font-medium shadow-md hover:opacity-90 transition"
           >
             Explore Products
           </button>
@@ -481,7 +481,7 @@ const Checkout = () => {
                 <button
                   onClick={applyPromo}
 
-                  className="px-6 py-3 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-500 text-white text-sm font-medium shadow-md hover:opacity-90 transition"
+                  className="px-6 py-3 rounded-xl bg-brand hover:bg-brand-dark text-white text-sm font-medium shadow-md hover:opacity-90 transition"
                 >
                   Apply
                 </button>
@@ -553,7 +553,7 @@ const Checkout = () => {
 
                 onClick={handlePayment}
 
-                className="w-full mt-8 bg-gradient-to-r from-indigo-500 to-purple-500 text-white py-4 rounded-xl font-medium shadow-md hover:opacity-90 transition disabled:opacity-60"
+                className="w-full mt-8 bg-brand hover:bg-brand-dark text-white py-4 rounded-xl font-medium shadow-md hover:opacity-90 transition disabled:opacity-60"
               >
                 {loading
                   ? "Processing..."

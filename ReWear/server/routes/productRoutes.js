@@ -1,6 +1,8 @@
 import express from "express";
 import Product, { LIVE } from "../models/Product.js";
 import Upload from "../models/Upload.js";
+import User from "../models/User.js";
+import mongoose from "mongoose";
 import protect, { optionalAuth } from "../middleware/authMiddleware.js";
 import { validateProduct } from "../utils/validateProduct.js";
 import { CATEGORIES, SIZES, normalizeCategory } from "../utils/catalog.js";
@@ -25,6 +27,14 @@ const listParam = (value, allowed) =>
   typeof value === "string"
     ? value.split(",").map((v) => v.trim()).filter((v) => allowed.includes(v))
     : [];
+
+// Adds each listing's seller name (kept separate from "user" so owner checks still compare ids)
+const withSellerNames = async (items) => {
+  const ids = [...new Set(items.map((p) => p.user?.toString()).filter(Boolean))];
+  const users = await User.find({ _id: { $in: ids } }).select("name").lean();
+  const names = new Map(users.map((u) => [u._id.toString(), u.name]));
+  return items.map((p) => ({ ...p, sellerName: names.get(p.user?.toString()) || "ReWear seller" }));
+};
 
 const escapeRegex = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
@@ -67,13 +77,17 @@ const notifyNewSubmission = (product) =>
 // GET /api/products?mode=sale|rent&search=&categories=party,wedding&sizes=M,L&maxPrice=5000&sort=new|low|high&page=1&limit=9
 //
 router.get("/", async (req, res) => {
-  const mode = req.query.mode === "rent" ? "rent" : "sale";
+  // "all" = both kinds (home page "Fresh on ReWear")
+  const mode = ["rent", "all"].includes(req.query.mode) ? req.query.mode : "sale";
   const priceField = mode === "rent" ? "rent" : "price";
 
   const filter = {
     status: { $in: LIVE },
-    mode: { $in: mode === "rent" ? ["rent", "both"] : ["sell", "sale", "both"] },
   };
+
+  if (mode !== "all") {
+    filter.mode = { $in: mode === "rent" ? ["rent", "both"] : ["sell", "sale", "both"] };
+  }
 
   const search = typeof req.query.search === "string" ? req.query.search.trim().slice(0, 60) : "";
   if (search) {
@@ -98,9 +112,19 @@ router.get("/", async (req, res) => {
     filter.size = { $in: sizes };
   }
 
+  // One seller's shop ("See all items from this seller")
+  if (typeof req.query.seller === "string" && mongoose.isValidObjectId(req.query.seller)) {
+    filter.user = req.query.seller;
+  }
+
   const maxPrice = Number(req.query.maxPrice);
   if (Number.isFinite(maxPrice) && maxPrice > 0) {
-    filter[priceField] = { $lte: maxPrice };
+    if (mode === "all") {
+      // Either price can match (rent-only listings have no sale price)
+      filter.$or = [{ price: { $lte: maxPrice } }, { rent: { $lte: maxPrice } }];
+    } else {
+      filter[priceField] = { $lte: maxPrice };
+    }
   }
 
   const sort =
@@ -117,7 +141,7 @@ router.get("/", async (req, res) => {
   ]);
 
   res.json({
-    items,
+    items: await withSellerNames(items),
     total,
     page,
     pages: Math.max(Math.ceil(total / limit), 1),
@@ -191,7 +215,13 @@ router.get("/:id", optionalAuth, async (req, res) => {
     end: toDay(b.end),
   }));
 
-  res.json({ ...product, bookings });
+  const seller = await User.findById(product.user).select("name createdAt").lean();
+
+  res.json({
+    ...product,
+    bookings,
+    seller: seller ? { _id: seller._id, name: seller.name, since: seller.createdAt } : null,
+  });
 });
 
 //

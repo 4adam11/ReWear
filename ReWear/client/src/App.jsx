@@ -3,8 +3,6 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import MainLayout from "./components/layout/MainLayout";
 
 import Landing from "./pages/Landing";
-import ScrollProgress from "./components/ui/ScrollProgress";
-import CustomCursor from "./components/ui/CustomCursor";
 import ScrollToTop from "./components/ui/ScrolltoTop";
 
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -43,8 +41,6 @@ function App() {
 
       {/* GLOBAL UI */}
       <ScrollToTop/>
-      <ScrollProgress />
-      <CustomCursor />
 
       <MainLayout>
         <Suspense fallback={<PageLoader />}>

@@ -1,331 +1,233 @@
+import { useEffect, useRef, useState } from "react";
+import { Link, NavLink, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import {
-  Heart,
-  ShoppingCart,
-  Menu,
-  X,
-  LayoutDashboard,
-  Package,
+  Search,
   Plus,
-  LogOut,
+  Heart,
+  ShoppingBag,
+  User,
+  LayoutDashboard,
   ListChecks,
   Truck,
+  Package,
   ShieldCheck,
+  LogOut,
 } from "lucide-react";
 
-import { Link, NavLink, useNavigate } from "react-router-dom";
-import { useState, useRef, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
+import { useCart } from "../../context/CartContext";
+import { useWishlist } from "../../context/WishListContext";
+import { CATEGORIES } from "../../utils/catalog";
 import Logo from "../ui/Logo";
 import NotificationBell from "./NotificationBell";
 
+// Icon with a small label under it, like most shopping sites
+export const HeaderIcon = ({ icon: Icon, label, count, as: Tag = Link, ...props }) => (
+  <Tag
+    aria-label={label}
+    {...props}
+    className="relative flex flex-col items-center gap-0.5 min-w-[40px] sm:min-w-[48px] px-1.5 sm:px-2 py-1 text-[12px] font-medium text-ink hover:text-brand"
+  >
+    <Icon size={20} strokeWidth={1.8} />
+    <span className="hidden sm:block">{label}</span>
+    {count > 0 && (
+      <span className="absolute top-0 right-1 min-w-[17px] h-[17px] px-1 rounded-full bg-brand text-white text-[10px] font-semibold flex items-center justify-center">
+        {count > 9 ? "9+" : count}
+      </span>
+    )}
+  </Tag>
+);
 
-const Navbar = () => {
+const SearchBar = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [params] = useSearchParams();
+
+  const current = location.pathname === "/explore" ? params.get("search") || "" : "";
+  const [text, setText] = useState(current);
+
+  // Keep the box in step with the URL (back button, category links)
+  useEffect(() => {
+    setText(current);
+  }, [current]);
+
+  const submit = (e) => {
+    e.preventDefault();
+
+    const next = new URLSearchParams(location.pathname === "/explore" ? params : undefined);
+    const q = text.trim();
+
+    if (q) next.set("search", q);
+    else next.delete("search");
+    next.delete("page");
+
+    navigate(`/explore?${next}`);
+  };
+
+  return (
+    <form role="search" onSubmit={submit} className="flex flex-1 min-w-0 order-last basis-full md:order-none md:basis-auto">
+      <label htmlFor="site-search" className="sr-only">
+        Search ReWear
+      </label>
+      <input
+        id="site-search"
+        type="search"
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        placeholder="Search lehengas, sherwanis, sarees, kurtas…"
+        className="flex-1 min-w-0 h-11 px-4 rounded-l-md border border-r-0 border-[#d9cbb9] bg-paper text-sm text-ink placeholder:text-muted focus:outline-none focus:border-brand focus:bg-white"
+      />
+      <button
+        type="submit"
+        aria-label="Search"
+        className="w-[52px] h-11 rounded-r-md bg-brand text-white flex items-center justify-center hover:bg-brand-dark"
+      >
+        <Search size={18} />
+      </button>
+    </form>
+  );
+};
+
+const AccountMenu = () => {
   const navigate = useNavigate();
   const { user, logout, isAdmin } = useAuth();
-
   const [open, setOpen] = useState(false);
-  const [mobileMenu, setMobileMenu] = useState(false);
+  const ref = useRef();
 
-  const dropdownRef = useRef();
-
-  // CLOSE DROPDOWN ON OUTSIDE CLICK
   useEffect(() => {
     const handler = (e) => {
-      if (!dropdownRef.current?.contains(e.target)) {
-        setOpen(false);
-      }
+      if (!ref.current?.contains(e.target)) setOpen(false);
     };
-
     document.addEventListener("mousedown", handler);
-
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  // INITIALS
-  const getInitials = (name = "") =>
-    name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
+  if (!user) {
+    return <HeaderIcon icon={User} label="Log in" to="/login" />;
+  }
 
-  const navLinkStyles = ({ isActive }) =>
-    `transition duration-300 hover:text-indigo-600 ${isActive ? "text-indigo-600" : "text-gray-700"
-    }`;
+  const go = (path) => {
+    setOpen(false);
+    navigate(path);
+  };
+
+  const items = [
+    { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
+    { icon: Package, label: "My orders", path: "/orders" },
+    { icon: ListChecks, label: "My listings", path: "/seller/listings" },
+    { icon: Truck, label: "Orders to fulfil", path: "/seller/orders" },
+    ...(isAdmin ? [{ icon: ShieldCheck, label: "Admin panel", path: "/admin" }] : []),
+  ];
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b border-gray-200/60 bg-white/75 backdrop-blur-xl">
+    <div className="relative" ref={ref}>
+      <HeaderIcon
+        as="button"
+        type="button"
+        icon={User}
+        label={user.name?.split(" ")[0] || "Account"}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        onClick={() => setOpen(!open)}
+      />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-
-        <div className="h-16 sm:h-20 flex items-center justify-between">
-
-          {/* LEFT */}
-          <div className="flex items-center gap-8">
-
-            {/* LOGO */}
-            <Link to="/" aria-label="ReWear home">
-              <Logo
-                size={36}
-                textClassName="text-2xl sm:text-3xl font-black tracking-tight bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent"
-              />
-            </Link>
-
-            {/* DESKTOP NAV */}
-            <div className="hidden lg:flex items-center gap-8 text-sm font-semibold">
-
-              <NavLink to="/explore" className={navLinkStyles}>
-                Explore
-              </NavLink>
-
-              <button
-                onClick={() => navigate(user ? "/sell" : "/login")}
-                className="text-gray-700 hover:text-indigo-600 transition duration-300"
-              >
-                Sell
-              </button>
-
-              <NavLink to="/howitworks" className={navLinkStyles}>
-                How It Works
-              </NavLink>
-
-              <button
-                onClick={() => navigate(user ? "/orders" : "/login")}
-                className="text-gray-700 hover:text-indigo-600 transition duration-300"
-              >
-                Orders
-              </button>
-
-            </div>
+      {open && (
+        <div role="menu" className="absolute right-0 mt-2 w-60 rounded-lg border border-line bg-white shadow-lg py-2 z-50">
+          <div className="px-4 pb-2 mb-1 border-b border-line">
+            <p className="text-sm font-semibold text-ink truncate">{user.name}</p>
+            <p className="text-xs text-muted truncate">{isAdmin ? "Admin" : user.email}</p>
           </div>
 
-          {/* RIGHT */}
-          <div className="flex items-center gap-2 sm:gap-3">
-
-            {/* WISHLIST */}
-            <NavLink
-              to="/wishlist"
-              className="w-10 h-10 rounded-full border border-gray-200 bg-white flex items-center justify-center hover:bg-gray-100 transition duration-300"
-            >
-              <Heart size={18} className="text-gray-700" />
-            </NavLink>
-
-            {/* NOTIFICATIONS */}
-            <NotificationBell />
-
-            {/* CART */}
-            <NavLink
-              to="/cart"
-              className="w-10 h-10 rounded-full border border-gray-200 bg-white flex items-center justify-center hover:bg-gray-100 transition duration-300"
-            >
-              <ShoppingCart size={18} className="text-gray-700" />
-            </NavLink>
-
-            {/* LOGIN */}
-            {!user ? (
-              <NavLink
-                to="/login"
-                className="hidden sm:flex px-4 py-2 rounded-full text-sm font-semibold border border-gray-200 hover:border-indigo-300 hover:text-indigo-600 transition duration-300"
-              >
-                Login
-              </NavLink>
-            ) : (
-              <div className="relative" ref={dropdownRef}>
-
-                {/* AVATAR */}
-                <button
-                  onClick={() => setOpen(!open)}
-                  className="w-10 h-10 rounded-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white font-bold flex items-center justify-center shadow-md hover:scale-105 transition duration-300"
-                >
-                  {getInitials(user.name || "U")}
-                </button>
-
-                {/* DROPDOWN */}
-                {open && (
-                  <div className="absolute right-0 mt-3 w-64 rounded-2xl border border-gray-200 bg-white shadow-2xl p-3">
-
-                    {/* USER INFO */}
-                    <div className="pb-3 border-b border-gray-100">
-                      <p className="font-semibold text-gray-800 truncate">
-                        {user.name}
-                      </p>
-
-                      <p className="text-sm text-gray-500 mt-1">
-                        {isAdmin ? "Admin" : user.email}
-                      </p>
-                    </div>
-
-                    {/* MENU */}
-                    <div className="pt-3 space-y-1">
-
-                      <button
-                        onClick={() => {
-                          navigate("/dashboard");
-                          setOpen(false);
-                        }}
-                        className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-100 transition duration-300 text-gray-700"
-                      >
-                        <LayoutDashboard size={18} />
-                        Dashboard
-                      </button>
-
-                      <button
-                        onClick={() => {
-                          navigate("/seller/listings");
-                          setOpen(false);
-                        }}
-                        className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-100 transition duration-300 text-gray-700"
-                      >
-                        <ListChecks size={18} />
-                        My Listings
-                      </button>
-
-                      <button
-                        onClick={() => {
-                          navigate("/seller/orders");
-                          setOpen(false);
-                        }}
-                        className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-100 transition duration-300 text-gray-700"
-                      >
-                        <Truck size={18} />
-                        Orders to Fulfil
-                      </button>
-
-                      {isAdmin && (
-                        <button
-                          onClick={() => {
-                            navigate("/admin");
-                            setOpen(false);
-                          }}
-                          className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-100 transition duration-300 text-gray-700"
-                        >
-                          <ShieldCheck size={18} />
-                          Admin Panel
-                        </button>
-                      )}
-
-                      <button
-                        onClick={() => {
-                          navigate("/orders");
-                          setOpen(false);
-                        }}
-                        className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-100 transition duration-300 text-gray-700"
-                      >
-                        <Package size={18} />
-                        My Orders
-                      </button>
-
-                      <button
-                        onClick={() => {
-                          navigate("/sell");
-                          setOpen(false);
-                        }}
-                        className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-100 transition duration-300 text-gray-700"
-                      >
-                        <Plus size={18} />
-                        Sell Item
-                      </button>
-
-                      <button
-                        onClick={() => {
-                          logout();
-                          navigate("/login");
-                        }}
-                        className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-500 hover:bg-red-50 transition duration-300"
-                      >
-                        <LogOut size={18} />
-                        Logout
-                      </button>
-
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* CTA */}
+          {items.map(({ icon: Icon, label, path }) => (
             <button
-              onClick={() => navigate(user ? "/sell" : "/login")}
-              className="hidden md:flex items-center gap-2 px-5 lg:px-6 py-2.5 rounded-full text-sm font-semibold text-white bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 shadow-md hover:scale-105 transition duration-300"
+              key={path}
+              role="menuitem"
+              onClick={() => go(path)}
+              className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-ink hover:bg-cream"
             >
-              <Plus size={16} />
-              Start Selling
+              <Icon size={17} className="text-muted" />
+              {label}
             </button>
+          ))}
 
-            {/* MOBILE MENU BUTTON */}
-            <button
-              onClick={() => setMobileMenu(!mobileMenu)}
-              className="lg:hidden w-10 h-10 rounded-full border border-gray-200 bg-white flex items-center justify-center"
-            >
-              {mobileMenu ? (
-                <X size={20} className="text-gray-700" />
-              ) : (
-                <Menu size={20} className="text-gray-700" />
-              )}
-            </button>
-
-          </div>
+          <button
+            role="menuitem"
+            onClick={() => {
+              setOpen(false);
+              logout();
+              navigate("/login");
+            }}
+            className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-700 hover:bg-red-50 border-t border-line mt-1"
+          >
+            <LogOut size={17} />
+            Log out
+          </button>
         </div>
+      )}
+    </div>
+  );
+};
 
-        {/* MOBILE MENU */}
-        {mobileMenu && (
-          <div className="lg:hidden pb-5 animate-in fade-in slide-in-from-top-2 duration-300">
+const CategoryBar = () => {
+  const location = useLocation();
+  const [params] = useSearchParams();
+  const onExplore = location.pathname === "/explore";
+  const activeCategory = onExplore ? params.get("category") : null;
+  const activeMode = onExplore ? params.get("mode") : null;
 
-            <div className="flex flex-col gap-2 pt-2">
+  const linkClass = (active, accent) =>
+    `px-3 py-3 whitespace-nowrap text-sm ${active ? "font-semibold text-brand shadow-[inset_0_-2px_0_#6b4430]" : accent ? "font-semibold text-brand hover:text-brand-dark" : "font-medium text-ink hover:text-brand"}`;
 
-              <NavLink
-                to="/explore"
-                className="px-4 py-3 rounded-xl hover:bg-gray-100 text-gray-700 font-medium"
-                onClick={() => setMobileMenu(false)}
-              >
-                Explore
-              </NavLink>
+  return (
+    <nav aria-label="Categories" className="border-t border-[#efe6da]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-stretch gap-1 overflow-x-auto">
+        {CATEGORIES.map((c) => (
+          <Link key={c.value} to={`/explore?category=${c.value}`} className={linkClass(activeCategory === c.value)}>
+            {c.label}
+          </Link>
+        ))}
 
-              <button
-                onClick={() => {
-                  navigate(user ? "/sell" : "/login");
-                  setMobileMenu(false);
-                }}
-                className="text-left px-4 py-3 rounded-xl hover:bg-gray-100 text-gray-700 font-medium"
-              >
-                Sell
-              </button>
+        <span className="w-px bg-line my-2.5 mx-2 flex-shrink-0" aria-hidden="true" />
 
-              <NavLink
-                to="/howitworks"
-                className="px-4 py-3 rounded-xl hover:bg-gray-100 text-gray-700 font-medium"
-                onClick={() => setMobileMenu(false)}
-              >
-                How It Works
-              </NavLink>
-
-              <button
-                onClick={() => {
-                  navigate(user ? "/orders" : "/login");
-                  setMobileMenu(false);
-                }}
-                className="text-left px-4 py-3 rounded-xl hover:bg-gray-100 text-gray-700 font-medium"
-              >
-                Orders
-              </button>
-
-              {!user && (
-                <NavLink
-                  to="/login"
-                  onClick={() => setMobileMenu(false)}
-                  className="px-4 py-3 rounded-xl bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white font-semibold text-center mt-2"
-                >
-                  Login
-                </NavLink>
-              )}
-
-            </div>
-          </div>
-        )}
-
+        <Link to="/explore?mode=rent" className={linkClass(!activeCategory && activeMode === "rent", true)}>
+          Rent an outfit
+        </Link>
+        <Link to="/explore?mode=sale" className={linkClass(!activeCategory && activeMode === "sale", true)}>
+          Buy pre-loved
+        </Link>
+        <NavLink to="/howitworks" className={({ isActive }) => `${linkClass(isActive)} ml-auto hidden md:block`}>
+          How it works
+        </NavLink>
       </div>
     </nav>
+  );
+};
+
+const Navbar = () => {
+  const { user } = useAuth();
+  const { cartItems } = useCart();
+  const { wishlist } = useWishlist();
+
+  return (
+    <header className="sticky top-0 z-40 bg-white border-b border-line">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2.5 flex flex-wrap items-center gap-x-4 sm:gap-x-6 gap-y-2.5">
+        <Link to="/" aria-label="ReWear home" className="flex-shrink-0">
+          <Logo size={36} textClassName="text-[21px] font-bold tracking-tight text-ink" />
+        </Link>
+
+        <SearchBar />
+
+        <nav aria-label="Account" className="flex items-center gap-0.5 ml-auto md:ml-0">
+          <HeaderIcon icon={Plus} label="Sell" to={user ? "/sell" : "/login"} />
+          <HeaderIcon icon={Heart} label="Wishlist" to="/wishlist" count={wishlist.length} />
+          <NotificationBell />
+          <HeaderIcon icon={ShoppingBag} label="Bag" to="/cart" count={cartItems.length} />
+          <AccountMenu />
+        </nav>
+      </div>
+
+      <CategoryBar />
+    </header>
   );
 };
 

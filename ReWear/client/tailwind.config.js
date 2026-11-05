@@ -57,6 +57,13 @@ export default {
         // Named tokens for the colours the pages hard-code
         ink: "#2b1d14",
         paper: "#faf6ef",
+        line: "#e7ddd0",
+        muted: "#6e5d50",
+        cream: "#f6efe5",
+        brand: { DEFAULT: "#6b4430", dark: "#4a2e20" },
+      },
+      fontFamily: {
+        sans: ["Inter", "system-ui", "-apple-system", "Segoe UI", "sans-serif"],
       },
     },
   },

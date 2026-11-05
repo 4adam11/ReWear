@@ -1,247 +1,82 @@
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
+import { Heart } from "lucide-react";
 
 import { useWishlist } from "../../context/WishListContext";
+import { thumb, PLACEHOLDER_IMAGE } from "../../utils/image";
 
-import { motion } from "framer-motion";
+export const money = (n) => `₹${Number(n || 0).toLocaleString("en-IN")}`;
 
-import {
-  Heart,
-  ShieldCheck,
-  ArrowUpRight,
-} from "lucide-react";
+const canSell = (p) => ["sell", "sale", "both"].includes(p.mode) && p.price > 0;
+const canRent = (p) => ["rent", "both"].includes(p.mode) && p.rent > 0;
 
-import {
-  thumb,
-  PLACEHOLDER_IMAGE,
-} from "../../utils/image";
+// Main price plus the other option, e.g. "₹6,500" + "or rent ₹900/day".
+// `prefer` = "rent" shows the rental price first (Explore in rent mode).
+const priceLines = (p, prefer) => {
+  const sale = canSell(p);
+  const rent = canRent(p);
 
-import { categoryLabel } from "../../utils/catalog";
+  if (rent && (!sale || prefer === "rent")) {
+    return { main: money(p.rent), unit: "/day", extra: sale ? `or buy for ${money(p.price)}` : "" };
+  }
 
-const ProductCard = ({ product }) => {
-  const navigate = useNavigate();
+  return { main: money(p.price), unit: "", extra: rent ? `or rent ${money(p.rent)}/day` : "" };
+};
 
-  const { wishlist, toggleWishlist } =
-    useWishlist();
-
-  const isWishlisted = wishlist.some(
-    (p) => p._id === product._id
-  );
-
-  // A card-sized copy, not the full-resolution original
-  const image =
-    thumb(product?.images?.[0], 600) ||
-    PLACEHOLDER_IMAGE;
-
-  // Only photos uploaded through the checker live in this folder
-  const photosChecked =
-    product?.images?.[0]?.includes(
-      "/rewear/products/"
-    );
+const ProductCard = ({ product, prefer }) => {
+  const { wishlist, toggleWishlist } = useWishlist();
+  const saved = wishlist.some((p) => p._id === product._id);
+  const { main, unit, extra } = priceLines(product, prefer);
+  const sold = product.status === "sold";
 
   return (
-    <motion.div
-      initial={{
-        opacity: 0,
-        y: 40,
-      }}
-
-      whileInView={{
-        opacity: 1,
-        y: 0,
-      }}
-
-      viewport={{ once: true }}
-
-      transition={{
-        duration: 0.6,
-      }}
-
-      whileHover={{
-        y: -10,
-      }}
-
-      onClick={() =>
-        navigate(`/product/${product._id}`)
-      }
-
-      className="group relative overflow-hidden rounded-[30px] border border-white/40 bg-white/80 backdrop-blur-xl shadow-[0_10px_40px_rgba(0,0,0,0.06)] cursor-pointer"
-    >
-
-      {/* GLOW */}
-      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition duration-500 bg-gradient-to-r from-indigo-500/10 via-purple-500/10 to-pink-500/10 blur-2xl z-0" />
-
-      {/* IMAGE SECTION */}
-      <div className="relative overflow-hidden aspect-[4/5] bg-gray-100">
-
-        {/* IMAGE */}
-        <motion.img
-          whileHover={{
-            scale: 1.08,
-          }}
-
-          transition={{
-            duration: 0.6,
-          }}
-
-          src={image}
-
-          alt={product.title}
-
-          loading="lazy"
-
-          decoding="async"
-
-          className="w-full h-full object-cover"
-        />
-
-        {/* OVERLAY */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-80" />
-
-        {/* SHINE EFFECT (on hover only, instead of animating every card forever) */}
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent rotate-12 -translate-x-[120%] group-hover:translate-x-[120%] transition-transform duration-[1500ms] ease-linear" />
-
-        {/* MODE BADGE */}
-        <div className="absolute top-4 left-4">
-
-          <motion.div
-            whileHover={{
-              scale: 1.05,
-            }}
-
-            className="px-4 py-2 rounded-full bg-white/15 backdrop-blur-xl border border-white/20 text-white text-xs font-bold shadow-lg"
-          >
-            {product.mode === "both"
-              ? "Both Available"
-              : product.mode === "rent"
-                ? "For Rent"
-                : "For Sale"}
-          </motion.div>
-
-        </div>
-
-        {/* WISHLIST */}
-        <motion.button
-          whileHover={{
-            scale: 1.12,
-          }}
-
-          whileTap={{
-            scale: 0.92,
-          }}
-
-          onClick={(e) => {
-            e.stopPropagation();
-
-            toggleWishlist(product);
-          }}
-
-          className="absolute top-4 right-4 w-11 h-11 rounded-full bg-white/15 backdrop-blur-xl border border-white/20 flex items-center justify-center shadow-lg"
-        >
-
-          <Heart
-            size={18}
-
-            className={`transition ${isWishlisted
-                ? "fill-red-500 text-red-500"
-                : "text-white"
-              }`}
+    <article className="group relative flex flex-col bg-white border border-line rounded-lg overflow-hidden hover:shadow-md transition-shadow">
+      <Link to={`/product/${product._id}`} className="flex flex-col flex-1 text-ink">
+        <div className="relative aspect-[3/4] bg-cream overflow-hidden">
+          <img
+            src={thumb(product.images?.[0], 500) || PLACEHOLDER_IMAGE}
+            alt={product.title}
+            loading="lazy"
+            decoding="async"
+            className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300"
           />
 
-        </motion.button>
-
-        {/* QUICK VIEW */}
-        <motion.div
-          initial={{
-            opacity: 0,
-            y: 20,
-          }}
-
-          whileHover={{
-            opacity: 1,
-            y: 0,
-          }}
-
-          className="absolute bottom-4 right-4 w-11 h-11 rounded-full bg-white text-gray-800 flex items-center justify-center shadow-xl"
-        >
-          <ArrowUpRight size={18} />
-        </motion.div>
-
-      </div>
-
-      {/* DETAILS */}
-      <div className="relative z-10 p-5 sm:p-6">
-
-        {/* TOP ROW */}
-        <div className="flex items-start justify-between gap-3">
-
-          <div className="flex-1 min-w-0">
-
-            {/* TITLE */}
-            <h3 className="text-base sm:text-lg font-bold text-gray-900 tracking-tight line-clamp-1">
-              {product.title}
-            </h3>
-
-            {/* CATEGORY */}
-            <p className="mt-1 text-sm text-gray-500 capitalize">
-              {categoryLabel(product.category)}
-            </p>
-
-          </div>
-
-        </div>
-
-        {/* PRICE */}
-        <div className="mt-5 flex items-end justify-between">
-
-          <div>
-
-            <p className="text-2xl font-black tracking-tight text-[#2b1d14]">
-
-              ₹ {product.price || product.rent}
-
-            </p>
-
-            {product.mode === "rent" && (
-              <p className="text-xs text-gray-500 mt-1">
-                Per day rental
-              </p>
-            )}
-
-          </div>
-
-          {/* SIZE */}
-          <motion.div
-            whileHover={{
-              y: -2,
-            }}
-
-            className="px-4 py-2 rounded-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white text-xs font-bold shadow-lg"
-          >
-            {product.size}
-          </motion.div>
-
-        </div>
-
-        {/* CONDITION */}
-        <div className="mt-5 flex items-center justify-between gap-3">
-
-          <div className="px-4 py-2 rounded-full bg-gray-100 text-xs font-semibold text-gray-600">
-            {product.condition ||
-              "Good Condition"}
-          </div>
-
-          {photosChecked && (
-            <p className="inline-flex items-center gap-1 text-xs text-gray-400">
-              <ShieldCheck size={14} />
-              Photos checked
-            </p>
+          {canRent(product) && (
+            <span className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded bg-ink text-paper text-[11px] font-semibold">
+              Rent
+            </span>
           )}
-
+          {sold && (
+            <span className="absolute inset-x-0 bottom-0 py-1.5 bg-white/90 text-center text-xs font-semibold text-ink">
+              Sold
+            </span>
+          )}
         </div>
 
-      </div>
+        <div className="px-3 pt-2.5 pb-3.5 flex flex-col gap-0.5">
+          {product.sellerName && <span className="text-xs text-muted truncate">{product.sellerName}</span>}
+          <h3 className="text-sm font-medium truncate">{product.title}</h3>
+          <span className="text-xs text-muted">
+            Size {product.size}
+            {product.condition ? ` · ${product.condition}` : ""}
+          </span>
+          <p className="mt-1 text-base font-bold">
+            {main}
+            {unit && <span className="text-xs font-medium text-muted"> {unit}</span>}
+          </p>
+          {extra && <span className="text-xs text-muted">{extra}</span>}
+        </div>
+      </Link>
 
-    </motion.div>
+      <button
+        type="button"
+        onClick={() => toggleWishlist(product)}
+        aria-label={saved ? "Remove from wishlist" : "Add to wishlist"}
+        aria-pressed={saved}
+        className="absolute top-2 right-2 w-9 h-9 rounded-full bg-white/90 flex items-center justify-center text-ink hover:bg-white shadow-sm"
+      >
+        <Heart size={17} className={saved ? "fill-brand text-brand" : ""} />
+      </button>
+    </article>
   );
 };
 

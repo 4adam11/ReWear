@@ -1,13 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
   <!-- ReWear mark: a "pre-loved" thrift price tag with a heart. Keep in sync with src/components/ui/Logo.jsx -->
-  <defs>
-    <linearGradient id="rw-bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#5a3826"/>
-      <stop offset="0.55" stop-color="#8b5e3c"/>
-      <stop offset="1" stop-color="#c0834f"/>
-    </linearGradient>
-  </defs>
-  <rect width="64" height="64" rx="18" fill="url(#rw-bg)"/>
+  <rect width="64" height="64" rx="18" fill="#6b4430"/>
   <path d="M16 11.5 C8.5 19 11 32 21.1 39.3" fill="none" stroke="#f6ead8" stroke-width="2.4" stroke-linecap="round"/>
   <g transform="rotate(-24 33 34)">
     <path d="M22.5 22 h22 a4.5 4.5 0 0 1 4.5 4.5 v15 a4.5 4.5 0 0 1 -4.5 4.5 h-22 l-10 -12 z" fill="#f6ead8"/>

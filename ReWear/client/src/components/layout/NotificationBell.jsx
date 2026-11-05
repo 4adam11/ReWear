@@ -67,12 +67,13 @@ const NotificationBell = () => {
       <button
         onClick={() => setOpen(!open)}
         aria-label={`Notifications${data.unread ? ` (${data.unread} unread)` : ""}`}
-        className="relative w-10 h-10 rounded-full border border-gray-200 bg-white flex items-center justify-center hover:bg-gray-100 transition"
+        className="relative flex flex-col items-center gap-0.5 min-w-[40px] sm:min-w-[48px] px-1.5 sm:px-2 py-1 text-[12px] font-medium text-ink hover:text-brand"
       >
-        <Bell size={18} className="text-gray-700" />
+        <Bell size={20} strokeWidth={1.8} />
+        <span className="hidden sm:block">Alerts</span>
 
         {data.unread > 0 && (
-          <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-pink-600 text-white text-[10px] font-semibold flex items-center justify-center">
+          <span className="absolute top-0 right-1 min-w-[17px] h-[17px] px-1 rounded-full bg-brand text-white text-[10px] font-semibold flex items-center justify-center">
             {data.unread > 9 ? "9+" : data.unread}
           </span>
         )}

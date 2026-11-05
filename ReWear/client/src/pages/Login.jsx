@@ -368,10 +368,8 @@ const Login = () => {
               className="
                 w-full
                 mt-2
-                bg-gradient-to-r
-                from-indigo-500
-                via-purple-500
-                to-pink-500
+                bg-brand
+                hover:bg-brand-dark
                 text-white
                 py-4
                 rounded-2xl
