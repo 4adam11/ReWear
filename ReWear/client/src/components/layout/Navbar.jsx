@@ -12,6 +12,8 @@ import {
   Package,
   ShieldCheck,
   LogOut,
+  HandCoins,
+  Settings,
 } from "lucide-react";
 
 import { useAuth } from "../../context/AuthContext";
@@ -116,6 +118,8 @@ const AccountMenu = () => {
     { icon: Package, label: "My orders", path: "/orders" },
     { icon: ListChecks, label: "My listings", path: "/seller/listings" },
     { icon: Truck, label: "Orders to fulfil", path: "/seller/orders" },
+    { icon: HandCoins, label: "Offers", path: "/offers" },
+    { icon: Settings, label: "Account settings", path: "/account" },
     ...(isAdmin ? [{ icon: ShieldCheck, label: "Admin panel", path: "/admin" }] : []),
   ];
 

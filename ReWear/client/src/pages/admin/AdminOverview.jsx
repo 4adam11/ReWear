@@ -5,6 +5,7 @@ import { AlertTriangle, ArrowRight } from "lucide-react";
 
 import API from "../../utils/api";
 import { useAuth } from "../../context/AuthContext";
+import DayBars from "../../components/admin/DayBars";
 
 const Stat = ({ label, value, to, tone = "text-ink" }) => {
   const body = (
@@ -20,6 +21,7 @@ const Stat = ({ label, value, to, tone = "text-ink" }) => {
 const AdminOverview = () => {
   const { authHeader } = useAuth();
   const [stats, setStats] = useState(null);
+  const [charts, setCharts] = useState(null);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -27,6 +29,10 @@ const AdminOverview = () => {
       .get(`${API}/admin/stats`, authHeader)
       .then(({ data }) => setStats(data))
       .catch((err) => setError(err.response?.data?.message || "Could not load stats"));
+    axios
+      .get(`${API}/admin/charts`, authHeader)
+      .then(({ data }) => setCharts(data))
+      .catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -38,9 +44,22 @@ const AdminOverview = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold text-ink">Overview</h1>
+        <h1 className="text-[26px] font-bold tracking-tight text-ink">Overview</h1>
         <p className="mt-1 text-sm text-muted">What needs your attention today.</p>
       </div>
+
+      {stats.openDisputes > 0 && (
+        <Link
+          to="/admin/disputes"
+          className="flex items-center justify-between gap-4 rounded-lg border border-red-200 bg-red-50 px-5 py-4 text-red-800 hover:bg-red-100 transition"
+        >
+          <span className="flex items-center gap-3 text-sm font-medium">
+            <AlertTriangle size={18} />
+            {stats.openDisputes} open problem report{stats.openDisputes === 1 ? "" : "s"} from buyers or sellers
+          </span>
+          <ArrowRight size={18} />
+        </Link>
+      )}
 
       {listings.pending > 0 && (
         <Link
@@ -76,6 +95,28 @@ const AdminOverview = () => {
           <Stat label="Sales value" value={`₹${stats.revenue.toLocaleString("en-IN")}`} />
         </div>
       </section>
+
+      {charts && (
+        <section>
+          <h2 className="text-sm font-semibold text-gray-700 mb-3">Activity</h2>
+          <div className="grid gap-3 lg:grid-cols-2">
+            <DayBars title="Orders" series={charts.series} field="orders" total={charts.series.reduce((s, d) => s + d.orders, 0)} />
+            <DayBars
+              title="Sales value"
+              series={charts.series}
+              field="revenue"
+              formatValue={(v) => `₹${Number(v).toLocaleString("en-IN")}`}
+              total={charts.series.reduce((s, d) => s + d.revenue, 0)}
+            />
+            <DayBars title="New listings" series={charts.series} field="listings" total={charts.series.reduce((s, d) => s + d.listings, 0)} />
+            <DayBars title="New users" series={charts.series} field="users" total={charts.series.reduce((s, d) => s + d.users, 0)} />
+          </div>
+          <div className="mt-3 grid grid-cols-2 md:grid-cols-4 gap-3">
+            <Stat label="Listings approved (all time)" value={charts.approved} to="/admin/activity" />
+            <Stat label="Listings rejected (all time)" value={charts.rejected} to="/admin/activity" />
+          </div>
+        </section>
+      )}
     </div>
   );
 };

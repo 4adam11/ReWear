@@ -16,7 +16,7 @@ const loadCart = (userId) => {
 };
 
 // Only what the bag and checkout need (the server re-checks prices anyway)
-const FIELDS = ["_id", "title", "category", "size", "condition", "price", "rent", "mode", "total", "rentStart", "rentEnd", "quantity"];
+const FIELDS = ["_id", "title", "category", "size", "condition", "price", "rent", "mode", "total", "rentStart", "rentEnd", "quantity", "offerId"];
 
 const saveCart = (userId, items) => {
   try {

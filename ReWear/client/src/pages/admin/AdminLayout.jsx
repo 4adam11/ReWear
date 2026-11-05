@@ -1,11 +1,13 @@
 import { NavLink, Outlet } from "react-router-dom";
-import { LayoutDashboard, ClipboardCheck, Users, Package, ShieldCheck } from "lucide-react";
+import { LayoutDashboard, ClipboardCheck, Users, Package, ShieldCheck, TriangleAlert, History } from "lucide-react";
 
 const LINKS = [
   { to: "/admin", label: "Overview", icon: LayoutDashboard, end: true },
   { to: "/admin/listings", label: "Review queue", icon: ClipboardCheck },
   { to: "/admin/users", label: "Users", icon: Users },
   { to: "/admin/orders", label: "Orders", icon: Package },
+  { to: "/admin/disputes", label: "Problem reports", icon: TriangleAlert },
+  { to: "/admin/activity", label: "Activity log", icon: History },
 ];
 
 const AdminLayout = () => (
@@ -28,8 +30,8 @@ const AdminLayout = () => (
               end={end}
               className={({ isActive }) =>
                 `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium whitespace-nowrap transition ${isActive
-                  ? "bg-indigo-50 text-indigo-700"
-                  : "text-gray-600 hover:bg-gray-50 hover:text-ink"
+                  ? "bg-cream text-brand font-semibold"
+                  : "text-muted hover:bg-cream hover:text-ink"
                 }`
               }
             >

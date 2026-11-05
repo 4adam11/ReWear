@@ -9,6 +9,7 @@ import { useAuth } from "../context/AuthContext";
 import { thumb, PLACEHOLDER_IMAGE } from "../utils/image";
 import StatusBadge from "../components/ui/StatusBadge";
 import OrderProgress, { isRentalOrder } from "../components/orders/OrderProgress";
+import { ReviewBox, ProblemBox, DisputeBanner } from "../components/orders/OrderExtras";
 
 const PAYMENT = { card: "Card", upi: "UPI", cod: "Cash on delivery" };
 
@@ -18,6 +19,9 @@ const TIMELINE_LABEL = {
   shipped: "Shipped",
   delivered: "Delivered",
   returned: "Returned to seller",
+  dispute_opened: "Problem reported",
+  dispute_closed: "Problem report closed",
+  refunded: "Refunded",
   completed: "Completed",
   cancelled: "Cancelled",
 };
@@ -38,7 +42,7 @@ const OrderCard = ({ order, onUpdate }) => {
     setBusy(true);
     try {
       const { data } = await axios.patch(`${API}/orders/${order._id}/${action}`, {}, authHeader);
-      onUpdate({ ...data, seller: order.seller });
+      onUpdate({ ...order, ...data, seller: order.seller });
     } catch (err) {
       alert(err.response?.data?.message || "Something went wrong");
     } finally {
@@ -75,7 +79,9 @@ const OrderCard = ({ order, onUpdate }) => {
           <span className="text-xs text-muted">· {PAYMENT[order.paymentMethod]}</span>
         </div>
 
-        {status === "cancelled" ? (
+        {status === "refunded" ? (
+          <p className="text-sm text-muted">This order was refunded after a problem report.</p>
+        ) : status === "cancelled" ? (
           <p className="text-sm text-red-700">
             Cancelled by the {order.cancel?.by || "buyer"}
             {order.cancel?.reason ? `: ${order.cancel.reason}` : "."}
@@ -129,8 +135,18 @@ const OrderCard = ({ order, onUpdate }) => {
           </p>
         )}
 
+        <DisputeBanner dispute={order.dispute} />
+
         {/* ACTIONS + DETAILS */}
         <div className="flex flex-wrap items-center gap-2">
+          {status === "completed" && (
+            <ReviewBox order={order} onDone={(rating) => onUpdate({ ...order, reviewRating: rating })} />
+          )}
+
+          {["shipped", "delivered"].includes(status) && order.dispute?.status !== "open" && (
+            <ProblemBox order={order} role="buyer" onDone={(dispute) => onUpdate({ ...order, dispute })} />
+          )}
+
           {status === "shipped" && (
             <button
               disabled={busy}
@@ -141,7 +157,7 @@ const OrderCard = ({ order, onUpdate }) => {
             </button>
           )}
 
-          {status === "delivered" && !rental && (
+          {status === "delivered" && !rental && order.dispute?.status !== "open" && (
             <button
               disabled={busy}
               onClick={() => act("complete", "Is everything as described? This completes the order.")}
@@ -214,6 +230,7 @@ const FILTERS = [
   { key: "active", label: "In progress" },
   { key: "completed", label: "Completed" },
   { key: "cancelled", label: "Cancelled" },
+  { key: "refunded", label: "Refunded" },
 ];
 
 const Orders = () => {
@@ -234,7 +251,7 @@ const Orders = () => {
 
   const shown = orders.filter((o) =>
     filter === "all" ? true
-      : filter === "active" ? !["completed", "cancelled"].includes(o.status)
+      : filter === "active" ? !["completed", "cancelled", "refunded"].includes(o.status)
         : o.status === filter
   );
 

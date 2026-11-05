@@ -16,4 +16,5 @@ export const toOrderItems = (items) =>
     mode: item.mode === "rent" ? "rent" : "sale",
     rentStart: item.rentStart,
     rentEnd: item.rentEnd,
+    offerId: item.offerId,
   }));

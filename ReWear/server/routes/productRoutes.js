@@ -31,9 +31,12 @@ const listParam = (value, allowed) =>
 // Adds each listing's seller name (kept separate from "user" so owner checks still compare ids)
 const withSellerNames = async (items) => {
   const ids = [...new Set(items.map((p) => p.user?.toString()).filter(Boolean))];
-  const users = await User.find({ _id: { $in: ids } }).select("name").lean();
-  const names = new Map(users.map((u) => [u._id.toString(), u.name]));
-  return items.map((p) => ({ ...p, sellerName: names.get(p.user?.toString()) || "ReWear seller" }));
+  const users = await User.find({ _id: { $in: ids } }).select("name rating").lean();
+  const byId = new Map(users.map((u) => [u._id.toString(), u]));
+  return items.map((p) => {
+    const u = byId.get(p.user?.toString());
+    return { ...p, sellerName: u?.name || "ReWear seller", sellerRating: u?.rating?.count ? u.rating : null };
+  });
 };
 
 const escapeRegex = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -215,12 +218,12 @@ router.get("/:id", optionalAuth, async (req, res) => {
     end: toDay(b.end),
   }));
 
-  const seller = await User.findById(product.user).select("name createdAt").lean();
+  const seller = await User.findById(product.user).select("name createdAt rating").lean();
 
   res.json({
     ...product,
     bookings,
-    seller: seller ? { _id: seller._id, name: seller.name, since: seller.createdAt } : null,
+    seller: seller ? { _id: seller._id, name: seller.name, since: seller.createdAt, rating: seller.rating } : null,
   });
 });
 

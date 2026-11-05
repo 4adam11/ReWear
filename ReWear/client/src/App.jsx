@@ -24,6 +24,11 @@ const Wishlist = lazy(() => import("./pages/WishList"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const SellerListings = lazy(() => import("./pages/SellerListings"));
 const SellerOrders = lazy(() => import("./pages/SellerOrders"));
+const SellerShop = lazy(() => import("./pages/SellerShop"));
+const Account = lazy(() => import("./pages/Account"));
+const Offers = lazy(() => import("./pages/Offers"));
+const AdminDisputes = lazy(() => import("./pages/admin/AdminDisputes"));
+const AdminActivity = lazy(() => import("./pages/admin/AdminActivity"));
 const AdminLayout = lazy(() => import("./pages/admin/AdminLayout"));
 const AdminOverview = lazy(() => import("./pages/admin/AdminOverview"));
 const AdminListings = lazy(() => import("./pages/admin/AdminListings"));
@@ -61,6 +66,23 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/howitworks" element={<HowItWorks />} />
           <Route path="/wishlist" element={<Wishlist />} />
+          <Route path="/seller/:id" element={<SellerShop />} />
+          <Route
+            path="/account"
+            element={
+              <ProtectedRoute>
+                <Account />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/offers"
+            element={
+              <ProtectedRoute>
+                <Offers />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/dashboard"
             element={
@@ -121,6 +143,8 @@ function App() {
             <Route path="listings" element={<AdminListings />} />
             <Route path="users" element={<AdminUsers />} />
             <Route path="orders" element={<AdminOrders />} />
+            <Route path="disputes" element={<AdminDisputes />} />
+            <Route path="activity" element={<AdminActivity />} />
           </Route>
 
           <Route

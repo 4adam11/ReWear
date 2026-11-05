@@ -22,6 +22,8 @@ import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import { useWishlist } from "../context/WishListContext";
 import ProductCard, { money } from "../components/explore/ProductCard";
+import OfferBox from "../components/product/OfferBox";
+import { RatingBadge, Stars } from "../components/ui/Stars";
 
 const PriceOption = ({ active, disabled, onClick, label, price, unit }) => (
   <button
@@ -64,12 +66,22 @@ const ProductDetail = () => {
   const [activeImage, setActiveImage] = useState("");
   const [loading, setLoading] = useState(true);
   const [added, setAdded] = useState("");
+  const [offer, setOffer] = useState(null);
   const [dateRange, setDateRange] = useState([{ startDate: new Date(), endDate: new Date(), key: "selection" }]);
 
   useEffect(() => {
     let ignore = false;
     setLoading(true);
     setAdded("");
+    setOffer(null);
+
+    // The buyer's open offer on this item, if any
+    if (user) {
+      axios
+        .get(`${API}/offers/for/${id}`, authHeader)
+        .then(({ data }) => !ignore && setOffer(data))
+        .catch(() => {});
+    }
 
     axios
       // Logged in: sellers and admins can also open listings that aren't live yet
@@ -122,7 +134,10 @@ const ProductDetail = () => {
   const days = Math.max(differenceInDays(end, start) + 1, 1);
   const rentPerDay = product.rent || 0;
   const totalRent = rentPerDay * days;
-  const totalPrice = mode === "rent" ? totalRent : product.price;
+  // An accepted offer replaces the listed price for this buyer
+  const offerPrice = offer?.status === "accepted" ? offer.amount : null;
+  const salePrice = offerPrice ?? product.price;
+  const totalPrice = mode === "rent" ? totalRent : salePrice;
 
   const canBuy = ["sell", "sale", "both"].includes(product.mode) && product.price > 0;
   const canRent = ["rent", "both"].includes(product.mode) && product.rent > 0;
@@ -160,6 +175,7 @@ const ProductDetail = () => {
     mode,
     total: totalPrice,
     ...(mode === "rent" && { rentStart: day(start), rentEnd: day(end) }),
+    ...(mode === "sale" && offerPrice && { offerId: offer._id }),
   };
 
   const saved = wishlist.some((p) => p._id === product._id);
@@ -205,9 +221,12 @@ const ProductDetail = () => {
         <div className="flex flex-col gap-5">
           <div className="flex flex-col gap-1.5">
             {product.seller && (
-              <Link to={`/explore?seller=${product.seller._id}`} className="text-sm font-semibold text-brand hover:underline self-start">
-                {product.seller.name}
-              </Link>
+              <span className="flex items-center gap-2">
+                <Link to={`/seller/${product.seller._id}`} className="text-sm font-semibold text-brand hover:underline">
+                  {product.seller.name}
+                </Link>
+                <RatingBadge rating={product.seller.rating} />
+              </span>
             )}
             <h1 className="text-[28px] leading-tight font-bold tracking-tight">{product.title}</h1>
             {approved && (
@@ -220,7 +239,7 @@ const ProductDetail = () => {
 
           <div role="tablist" aria-label="Rent or buy" className="grid grid-cols-2 gap-2.5">
             <PriceOption label="Rent" price={product.rent} unit="/day" active={mode === "rent"} disabled={!canRent} onClick={() => setMode("rent")} />
-            <PriceOption label="Buy" price={product.price} active={mode === "sale"} disabled={!canBuy} onClick={() => setMode("sale")} />
+            <PriceOption label={offerPrice ? "Buy at your offer" : "Buy"} price={salePrice} active={mode === "sale"} disabled={!canBuy} onClick={() => setMode("sale")} />
           </div>
 
           <div className="flex flex-wrap gap-6">
@@ -265,6 +284,10 @@ const ProductDetail = () => {
             </div>
           )}
 
+          {mode === "sale" && canBuy && !isMine && ["live", "available"].includes(product.status) && (
+            <OfferBox product={product} offer={offer} setOffer={setOffer} />
+          )}
+
           {blockedReason && (
             <p className="rounded-md bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-800">{blockedReason}</p>
           )}
@@ -285,7 +308,7 @@ const ProductDetail = () => {
                   onClick={() => setAdded(addToCart(cartLine) === "updated" ? "Your bag has been updated" : "Added to your bag")}
                   className="flex-1 h-12 rounded-md bg-brand text-white font-semibold hover:bg-brand-dark disabled:opacity-40 disabled:cursor-not-allowed"
                 >
-                  {mode === "rent" ? `Add rental to bag · ${money(totalRent)}` : `Add to bag · ${money(product.price)}`}
+                  {mode === "rent" ? `Add rental to bag · ${money(totalRent)}` : `Add to bag · ${money(salePrice)}`}
                 </button>
                 <button
                   type="button"
@@ -366,13 +389,19 @@ const ProductDetail = () => {
               </span>
               <div>
                 <p className="font-semibold">{product.seller.name}</p>
+                {product.seller.rating?.count > 0 && (
+                  <p className="flex items-center gap-1.5 text-[13px] text-muted">
+                    <Stars value={product.seller.rating.avg} size={13} />
+                    {product.seller.rating.avg.toFixed(1)} from {product.seller.rating.count} review{product.seller.rating.count > 1 ? "s" : ""}
+                  </p>
+                )}
                 {product.seller.since && (
                   <p className="text-[13px] text-muted">On ReWear since {format(new Date(product.seller.since), "MMMM yyyy")}</p>
                 )}
               </div>
             </div>
-            <Link to={`/explore?seller=${product.seller._id}`} className="text-sm font-semibold text-brand hover:underline">
-              See all items from this seller
+            <Link to={`/seller/${product.seller._id}`} className="text-sm font-semibold text-brand hover:underline">
+              Visit the seller's shop
             </Link>
           </div>
         )}

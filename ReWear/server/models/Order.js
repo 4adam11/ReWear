@@ -7,10 +7,10 @@ import mongoose from "mongoose";
 //   rental: delivered -> completed when the seller confirms the item came back
 //   cancelled: by the buyer or seller before shipping (item goes back on sale)
 // ("placed" is the old name for "confirmed" and is migrated on startup.)
-export const ORDER_STATUSES = ["placed", "confirmed", "accepted", "shipped", "delivered", "completed", "cancelled"];
+export const ORDER_STATUSES = ["placed", "confirmed", "accepted", "shipped", "delivered", "completed", "cancelled", "refunded"];
 
 // Orders that still hold their items (count for stock, rental bookings and earnings)
-export const ACTIVE_ORDER = { $nin: ["cancelled"] };
+export const ACTIVE_ORDER = { $nin: ["cancelled", "refunded"] };
 
 // Snapshot of the product at purchase time; prices come from the database, not the client
 const orderItemSchema = new mongoose.Schema({
@@ -24,7 +24,9 @@ const orderItemSchema = new mongoose.Schema({
   rentStart: Date,
   rentEnd: Date,
   days: Number,
-  lineTotal: { type: Number, required: true }
+  lineTotal: { type: Number, required: true },
+  // Set when bought at an accepted "make an offer" price
+  offer: { type: mongoose.Schema.Types.ObjectId, ref: "Offer" }
 }, { _id: false });
 
 const timelineSchema = new mongoose.Schema({

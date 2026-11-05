@@ -12,6 +12,9 @@ import userRoutes from "./routes/userRoutes.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import notificationRoutes from "./routes/notificationRoutes.js";
+import reviewRoutes from "./routes/reviewRoutes.js";
+import disputeRoutes from "./routes/disputeRoutes.js";
+import offerRoutes from "./routes/offerRoutes.js";
 import Product from "./models/Product.js";
 import Order from "./models/Order.js";
 import { loadModels } from "./utils/imageModeration.js";
@@ -52,6 +55,9 @@ app.use("/api/users", userRoutes);
 app.use("/api/uploads", uploadRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/reviews", reviewRoutes);
+app.use("/api/disputes", disputeRoutes);
+app.use("/api/offers", offerRoutes);
 
 app.get("/", (req, res) => res.send("API Running"));
 

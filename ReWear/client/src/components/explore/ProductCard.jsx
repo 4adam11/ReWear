@@ -3,6 +3,7 @@ import { Heart } from "lucide-react";
 
 import { useWishlist } from "../../context/WishListContext";
 import { thumb, PLACEHOLDER_IMAGE } from "../../utils/image";
+import { RatingBadge } from "../ui/Stars";
 
 export const money = (n) => `₹${Number(n || 0).toLocaleString("en-IN")}`;
 
@@ -53,7 +54,12 @@ const ProductCard = ({ product, prefer }) => {
         </div>
 
         <div className="px-3 pt-2.5 pb-3.5 flex flex-col gap-0.5">
-          {product.sellerName && <span className="text-xs text-muted truncate">{product.sellerName}</span>}
+          {product.sellerName && (
+            <span className="flex items-center gap-1.5 text-xs text-muted min-w-0">
+              <span className="truncate">{product.sellerName}</span>
+              <RatingBadge rating={product.sellerRating} className="flex-shrink-0" />
+            </span>
+          )}
           <h3 className="text-sm font-medium truncate">{product.title}</h3>
           <span className="text-xs text-muted">
             Size {product.size}

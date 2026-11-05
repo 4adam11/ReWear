@@ -8,6 +8,7 @@ import { useAuth } from "../context/AuthContext";
 import { thumb, PLACEHOLDER_IMAGE } from "../utils/image";
 import StatusBadge from "../components/ui/StatusBadge";
 import OrderProgress, { isRentalOrder } from "../components/orders/OrderProgress";
+import { ProblemBox, DisputeBanner } from "../components/orders/OrderExtras";
 
 const TABS = [
   { key: "confirmed", label: "New" },
@@ -16,6 +17,7 @@ const TABS = [
   { key: "delivered", label: "Delivered" },
   { key: "completed", label: "Completed" },
   { key: "cancelled", label: "Cancelled" },
+  { key: "refunded", label: "Refunded" },
 ];
 
 const COURIERS = ["Delhivery", "Blue Dart", "DTDC", "Ekart", "India Post", "Self delivery"];
@@ -73,7 +75,9 @@ const SaleCard = ({ order, onUpdate }) => {
 
       <div className="p-5 grid md:grid-cols-[1fr_260px] gap-6">
         <div className="space-y-4 min-w-0">
-          {status === "cancelled" ? (
+          {status === "refunded" ? (
+            <p className="text-sm text-muted">Refunded to the buyer after a problem report.</p>
+          ) : status === "cancelled" ? (
             <p className="text-sm text-red-700">
               Cancelled by the {order.cancel?.by || "buyer"}
               {order.cancel?.reason ? `: ${order.cancel.reason}` : "."}
@@ -117,6 +121,12 @@ const SaleCard = ({ order, onUpdate }) => {
           )}
           {status === "delivered" && rental && (
             <p className="text-sm text-muted">Due back by {format(returnBy, "d MMM yyyy")}. Confirm once you have it.</p>
+          )}
+
+          <DisputeBanner dispute={order.dispute} />
+
+          {status === "delivered" && rental && order.dispute?.status !== "open" && !form && (
+            <ProblemBox order={order} role="seller" onDone={(dispute) => onUpdate({ ...order, dispute })} />
           )}
 
           {error && <p className="text-sm text-red-600">{error}</p>}
@@ -231,7 +241,7 @@ const SaleCard = ({ order, onUpdate }) => {
                 </button>
               )}
 
-              {status === "delivered" && rental && (
+              {status === "delivered" && rental && order.dispute?.status !== "open" && (
                 <button
                   disabled={busy}
                   onClick={() => window.confirm("Confirm the outfit has been returned to you?") && act("return")}

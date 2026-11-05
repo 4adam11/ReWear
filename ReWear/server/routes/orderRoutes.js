@@ -5,6 +5,10 @@ import Order, { ORDER_STATUSES } from "../models/Order.js";
 import Product, { LIVE } from "../models/Product.js";
 import protect from "../middleware/authMiddleware.js";
 import { notify } from "../utils/notify.js";
+import Offer from "../models/Offer.js";
+import Review from "../models/Review.js";
+import Dispute from "../models/Dispute.js";
+import { findUsableOffer } from "./offerRoutes.js";
 import {
   DAY_MS,
   parseDay,
@@ -133,7 +137,18 @@ const buildItems = async (rawItems, buyerId) => {
       }
 
       line.unitPrice = product.price;
-      line.lineTotal = product.price;
+
+      // An accepted "make an offer" price, for this buyer only
+      if (raw.offerId) {
+        const offer = await findUsableOffer(raw.offerId, buyerId, product._id);
+        if (!offer) {
+          return { error: `Your accepted offer on "${product.title}" has expired or was already used` };
+        }
+        line.unitPrice = offer.amount;
+        line.offer = offer._id;
+      }
+
+      line.lineTotal = line.unitPrice;
     }
 
     items.push(line);
@@ -265,6 +280,11 @@ router.post("/", protect, async (req, res) => {
 
     try {
       const orders = await Order.insertMany(docs);
+
+      const offerIds = items.map((i) => i.offer).filter(Boolean);
+      if (offerIds.length) {
+        await Offer.updateMany({ _id: { $in: offerIds } }, { $set: { status: "used" } });
+      }
       return { status: 201, body: { checkoutId, orders } };
     } catch (err) {
       await Product.updateMany({ _id: { $in: reserved } }, { $set: { status: "live" } });
@@ -286,6 +306,26 @@ router.post("/", protect, async (req, res) => {
   res.status(result.status).json(result.body);
 });
 
+// Adds whether the buyer reviewed each order and any problem report on it
+const withExtras = async (orders) => {
+  const ids = orders.map((o) => o._id);
+  const [reviews, disputes] = await Promise.all([
+    Review.find({ order: { $in: ids } }).select("order rating").lean(),
+    Dispute.find({ order: { $in: ids } }).sort({ createdAt: -1 }).lean(),
+  ]);
+  const reviewOf = new Map(reviews.map((r) => [r.order.toString(), r.rating]));
+  const disputeOf = new Map();
+  disputes.forEach((d) => {
+    if (!disputeOf.has(d.order.toString())) disputeOf.set(d.order.toString(), d);
+  });
+
+  return orders.map((o) => ({
+    ...o,
+    reviewRating: reviewOf.get(o._id.toString()) || null,
+    dispute: disputeOf.get(o._id.toString()) || null,
+  }));
+};
+
 //
 // BUYER: my orders
 //
@@ -297,7 +337,7 @@ router.get("/", protect, async (req, res) => {
     .populate("seller", "name")
     .lean();
 
-  res.json(orders);
+  res.json(await withExtras(orders));
 });
 
 //
@@ -324,11 +364,11 @@ router.get("/sales", protect, async (req, res) => {
       items,
       buyer: o.user?.name,
       user: undefined,
-      earnings: o.status === "cancelled" ? 0 : items.reduce((sum, i) => sum + i.lineTotal, 0) - (o.discount || 0),
+      earnings: ["cancelled", "refunded"].includes(o.status) ? 0 : items.reduce((sum, i) => sum + i.lineTotal, 0) - (o.discount || 0),
     };
   });
 
-  res.json(sales);
+  res.json(await withExtras(sales));
 });
 
 //
@@ -388,6 +428,11 @@ router.patch("/:id/:action", protect, async (req, res) => {
   }
   if (action.rental && !isRental(order)) {
     return res.status(400).json({ message: "Only rentals can be marked as returned" });
+  }
+
+  // An admin decides orders with an open problem report
+  if (["complete", "return"].includes(name) && (await Dispute.exists({ order: order._id, status: "open" }))) {
+    return res.status(400).json({ message: "There's an open problem report on this order. A ReWear admin will resolve it." });
   }
 
   const note = typeof req.body.reason === "string" ? req.body.reason.trim().slice(0, 500) : "";

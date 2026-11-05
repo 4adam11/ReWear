@@ -77,6 +77,29 @@ const Checkout = () => {
     pincode: "",
   });
 
+  const [saved, setSaved] = useState([]);
+  const [chosen, setChosen] = useState("new");
+  const [saveAddress, setSaveAddress] = useState(true);
+
+  // Saved addresses: pick one instead of typing
+  useEffect(() => {
+    if (!user) return;
+    axios
+      .get(`${API}/users/me`, authHeader)
+      .then(({ data }) => {
+        setSaved(data.addresses || []);
+        if (data.addresses?.length) pickSaved(data.addresses[0]);
+      })
+      .catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  function pickSaved(a) {
+    setChosen(a._id);
+    setFieldErrors({});
+    setAddress({ name: a.name, phone: a.phone, line: a.line, city: a.city, state: a.state, pincode: a.pincode });
+  }
+
   const fetchQuote = (promoCode) =>
     axios.post(`${API}/orders/quote`, { items: toOrderItems(items), promoCode }, authHeader);
 
@@ -162,6 +185,13 @@ const Checkout = () => {
         authHeader
       );
 
+      // Remember a newly typed address for next time
+      if (chosen === "new" && saveAddress && saved.length < 5) {
+        axios
+          .post(`${API}/users/me/addresses`, { ...address, phone: address.phone.replace(/s/g, "") }, authHeader)
+          .catch(() => {});
+      }
+
       clearCart();
       navigate("/success", { replace: true, state: { orders: data.orders, paymentMethod } });
     } catch (err) {
@@ -191,6 +221,37 @@ const Checkout = () => {
         <div className="flex flex-col gap-5">
           <div id="delivery">
             <Step n="1" title="Delivery address">
+              {saved.length > 0 && (
+                <div role="radiogroup" aria-label="Saved addresses" className="mb-5 flex flex-col gap-2.5">
+                  {saved.map((a) => (
+                    <label
+                      key={a._id}
+                      className={`flex gap-3 px-4 py-3 rounded-md border cursor-pointer ${chosen === a._id ? "border-brand bg-cream" : "border-line hover:border-brand"}`}
+                    >
+                      <input type="radio" name="saved-address" checked={chosen === a._id} onChange={() => pickSaved(a)} className="mt-1 w-4 h-4 accent-[#6b4430]" />
+                      <span className="text-sm">
+                        <span className="block font-semibold">{a.name} · {a.phone}</span>
+                        <span className="block text-muted">{a.line}, {a.city}, {a.state} - {a.pincode}</span>
+                      </span>
+                    </label>
+                  ))}
+                  <label className={`flex items-center gap-3 px-4 py-3 rounded-md border cursor-pointer ${chosen === "new" ? "border-brand bg-cream" : "border-line hover:border-brand"}`}>
+                    <input
+                      type="radio"
+                      name="saved-address"
+                      checked={chosen === "new"}
+                      onChange={() => {
+                        setChosen("new");
+                        setAddress({ name: user?.name || "", phone: "", line: "", city: "", state: "", pincode: "" });
+                      }}
+                      className="w-4 h-4 accent-[#6b4430]"
+                    />
+                    <span className="text-sm font-semibold">Deliver to a new address</span>
+                  </label>
+                </div>
+              )}
+
+              {chosen === "new" && (
               <div className="grid gap-4 sm:grid-cols-2">
                 <Field id="a-name" label="Full name" error={fieldErrors.name}>
                   <input id="a-name" autoComplete="name" value={address.name} onChange={set("name")} className={inputClass} />
@@ -212,7 +273,14 @@ const Checkout = () => {
                     <input id="a-pin" inputMode="numeric" autoComplete="postal-code" maxLength={6} value={address.pincode} onChange={set("pincode")} className={inputClass} />
                   </Field>
                 </div>
+                {saved.length < 5 && (
+                  <label className="sm:col-span-2 flex items-center gap-2.5 text-sm cursor-pointer">
+                    <input type="checkbox" checked={saveAddress} onChange={(e) => setSaveAddress(e.target.checked)} className="w-4 h-4 accent-[#6b4430]" />
+                    Save this address for next time
+                  </label>
+                )}
               </div>
+              )}
             </Step>
           </div>
 
