@@ -13,6 +13,7 @@ import uploadRoutes from "./routes/uploadRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import notificationRoutes from "./routes/notificationRoutes.js";
 import Product from "./models/Product.js";
+import Order from "./models/Order.js";
 import { loadModels } from "./utils/imageModeration.js";
 
 // Fail fast instead of running with a missing or guessable secret
@@ -88,6 +89,18 @@ mongoose.connect(process.env.MONGO_URI)
       { $set: { status: "live", "review.everApproved": true } }
     );
     if (migrated.modifiedCount) console.log(`Marked ${migrated.modifiedCount} older listings as live`);
+
+    // Older orders join the order workflow as "confirmed", owned by their (first) seller
+    const oldOrders = await Order.updateMany({ status: "placed" }, [
+      {
+        $set: {
+          status: "confirmed",
+          seller: { $ifNull: ["$seller", { $arrayElemAt: ["$items.seller", 0] }] },
+          timeline: [{ status: "confirmed", at: "$createdAt", by: "system" }],
+        },
+      },
+    ], { updatePipeline: true });
+    if (oldOrders.modifiedCount) console.log(`Moved ${oldOrders.modifiedCount} older orders into the order workflow`);
     app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
     // Load the image models in the background so the first upload isn't slow.

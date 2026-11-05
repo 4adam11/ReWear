@@ -1,4 +1,4 @@
-import Order from "../models/Order.js";
+import Order, { ACTIVE_ORDER } from "../models/Order.js";
 
 export const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -19,7 +19,7 @@ export const todayUtc = () => {
 // Rentals on this product that haven't ended yet (cancelled orders don't count)
 export const upcomingRentals = async (productId) => {
   const orders = await Order.find({
-    status: "placed",
+    status: ACTIVE_ORDER,
     items: {
       $elemMatch: { product: productId, mode: "rent", rentEnd: { $gte: todayUtc() } },
     },
@@ -35,7 +35,7 @@ export const upcomingRentals = async (productId) => {
 // True if [start, end] (inclusive days) overlaps an existing booking
 export const hasRentalClash = (productId, start, end) =>
   Order.exists({
-    status: "placed",
+    status: ACTIVE_ORDER,
     items: {
       $elemMatch: {
         product: productId,

@@ -1,371 +1,292 @@
-import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import axios from "axios";
-
-import {
-  Package,
-  CircleX,
-  ArrowRight,
-  ShoppingBag,
-} from "lucide-react";
-
-import { motion } from "framer-motion";
+import { format } from "date-fns";
+import { Truck, ShoppingBag, ChevronDown, ChevronUp } from "lucide-react";
 
 import API from "../utils/api";
+import { useAuth } from "../context/AuthContext";
 import { thumb, PLACEHOLDER_IMAGE } from "../utils/image";
+import StatusBadge from "../components/ui/StatusBadge";
+import OrderProgress, { isRentalOrder } from "../components/orders/OrderProgress";
 
-const Orders = () => {
-  const navigate = useNavigate();
+const PAYMENT = { card: "Card", upi: "UPI", cod: "Cash on delivery" };
 
-  const [orders, setOrders] =
-    useState([]);
+const TIMELINE_LABEL = {
+  confirmed: "Order confirmed",
+  accepted: "Accepted by seller",
+  shipped: "Shipped",
+  delivered: "Delivered",
+  returned: "Returned to seller",
+  completed: "Completed",
+  cancelled: "Cancelled",
+};
 
-  const [loading, setLoading] =
-    useState(true);
+const money = (n) => `₹${(n || 0).toLocaleString("en-IN")}`;
 
-  const [error, setError] =
-    useState("");
+const OrderCard = ({ order, onUpdate }) => {
+  const { authHeader } = useAuth();
+  const [open, setOpen] = useState(false);
+  const [busy, setBusy] = useState(false);
 
-  const getUser = () =>
-    JSON.parse(
-      localStorage.getItem("user")
-    );
+  const rental = isRentalOrder(order);
+  const status = order.status === "placed" ? "confirmed" : order.status;
 
-  // FETCH ORDERS
-  useEffect(() => {
-    const fetchOrders = async () => {
-      const user = getUser();
+  const act = async (action, confirmText) => {
+    if (confirmText && !window.confirm(confirmText)) return;
 
-      if (!user) {
-        navigate("/login");
-
-        return;
-      }
-
-      try {
-        const { data } =
-          await axios.get(
-            `${API}/orders`,
-            {
-              headers: {
-                Authorization: `Bearer ${user.token}`,
-              },
-            }
-          );
-
-        setOrders(data);
-      } catch (err) {
-        console.error(err);
-
-        setError(
-          "Failed to load orders"
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchOrders();
-  }, []);
-
-  // CANCEL (orders stay in your history; bought items go back on sale)
-  const handleCancel = async (
-    id
-  ) => {
-    const confirmCancel =
-      window.confirm(
-        "Cancel this order?"
-      );
-
-    if (!confirmCancel) return;
-
-    const user = getUser();
-
+    setBusy(true);
     try {
-      const { data } =
-        await axios.patch(
-          `${API}/orders/${id}/cancel`,
-          {},
-          {
-            headers: {
-              Authorization: `Bearer ${user.token}`,
-            },
-          }
-        );
-
-      setOrders((prev) =>
-        prev.map((order) =>
-          order._id === id
-            ? data
-            : order
-        )
-      );
+      const { data } = await axios.patch(`${API}/orders/${order._id}/${action}`, {}, authHeader);
+      onUpdate({ ...data, seller: order.seller });
     } catch (err) {
-      console.error(err);
-
-      alert(
-        err.response?.data?.message ||
-        "Failed to cancel order"
-      );
+      alert(err.response?.data?.message || "Something went wrong");
+    } finally {
+      setBusy(false);
     }
   };
 
-  // LOADING
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-[#faf6ef] flex items-center justify-center">
+  return (
+    <article className="bg-white border border-gray-200 rounded-xl overflow-hidden">
 
-        <div className="text-center">
-
-          <div className="w-12 h-12 border-4 border-[#2b1d14]/20 border-t-[#2b1d14] rounded-full animate-spin mx-auto" />
-
-          <p className="mt-4 text-gray-500">
-            Loading orders...
-          </p>
-
+      {/* HEADER */}
+      <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-3 bg-gray-50 border-b border-gray-200 text-sm">
+        <div className="flex flex-wrap gap-x-6 gap-y-1 text-gray-600">
+          <span>
+            Ordered <span className="text-gray-900">{format(new Date(order.createdAt), "d MMM yyyy")}</span>
+          </span>
+          <span>
+            Total <span className="text-gray-900 font-medium">{money(order.total)}</span>
+          </span>
+          <span>
+            Sold by <span className="text-gray-900">{order.seller?.name || "a ReWear seller"}</span>
+          </span>
         </div>
 
+        <span className="font-mono text-xs text-gray-500">#{order._id.slice(-6).toUpperCase()}</span>
       </div>
-    );
-  }
 
-  return (
-    <div className="min-h-screen bg-[#faf6ef] py-8 sm:py-10">
+      <div className="p-5 space-y-5">
 
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
+        {/* STATUS */}
+        <div className="flex flex-wrap items-center gap-2">
+          <StatusBadge status={status} />
+          {rental && <span className="text-xs text-gray-500">Rental</span>}
+          <span className="text-xs text-gray-500">· {PAYMENT[order.paymentMethod]}</span>
+        </div>
 
-        {/* HEADER */}
-        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-5 mb-10">
+        {status === "cancelled" ? (
+          <p className="text-sm text-red-700">
+            Cancelled by the {order.cancel?.by || "buyer"}
+            {order.cancel?.reason ? `: ${order.cancel.reason}` : "."}
+          </p>
+        ) : (
+          <OrderProgress order={order} />
+        )}
 
-          <div>
-
-            <h1 className="text-3xl sm:text-4xl font-semibold text-[#2b1d14]">
-              My Orders
-            </h1>
-
-            <p className="mt-2 text-sm text-gray-500">
-              Track and manage your
-              fashion orders.
-            </p>
-
+        {/* TRACKING */}
+        {order.shipping?.trackingNumber && (
+          <div className="flex items-center gap-2 text-sm text-gray-700 rounded-lg bg-gray-50 px-3 py-2">
+            <Truck size={16} />
+            {order.shipping.courier} · Tracking <span className="font-mono">{order.shipping.trackingNumber}</span>
           </div>
+        )}
 
-          {/* COUNT */}
-          {orders.length > 0 && (
-            <div className="px-4 py-2 rounded-xl bg-white border border-gray-100 shadow-sm text-sm text-gray-600 w-fit">
+        {/* ITEMS */}
+        <ul className="divide-y divide-gray-100">
+          {order.items.map((item, idx) => (
+            <li key={idx} className="py-3 first:pt-0 flex gap-4">
+              <Link to={`/product/${item.product}`} className="flex-shrink-0">
+                <img
+                  src={thumb(item.image || item.images?.[0], 200) || PLACEHOLDER_IMAGE}
+                  alt={item.title}
+                  loading="lazy"
+                  className="w-16 h-20 rounded-lg object-cover border border-gray-200"
+                />
+              </Link>
 
-              {orders.length} order
-              {orders.length > 1
-                ? "s"
-                : ""}
+              <div className="flex-1 min-w-0">
+                <Link to={`/product/${item.product}`} className="font-medium text-gray-900 hover:underline">
+                  {item.title || "Item"}
+                </Link>
+                <p className="text-sm text-gray-600">
+                  {item.mode === "rent"
+                    ? `Rent ${format(new Date(item.rentStart), "d MMM")} – ${format(new Date(item.rentEnd), "d MMM")} (${item.days} day${item.days > 1 ? "s" : ""})`
+                    : "Bought"}
+                </p>
+              </div>
 
-            </div>
+              <p className="text-sm font-medium text-gray-900 whitespace-nowrap">{money(item.lineTotal)}</p>
+            </li>
+          ))}
+        </ul>
+
+        {/* WHAT HAPPENS NEXT */}
+        {status === "delivered" && rental && (
+          <p className="text-sm text-gray-600">
+            Please return the outfit to the seller by{" "}
+            {format(new Date(Math.max(...order.items.map((i) => new Date(i.rentEnd || 0)))), "d MMM")}. The order completes when they confirm it's back.
+          </p>
+        )}
+
+        {/* ACTIONS + DETAILS */}
+        <div className="flex flex-wrap items-center gap-2">
+          {status === "shipped" && (
+            <button
+              disabled={busy}
+              onClick={() => act("deliver")}
+              className="px-4 py-2 rounded-lg bg-gray-900 text-white text-sm font-medium hover:bg-gray-800 disabled:opacity-40"
+            >
+              I've received it
+            </button>
           )}
 
+          {status === "delivered" && !rental && (
+            <button
+              disabled={busy}
+              onClick={() => act("complete", "Is everything as described? This completes the order.")}
+              className="px-4 py-2 rounded-lg bg-gray-900 text-white text-sm font-medium hover:bg-gray-800 disabled:opacity-40"
+            >
+              Everything's fine, complete order
+            </button>
+          )}
+
+          {["confirmed", "accepted"].includes(status) && (
+            <button
+              disabled={busy}
+              onClick={() => act("cancel", "Cancel this order?")}
+              className="px-4 py-2 rounded-lg border border-red-200 text-red-700 text-sm font-medium hover:bg-red-50 disabled:opacity-40"
+            >
+              Cancel order
+            </button>
+          )}
+
+          <button
+            onClick={() => setOpen(!open)}
+            className="ml-auto inline-flex items-center gap-1 text-sm text-gray-600 hover:text-gray-900"
+          >
+            {open ? "Hide details" : "Order details"}
+            {open ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+          </button>
         </div>
 
-        {/* ERROR */}
-        {error && (
-          <div className="mb-6 bg-red-50 border border-red-200 text-red-500 text-sm px-4 py-3 rounded-xl">
-            {error}
-          </div>
-        )}
+        {open && (
+          <div className="grid sm:grid-cols-2 gap-5 border-t border-gray-100 pt-4 text-sm">
+            <div>
+              <p className="font-medium text-gray-900">Delivery address</p>
+              <p className="mt-1 text-gray-600">{order.address?.name}</p>
+              <p className="text-gray-600">{order.address?.address}</p>
+              <p className="text-gray-600">{order.address?.phone}</p>
 
-        {/* EMPTY */}
-        {orders.length === 0 ? (
-          <div className="bg-white border border-gray-100 rounded-3xl shadow-sm py-20 px-6 text-center">
-
-            <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center mx-auto">
-
-              <ShoppingBag
-                size={34}
-                className="text-gray-500"
-              />
-
+              <p className="mt-4 font-medium text-gray-900">Payment</p>
+              <p className="mt-1 text-gray-600">
+                Items {money(order.subtotal)}
+                {order.discount > 0 && ` · Discount −${money(order.discount)}`} · Total {money(order.total)}
+              </p>
             </div>
 
-            <h2 className="mt-6 text-2xl font-semibold text-[#2b1d14]">
-              No Orders Yet
-            </h2>
-
-            <p className="mt-3 text-gray-500 max-w-md mx-auto leading-7">
-              Looks like you haven’t
-              placed any fashion orders
-              yet.
-            </p>
-
-            <button
-              onClick={() =>
-                navigate("/explore")
-              }
-
-              className="mt-8 inline-flex items-center gap-2 bg-[#2b1d14] text-white px-7 py-4 rounded-2xl font-medium hover:opacity-95 transition"
-            >
-              Start Shopping
-
-              <ArrowRight size={18} />
-
-            </button>
-
-          </div>
-        ) : (
-          <div className="space-y-5">
-
-            {orders.map(
-              (order, index) => {
-                const firstItem =
-                  order.items?.[0];
-
-                const image =
-                  thumb(
-                    firstItem?.images?.[0] ||
-                    firstItem?.image,
-                    300
-                  ) ||
-                  PLACEHOLDER_IMAGE;
-
-                return (
-                  <motion.div
-                    key={order._id}
-
-                    initial={{
-                      opacity: 0,
-                      y: 30,
-                    }}
-
-                    animate={{
-                      opacity: 1,
-                      y: 0,
-                    }}
-
-                    transition={{
-                      delay:
-                        index * 0.05,
-                    }}
-
-                    className="bg-white border border-gray-100 rounded-3xl p-5 sm:p-6 shadow-sm hover:shadow-md transition"
-                  >
-
-                    <div className="flex flex-col lg:flex-row gap-6 lg:items-center lg:justify-between">
-
-                      {/* LEFT */}
-                      <div className="flex flex-col sm:flex-row gap-5">
-
-                        {/* IMAGE */}
-                        <div className="rounded-2xl overflow-hidden bg-gray-100 flex-shrink-0">
-
-                          <img
-                            src={image}
-
-                            alt={
-                              firstItem?.title
-                            }
-
-                            className="w-full sm:w-32 h-[220px] sm:h-36 object-cover"
-                          />
-
-                        </div>
-
-                        {/* INFO */}
-                        <div className="flex flex-col justify-between">
-
-                          <div>
-
-                            <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium ${order.status === "cancelled"
-                                ? "bg-red-50 text-red-600"
-                                : "bg-green-50 text-green-600"
-                              }`}>
-
-                              <Package size={14} />
-
-                              {order.status === "cancelled"
-                                ? "Cancelled"
-                                : "Order Placed"}
-
-                            </div>
-
-                            <h2 className="mt-4 text-2xl font-semibold text-[#2b1d14]">
-                              {firstItem?.title ||
-                                "Order"}
-                            </h2>
-
-                            <p className="mt-2 text-sm text-gray-500">
-                              Order ID:{" "}
-
-                              <span className="font-medium text-gray-700">
-                                #
-                                {order._id
-                                  .slice(-6)
-                                  .toUpperCase()}
-                              </span>
-
-                            </p>
-
-                            <p className="mt-1 text-sm text-gray-500">
-                              {order.items
-                                ?.length || 0}{" "}
-                              item
-                              {order.items
-                                ?.length > 1
-                                ? "s"
-                                : ""}
-                            </p>
-
-                          </div>
-
-                        </div>
-
-                      </div>
-
-                      {/* RIGHT */}
-                      <div className="flex flex-col sm:flex-row lg:flex-col items-start sm:items-center lg:items-end justify-between gap-5">
-
-                        {/* PRICE */}
-                        <div className="text-left sm:text-right">
-
-                          <p className="text-sm text-gray-500">
-                            Total Amount
-                          </p>
-
-                          <h3 className="mt-1 text-3xl font-semibold text-[#2b1d14]">
-                            ₹ {order.total}
-                          </h3>
-
-                        </div>
-
-                        {/* ACTION */}
-                        {order.status !== "cancelled" && (
-                          <button
-                            onClick={() =>
-                              handleCancel(
-                                order._id
-                              )
-                            }
-
-                            className="inline-flex items-center gap-2 text-sm font-medium text-red-500 hover:text-red-600 transition"
-                          >
-
-                            <CircleX size={16} />
-
-                            Cancel Order
-
-                          </button>
-                        )}
-
-                      </div>
-
+            <div>
+              <p className="font-medium text-gray-900">History</p>
+              <ol className="mt-2 space-y-2">
+                {(order.timeline || []).map((t, i) => (
+                  <li key={i} className="flex gap-3">
+                    <span className="mt-1.5 w-2 h-2 rounded-full bg-gray-400 flex-shrink-0" />
+                    <div>
+                      <p className="text-gray-900">{TIMELINE_LABEL[t.status] || t.status}</p>
+                      <p className="text-xs text-gray-500">
+                        {format(new Date(t.at), "d MMM yyyy, HH:mm")}
+                        {t.note ? ` · ${t.note}` : ""}
+                      </p>
                     </div>
-
-                  </motion.div>
-                );
-              }
-            )}
-
+                  </li>
+                ))}
+              </ol>
+            </div>
           </div>
         )}
-
       </div>
+    </article>
+  );
+};
 
+const FILTERS = [
+  { key: "all", label: "All orders" },
+  { key: "active", label: "In progress" },
+  { key: "completed", label: "Completed" },
+  { key: "cancelled", label: "Cancelled" },
+];
+
+const Orders = () => {
+  const { authHeader } = useAuth();
+  const [orders, setOrders] = useState([]);
+  const [filter, setFilter] = useState("all");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    axios
+      .get(`${API}/orders`, authHeader)
+      .then(({ data }) => setOrders(data))
+      .catch(() => setError("Failed to load orders"))
+      .finally(() => setLoading(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const shown = orders.filter((o) =>
+    filter === "all" ? true
+      : filter === "active" ? !["completed", "cancelled"].includes(o.status)
+        : o.status === filter
+  );
+
+  return (
+    <div className="min-h-screen bg-[#faf6ef]">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-5">
+
+        <div>
+          <h1 className="text-2xl font-semibold text-gray-900">My orders</h1>
+          <p className="mt-1 text-sm text-gray-500">Track deliveries, rentals and returns.</p>
+        </div>
+
+        <div className="flex gap-1 overflow-x-auto bg-white border border-gray-200 rounded-lg p-1 w-fit max-w-full">
+          {FILTERS.map((f) => (
+            <button
+              key={f.key}
+              onClick={() => setFilter(f.key)}
+              className={`px-3 py-1.5 rounded-md text-sm font-medium whitespace-nowrap transition ${filter === f.key ? "bg-gray-900 text-white" : "text-gray-600 hover:bg-gray-50"}`}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
+
+        {error && <p className="text-sm text-red-600">{error}</p>}
+
+        {loading ? (
+          <div className="space-y-3">
+            {[1, 2].map((i) => (
+              <div key={i} className="h-56 rounded-xl bg-white border border-gray-200 animate-pulse" />
+            ))}
+          </div>
+        ) : shown.length === 0 ? (
+          <div className="rounded-xl border border-dashed border-gray-300 bg-white py-16 text-center">
+            <ShoppingBag className="mx-auto text-gray-400" size={28} />
+            <p className="mt-3 text-gray-900 font-medium">No orders here</p>
+            <Link to="/explore" className="mt-2 inline-block text-sm text-indigo-700 hover:underline">
+              Browse pre-loved fashion
+            </Link>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {shown.map((order) => (
+              <OrderCard
+                key={order._id}
+                order={order}
+                onUpdate={(updated) => setOrders((list) => list.map((o) => (o._id === updated._id ? updated : o)))}
+              />
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

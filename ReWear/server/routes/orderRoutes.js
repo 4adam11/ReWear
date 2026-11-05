@@ -1,8 +1,10 @@
 import express from "express";
 import mongoose from "mongoose";
-import Order from "../models/Order.js";
+import crypto from "node:crypto";
+import Order, { ORDER_STATUSES } from "../models/Order.js";
 import Product, { LIVE } from "../models/Product.js";
 import protect from "../middleware/authMiddleware.js";
+import { notify } from "../utils/notify.js";
 import {
   DAY_MS,
   parseDay,
@@ -181,7 +183,7 @@ router.post("/quote", protect, async (req, res) => {
 });
 
 //
-// CREATE ORDER
+// CREATE ORDERS: one per seller, like split shipments on Amazon/Flipkart
 //
 router.post("/", protect, async (req, res) => {
   const address = validateAddress(req.body.address);
@@ -224,62 +226,105 @@ router.post("/", protect, async (req, res) => {
       reserved.push(item.product);
     }
 
+    // Group lines by seller; the promo discount is shared out by order value
+    const groups = new Map();
+    for (const item of items) {
+      const key = item.seller.toString();
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key).push(item);
+    }
+
     const discount = Math.min(PROMO_CODES[code] || 0, subtotal);
+    const checkoutId = crypto.randomUUID();
+    const sellerGroups = [...groups.entries()];
+    let discountLeft = discount;
+
+    const docs = sellerGroups.map(([seller, lines], idx) => {
+      const groupSubtotal = lines.reduce((s, l) => s + l.lineTotal, 0);
+      const share = idx === sellerGroups.length - 1
+        ? discountLeft
+        : Math.min(discountLeft, Math.round((discount * groupSubtotal) / subtotal));
+      discountLeft -= share;
+
+      return {
+        user: req.user._id,
+        seller,
+        checkoutId,
+        items: lines,
+        subtotal: groupSubtotal,
+        discount: share,
+        promoCode: share ? code : undefined,
+        total: groupSubtotal - share,
+        paymentMethod,
+        payment: { status: paymentMethod === "cod" ? "cod" : "simulated" },
+        address,
+        status: "confirmed",
+        timeline: [{ status: "confirmed", by: "buyer" }],
+      };
+    });
 
     try {
-      const order = await Order.create({
-        user: req.user._id,
-        items,
-        subtotal,
-        discount,
-        promoCode: code || undefined,
-        total: subtotal - discount,
-        paymentMethod,
-        address,
-      });
-
-      return { status: 201, body: order };
+      const orders = await Order.insertMany(docs);
+      return { status: 201, body: { checkoutId, orders } };
     } catch (err) {
       await Product.updateMany({ _id: { $in: reserved } }, { $set: { status: "live" } });
       throw err;
     }
   });
 
+  if (result.status === 201) {
+    for (const order of result.body.orders) {
+      notify(order.seller, {
+        type: "order_new",
+        title: "New order to accept",
+        message: `${order.items.map((i) => i.title).join(", ")} · ₹${order.total.toLocaleString("en-IN")}`,
+        link: "/seller/orders",
+      });
+    }
+  }
+
   res.status(result.status).json(result.body);
 });
 
 //
-// GET USER ORDERS
+// BUYER: my orders
 //
 router.get("/", protect, async (req, res) => {
   const orders = await Order.find({
     user: req.user._id,
-  }).sort({ createdAt: -1 }).lean();
+  })
+    .sort({ createdAt: -1 })
+    .populate("seller", "name")
+    .lean();
 
   res.json(orders);
 });
 
 //
-// GET SALES (orders that include the current user's listings)
+// SELLER: orders for my listings (every status), with the buyer's delivery details
+// ?status=confirmed|accepted|shipped|delivered|completed|cancelled
 //
 router.get("/sales", protect, async (req, res) => {
-  const orders = await Order.find({
-    "items.seller": req.user._id,
-    status: { $ne: "cancelled" },
-  }).sort({ createdAt: -1 }).lean();
+  const filter = {
+    $or: [{ seller: req.user._id }, { seller: { $exists: false }, "items.seller": req.user._id }],
+  };
 
-  // Only expose this seller's lines and the buyer's delivery details
+  if (typeof req.query.status === "string" && ORDER_STATUSES.includes(req.query.status)) {
+    filter.status = req.query.status;
+  }
+
+  const orders = await Order.find(filter).sort({ createdAt: -1 }).populate("user", "name").lean();
+
+  // Only expose this seller's lines (older orders could mix sellers)
   const sales = orders.map((o) => {
-    const items = o.items.filter(
-      (i) => i.seller?.toString() === req.user._id.toString()
-    );
+    const items = o.items.filter((i) => i.seller?.toString() === req.user._id.toString());
 
     return {
-      _id: o._id,
-      createdAt: o.createdAt,
-      address: o.address,
+      ...o,
       items,
-      earnings: items.reduce((sum, i) => sum + i.lineTotal, 0),
+      buyer: o.user?.name,
+      user: undefined,
+      earnings: o.status === "cancelled" ? 0 : items.reduce((sum, i) => sum + i.lineTotal, 0) - (o.discount || 0),
     };
   });
 
@@ -287,35 +332,121 @@ router.get("/sales", protect, async (req, res) => {
 });
 
 //
-// CANCEL ORDER (orders are kept for history instead of being deleted)
+// STATUS CHANGES
+// Each action says who may do it and from which statuses.
 //
-router.patch("/:id/cancel", protect, async (req, res) => {
-  const order = await Order.findById(req.params.id);
+const ACTIONS = {
+  accept: { by: ["seller"], from: ["confirmed"], to: "accepted" },
+  ship: { by: ["seller"], from: ["accepted"], to: "shipped" },
+  deliver: { by: ["buyer", "seller"], from: ["shipped"], to: "delivered" },
+  complete: { by: ["buyer"], from: ["delivered"], to: "completed", sale: true },
+  return: { by: ["seller"], from: ["delivered"], to: "completed", rental: true },
+  cancel: { by: ["buyer", "seller", "admin"], from: ["confirmed", "accepted"], to: "cancelled" },
+};
 
+const MESSAGES = {
+  accepted: { who: "buyer", title: "Your order was accepted", text: "The seller is preparing it for shipping." },
+  shipped: { who: "buyer", title: "Your order has shipped", text: "Track it from your orders page." },
+  delivered: { who: "both", title: "Order delivered", text: "Let us know if everything is as described." },
+  completed: { who: "both", title: "Order completed", text: "Thanks for shopping second-hand!" },
+  cancelled: { who: "both", title: "Order cancelled", text: "" },
+};
+
+const isRental = (order) => order.items.some((i) => i.mode === "rent");
+
+router.patch("/:id/:action", protect, async (req, res) => {
+  const name = req.params.action;
+  const action = ACTIONS[name];
+  if (!action || !mongoose.isValidObjectId(req.params.id)) {
+    return res.status(404).json({ message: "Not found" });
+  }
+
+  const order = await Order.findById(req.params.id);
   if (!order) {
     return res.status(404).json({ message: "Order not found" });
   }
 
-  if (order.user.toString() !== req.user._id.toString()) {
-    return res.status(403).json({ message: "Not authorized" });
+  const me = req.user._id.toString();
+  const sellerId = (order.seller || order.items[0]?.seller)?.toString();
+  const role =
+    order.user.toString() === me ? "buyer"
+      : sellerId === me ? "seller"
+        : req.user.role === "admin" ? "admin"
+          : null;
+
+  if (!role || !action.by.includes(role)) {
+    return res.status(403).json({ message: "You can't do that on this order" });
   }
 
-  if (order.status === "cancelled") {
-    return res.status(400).json({ message: "This order is already cancelled" });
+  const current = order.status === "placed" ? "confirmed" : order.status;
+  if (!action.from.includes(current)) {
+    return res.status(400).json({ message: `This order is already ${current}` });
   }
 
-  const started = order.items.some((i) => i.mode === "rent" && i.rentStart <= todayUtc());
-  if (started) {
-    return res.status(400).json({ message: "A rental in this order has already started" });
+  if (action.sale && isRental(order)) {
+    return res.status(400).json({ message: "Rentals are completed when the seller confirms the item was returned" });
+  }
+  if (action.rental && !isRental(order)) {
+    return res.status(400).json({ message: "Only rentals can be marked as returned" });
   }
 
-  order.status = "cancelled";
+  const note = typeof req.body.reason === "string" ? req.body.reason.trim().slice(0, 500) : "";
+
+  if (name === "ship") {
+    const courier = typeof req.body.courier === "string" ? req.body.courier.trim().slice(0, 60) : "";
+    const trackingNumber = typeof req.body.trackingNumber === "string" ? req.body.trackingNumber.trim().slice(0, 60) : "";
+
+    if (!courier || !trackingNumber) {
+      return res.status(400).json({ message: "Please enter the courier and tracking number" });
+    }
+    order.shipping = { courier, trackingNumber };
+  }
+
+  if (name === "cancel") {
+    if (role !== "buyer" && note.length < 5) {
+      return res.status(400).json({ message: "Please tell the buyer why (at least 5 characters)" });
+    }
+    order.cancel = { by: role, reason: note || undefined };
+  }
+
+  order.status = action.to;
+  order.timeline.push({
+    status: name === "return" ? "returned" : action.to,
+    by: role,
+    note: name === "ship"
+      ? `${order.shipping.courier} · ${order.shipping.trackingNumber}`
+      : note || undefined,
+  });
+  if (name === "return") {
+    order.timeline.push({ status: "completed", by: "system" });
+  }
+
   await order.save();
 
-  // Bought items go back on sale
-  const sold = order.items.filter((i) => i.mode === "sale").map((i) => i.product);
-  if (sold.length) {
-    await Product.updateMany({ _id: { $in: sold } }, { $set: { status: "live" } });
+  // Bought items go back on sale when an order is cancelled
+  if (action.to === "cancelled") {
+    const sold = order.items.filter((i) => i.mode === "sale").map((i) => i.product);
+    if (sold.length) {
+      await Product.updateMany({ _id: { $in: sold }, status: "sold" }, { $set: { status: "live" } });
+    }
+  }
+
+  // Tell the other side
+  const msg = MESSAGES[action.to];
+  if (msg) {
+    const titles = order.items.map((i) => i.title).join(", ");
+    const text = action.to === "cancelled"
+      ? `Cancelled by the ${role}${note ? `: ${note}` : "."}`
+      : action.to === "shipped"
+        ? `${msg.text} ${order.shipping.courier}, tracking ${order.shipping.trackingNumber}.`
+        : msg.text;
+
+    if (role !== "buyer" && (msg.who === "buyer" || msg.who === "both")) {
+      notify(order.user, { type: `order_${action.to}`, title: msg.title, message: `${titles}. ${text}`, link: "/orders" });
+    }
+    if (role !== "seller" && msg.who === "both" && sellerId) {
+      notify(sellerId, { type: `order_${action.to}`, title: msg.title, message: `${titles}. ${text}`, link: "/seller/orders" });
+    }
   }
 
   res.json(order);

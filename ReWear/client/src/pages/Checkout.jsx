@@ -439,6 +439,13 @@ const Checkout = () => {
 
               </div>
 
+              {/* Until a payment gateway is connected, online payments aren't actually charged */}
+              {paymentMethod !== "cod" && (
+                <p className="mt-4 text-sm text-gray-500">
+                  Online payment isn't connected yet, so no money will be charged. Your order is still confirmed and sent to the seller.
+                </p>
+              )}
+
             </div>
 
             {/* PROMO */}

@@ -24,6 +24,7 @@ const Cart = lazy(() => import("./pages/Cart"));
 const Wishlist = lazy(() => import("./pages/WishList"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const SellerListings = lazy(() => import("./pages/SellerListings"));
+const SellerOrders = lazy(() => import("./pages/SellerOrders"));
 const AdminLayout = lazy(() => import("./pages/admin/AdminLayout"));
 const AdminOverview = lazy(() => import("./pages/admin/AdminOverview"));
 const AdminListings = lazy(() => import("./pages/admin/AdminListings"));
@@ -90,6 +91,15 @@ function App() {
             element={
               <ProtectedRoute>
                 <SellerListings />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/seller/orders"
+            element={
+              <ProtectedRoute>
+                <SellerOrders />
               </ProtectedRoute>
             }
           />
