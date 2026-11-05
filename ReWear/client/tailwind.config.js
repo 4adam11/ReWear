@@ -73,6 +73,8 @@ export default {
       },
       fontFamily: {
         sans: ["Inter", "system-ui", "-apple-system", "Segoe UI", "sans-serif"],
+        // Geometric display face for headings, labels and buttons
+        display: ["Jost", "Inter", "system-ui", "sans-serif"],
       },
     },
   },

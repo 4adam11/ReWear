@@ -1,73 +1,59 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
-import { ArrowRight } from "lucide-react";
+import { ShieldCheck, CalendarDays, HandCoins, Truck } from "lucide-react";
 
 import API from "../utils/api";
-import { CATEGORIES, categoryInfo } from "../utils/catalog";
+import { CATEGORIES } from "../utils/catalog";
 import { thumb, cardImage, cardSrcSet, photoSrcSet, PLACEHOLDER_IMAGE } from "../utils/image";
 import ProductCard from "../components/explore/ProductCard";
 import usePageTitle from "../hooks/usePageTitle";
 
-const STEPS = [
-  { title: "Seller lists it", text: "Photos, size, condition and a sale or rental price." },
-  { title: "ReWear reviews it", text: "Our team checks the photos and details before the listing goes live." },
-  { title: "You order", text: "Buy it, or pick rental dates. The seller accepts the order." },
-  { title: "Shipped with tracking", text: "Track it to your door, then confirm it arrived as described." },
+// Real features, shown as the dark strip under the hero
+const PERKS = [
+  { icon: ShieldCheck, title: "Checked by our team", text: "Every listing reviewed", to: "/howitworks" },
+  { icon: CalendarDays, title: "Rent by the day", text: "Pick your dates", to: "/explore?mode=rent" },
+  { icon: HandCoins, title: "Make an offer", text: "Haggle on items for sale", to: "/explore?mode=sale" },
+  { icon: Truck, title: "Tracked delivery", text: "Courier and tracking number", to: "/howitworks" },
 ];
-
-const WEDDING = categoryInfo("wedding");
 
 const Container = ({ className = "", children }) => <div className={`max-w-7xl mx-auto px-4 sm:px-6 ${className}`}>{children}</div>;
 
-const SectionHead = ({ id, title, sub, to, linkText }) => (
-  <div className="flex flex-wrap items-end justify-between gap-3 mb-5">
-    <div>
-      <h2 id={id} className="text-2xl font-bold tracking-tight">
-        {title}
-      </h2>
-      {sub && <p className="mt-1 text-sm text-muted">{sub}</p>}
-    </div>
-    {to && (
-      <Link to={to} className="inline-flex items-center gap-1 text-sm font-semibold text-brand hover:text-brand-dark">
-        {linkText}
-        <ArrowRight size={15} />
-      </Link>
+// Centred, capitalised section heading with an optional coloured kicker above it
+const Heading = ({ id, kicker, kickerColor, children }) => (
+  <div className="text-center mb-6">
+    {kicker && (
+      <p className="font-display text-xs font-semibold uppercase tracking-[0.2em]" style={{ color: kickerColor || "#6e5d50" }}>
+        {kicker}
+      </p>
     )}
+    <h2 id={id} className="mt-1 text-[26px] sm:text-3xl font-bold uppercase tracking-[0.06em]">
+      {children}
+    </h2>
   </div>
 );
 
 const CardRowSkeleton = ({ count }) =>
-  [...Array(count)].map((_, i) => <div key={i} className="aspect-[3/5] rounded-lg bg-white border border-line animate-pulse" />);
+  [...Array(count)].map((_, i) => <div key={i} className="aspect-[3/5] bg-white animate-pulse" />);
 
-// One occasion: a coloured panel on the left and its newest items scrolling on the right
+// One occasion: heading, a swipeable row of its newest pieces and a "shop all" button
 const CategoryRow = ({ info, data, shaded }) => (
-  <section aria-labelledby={`row-${info.value}`} className={shaded ? "bg-sand py-10" : "py-10"}>
-    <Container className="grid gap-4 lg:grid-cols-[250px_minmax(0,1fr)] items-stretch">
-      <div className="rounded-xl p-6 text-white flex flex-col justify-between gap-6" style={{ backgroundColor: info.color }}>
-        <div>
-          <p className="text-xs font-semibold tracking-[0.08em] uppercase text-white/75">{data.count} pieces</p>
-          <h2 id={`row-${info.value}`} className="mt-1.5 text-2xl font-bold tracking-tight">
-            {info.title}
-          </h2>
-          <p className="mt-2 text-sm leading-relaxed text-white/85">{info.tagline}</p>
-        </div>
-        <Link
-          to={`/explore?category=${info.value}`}
-          className="self-start inline-flex items-center gap-1.5 h-10 px-4 rounded-md bg-white text-sm font-semibold hover:bg-paper"
-          style={{ color: info.color }}
-        >
-          Shop {info.label.toLowerCase()}
-          <ArrowRight size={15} />
-        </Link>
-      </div>
-
+  <section aria-labelledby={`row-${info.value}`} className={`py-12 ${shaded ? "bg-sand" : ""}`}>
+    <Container>
+      <Heading id={`row-${info.value}`} kicker={`${info.label} · ${data.count} pieces`} kickerColor={info.color}>
+        {info.title}
+      </Heading>
       <div className="scroll-row flex gap-3 sm:gap-4 overflow-x-auto snap-x snap-mandatory pb-3 -mr-4 pr-4 sm:mr-0 sm:pr-0">
         {data.items.map((p) => (
-          <div key={p._id} className="snap-start flex-shrink-0 w-[170px] sm:w-[200px]">
+          <div key={p._id} className="snap-start flex-shrink-0 w-[170px] sm:w-[210px]">
             <ProductCard product={p} />
           </div>
         ))}
+      </div>
+      <div className="mt-6 flex justify-center">
+        <Link to={`/explore?category=${info.value}`} className="btn btn-outline">
+          Shop {info.label}
+        </Link>
       </div>
     </Container>
   </section>
@@ -86,166 +72,146 @@ const Landing = () => {
   }, []);
 
   const categories = home?.categories || {};
-  const heroImage = categories.wedding?.cover;
+  const heroLeft = categories.wedding?.cover;
+  const heroRight = categories.party?.cover || categories.designer?.cover;
   const rows = CATEGORIES.filter((c) => categories[c.value]?.items?.length >= 2);
 
   return (
     <div className="flex flex-col">
-      <Container className="pt-6 flex flex-col gap-12">
-        {/* FEATURED */}
-        <section aria-label="Featured" className="grid gap-4 lg:grid-cols-3">
-          <div className="lg:col-span-2 rounded-xl overflow-hidden grid sm:grid-cols-2 min-h-[380px]" style={{ backgroundColor: WEDDING.color }}>
-            <div className="p-8 sm:p-10 flex flex-col justify-center gap-4 text-white">
-              <span className="text-xs font-semibold tracking-[0.08em] uppercase text-[#f3c9a4]">Wedding season</span>
-              <h1 className="text-4xl font-bold leading-tight tracking-tight">
-                Rent the lehenga.
-                <br />
-                Keep the memories.
-              </h1>
-              <p className="text-[15px] leading-relaxed text-white/85 max-w-sm">
-                Bridal and festive wear from real wardrobes, for the days you need it. Pick your dates, wear it, send it back.
-              </p>
-              <div className="flex flex-wrap gap-2.5 mt-1">
-                <Link
-                  to="/explore?category=wedding"
-                  className="inline-flex items-center h-11 px-5 rounded-md bg-white text-sm font-semibold hover:bg-paper"
-                  style={{ color: WEDDING.color }}
-                >
-                  Shop wedding wear
-                </Link>
-                <Link
-                  to="/explore?mode=rent"
-                  className="inline-flex items-center h-11 px-5 rounded-md border border-white/45 text-white text-sm font-semibold hover:bg-white/10"
-                >
-                  See rentals
-                </Link>
-              </div>
+      {/* HERO: two photos edge to edge with the message over them */}
+      <section aria-label="Featured" className="relative bg-ink">
+        <div className="grid grid-cols-1 sm:grid-cols-2 h-[460px] sm:h-[560px]">
+          {[heroLeft, heroRight].map((src, i) => (
+            <div key={i} className={`bg-[#3b2a1f] overflow-hidden ${i === 1 ? "hidden sm:block" : ""}`}>
+              {src && <img src={thumb(src, 900)} srcSet={photoSrcSet(src, 900)} alt="" className="w-full h-full object-cover" />}
             </div>
-            <div className="bg-[#5c1a25] min-h-[260px]">
-              {heroImage && (
-                <img src={thumb(heroImage, 700)} srcSet={photoSrcSet(heroImage, 700)} alt="" className="w-full h-full object-cover" />
-              )}
-            </div>
-          </div>
-
-          <div className="rounded-xl bg-white border border-line shadow-card p-7 flex flex-col justify-center gap-3">
-            <span className="text-xs font-semibold tracking-[0.08em] uppercase text-accent">Sell on ReWear</span>
-            <h2 className="text-2xl font-bold leading-snug tracking-tight">Your wardrobe can pay for your next outfit</h2>
-            <p className="text-[15px] leading-relaxed text-muted">
-              List in a few minutes. Set a sale price, a rental price per day, or both, and change it whenever you like.
-            </p>
-            <Link
-              to="/sell"
-              className="self-start mt-1 inline-flex items-center h-11 px-5 rounded-md bg-brand text-white text-sm font-semibold hover:bg-brand-dark"
-            >
-              Start selling
+          ))}
+        </div>
+        <div className="absolute inset-0 bg-black/35 flex flex-col items-center justify-center text-center px-6">
+          <p className="font-display text-xs sm:text-sm font-semibold uppercase tracking-[0.3em] text-[#f3dcc3]">Pre-loved Indian fashion</p>
+          <h1 className="mt-3 text-white text-5xl sm:text-7xl font-extrabold uppercase tracking-[0.04em] leading-none">
+            Wear it again
+          </h1>
+          <p className="mt-4 max-w-md text-white/90 text-[15px] sm:text-base">
+            Lehengas, sherwanis, sarees and streetwear from real wardrobes. Buy to keep, or rent for your dates.
+          </p>
+          <div className="mt-7 flex flex-wrap justify-center gap-3">
+            <Link to="/explore?mode=sale" className="btn btn-light min-w-[150px]">
+              Shop to buy
+            </Link>
+            <Link to="/explore?mode=rent" className="btn btn-light min-w-[150px]">
+              Shop to rent
             </Link>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* OCCASIONS */}
-        <section aria-labelledby="cat-h">
-          <SectionHead id="cat-h" title="Shop by occasion" sub="Every piece is sorted by what you'd wear it to." to="/explore" linkText="View all" />
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
+      {/* PERKS */}
+      <Container className="mt-4">
+        <ul className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          {PERKS.map(({ icon: Icon, title, text, to }) => (
+            <li key={title}>
+              <Link to={to} className="h-full bg-ink text-paper flex flex-col items-center justify-center gap-1.5 px-4 py-6 text-center hover:bg-brand transition-colors">
+                <Icon size={22} className="text-[#e8c39e]" />
+                <span className="font-display text-[13px] font-semibold uppercase tracking-[0.12em]">{title}</span>
+                <span className="text-xs text-paper/75">{text}</span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </Container>
+
+      {/* OCCASIONS */}
+      <section aria-labelledby="cat-h" className="py-12">
+        <Container>
+          <Heading id="cat-h" kicker="Sorted by what you'd wear it to">
+            Shop by occasion
+          </Heading>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
             {CATEGORIES.map((c) => {
               const data = categories[c.value];
               return (
-                <Link
-                  key={c.value}
-                  to={`/explore?category=${c.value}`}
-                  className="group rounded-lg overflow-hidden bg-white border border-line shadow-card hover:shadow-lift hover:-translate-y-0.5 transition duration-200"
-                >
-                  <div className="aspect-[4/5] bg-cream overflow-hidden">
-                    <img
-                      src={cardImage(data?.cover, 300) || PLACEHOLDER_IMAGE}
-                      srcSet={cardSrcSet(data?.cover, 300)}
-                      alt=""
-                      loading="lazy"
-                      className="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-300"
-                    />
-                  </div>
-                  <div className="px-3 py-2.5 text-white flex items-baseline justify-between gap-2" style={{ backgroundColor: c.color }}>
-                    <span className="text-[15px] font-semibold">{c.label}</span>
-                    <span className="text-xs text-white/80">{data ? `${data.count} items` : ""}</span>
-                  </div>
+                <Link key={c.value} to={`/explore?category=${c.value}`} className="group relative block aspect-[3/4] overflow-hidden bg-cream">
+                  <img
+                    src={cardImage(data?.cover, 320) || PLACEHOLDER_IMAGE}
+                    srcSet={cardSrcSet(data?.cover, 320)}
+                    alt=""
+                    loading="lazy"
+                    className="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-500"
+                  />
+                  <span className="absolute inset-x-0 bottom-0 pt-10 pb-3 px-3 bg-gradient-to-t from-black/70 to-transparent text-white">
+                    <span className="block font-display text-lg font-bold uppercase tracking-[0.08em]">{c.label}</span>
+                    <span className="mt-1 block h-[3px] w-8" style={{ backgroundColor: c.color }} aria-hidden="true" />
+                    {data && <span className="mt-1.5 block text-xs text-white/80">{data.count} pieces</span>}
+                  </span>
                 </Link>
               );
             })}
           </div>
-        </section>
+          <div className="mt-6 flex justify-center">
+            <Link to="/explore" className="btn btn-outline">
+              Shop all occasions
+            </Link>
+          </div>
+        </Container>
+      </section>
 
-        {/* HOW AN ORDER WORKS */}
-        <section aria-labelledby="how-h" className="rounded-xl bg-white border border-line shadow-card p-6 sm:p-8">
-          <h2 id="how-h" className="text-2xl font-bold tracking-tight mb-6">
-            How an order works
-          </h2>
-          <ol className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {STEPS.map((s, i) => (
-              <li key={s.title} className="flex gap-3.5">
-                <span className="flex-none w-9 h-9 rounded-full bg-[#f1e6d8] text-brand font-bold flex items-center justify-center">
-                  {i + 1}
-                </span>
-                <div>
-                  <p className="font-semibold">{s.title}</p>
-                  <p className="mt-1 text-sm leading-relaxed text-muted">{s.text}</p>
-                </div>
-              </li>
-            ))}
-          </ol>
-        </section>
-
-        {/* FRESH */}
-        <section aria-labelledby="new-h">
-          <SectionHead id="new-h" title="Fresh on ReWear" sub="Just listed and approved by our team." to="/explore" linkText="See everything" />
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
+      {/* NEW IN */}
+      <section aria-labelledby="new-h" className="pb-12">
+        <Container>
+          <Heading id="new-h" kicker="Just approved">
+            New in
+          </Heading>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-3 gap-y-6 sm:gap-x-4">
             {home ? home.fresh.map((p) => <ProductCard key={p._id} product={p} />) : <CardRowSkeleton count={10} />}
           </div>
-          {home?.fresh.length === 0 && <p className="text-sm text-muted">No listings yet. Be the first to sell something.</p>}
-        </section>
-      </Container>
+          {home?.fresh.length === 0 && <p className="text-center text-sm text-muted">No listings yet. Be the first to sell something.</p>}
+          <div className="mt-8 flex justify-center">
+            <Link to="/explore" className="btn btn-dark">
+              View everything
+            </Link>
+          </div>
+        </Container>
+      </section>
 
-      {/* ONE ROW PER OCCASION, on alternating bands */}
-      <div className="mt-6">
-        {rows.map((c, i) => (
-          <CategoryRow key={c.value} info={c} data={categories[c.value]} shaded={i % 2 === 0} />
-        ))}
-      </div>
+      {/* ONE ROW PER OCCASION */}
+      {rows.map((c, i) => (
+        <CategoryRow key={c.value} info={c} data={categories[c.value]} shaded={i % 2 === 0} />
+      ))}
 
-      <Container className="pt-6 flex flex-col gap-12">
-        {/* RENTALS */}
-        {home?.rentals.length > 0 && (
-          <section aria-labelledby="rent-h">
-            <SectionHead id="rent-h" title="Rent for your next event" sub="Pick your dates; booked days are blocked for everyone else." to="/explore?mode=rent" linkText="All rentals" />
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
+      {/* RENTALS */}
+      {home?.rentals.length > 0 && (
+        <section aria-labelledby="rent-h" className="py-12">
+          <Container>
+            <Heading id="rent-h" kicker="Booked days are blocked for everyone else">
+              Rent for your next event
+            </Heading>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-3 gap-y-6 sm:gap-x-4">
               {home.rentals.map((p) => (
                 <ProductCard key={p._id} product={p} prefer="rent" />
               ))}
             </div>
-          </section>
-        )}
-
-        {/* RENT VS BUY */}
-        <section aria-label="Renting and buying" className="grid gap-4 md:grid-cols-2">
-          <div className="rounded-xl bg-[#efe3d1] p-7 flex flex-col gap-2.5">
-            <h2 className="text-xl font-bold">Renting</h2>
-            <p className="text-[15px] leading-relaxed text-[#4a3a2e]">
-              Choose your dates on the calendar. Booked days are blocked, so nobody else can take your outfit. Return it after the event and the seller confirms it's back.
-            </p>
-            <Link to="/explore?mode=rent" className="mt-1 text-sm font-semibold text-brand hover:text-brand-dark">
-              Browse rentals
-            </Link>
-          </div>
-          <div className="rounded-xl bg-[#e4ddd1] p-7 flex flex-col gap-2.5">
-            <h2 className="text-xl font-bold">Buying</h2>
-            <p className="text-[15px] leading-relaxed text-[#4a3a2e]">
-              Each piece is one of a kind. The seller ships with a courier and tracking number, and you confirm when it arrives as described.
-            </p>
-            <Link to="/explore?mode=sale" className="mt-1 text-sm font-semibold text-brand hover:text-brand-dark">
-              Shop pre-loved
-            </Link>
-          </div>
+          </Container>
         </section>
-      </Container>
+      )}
+
+      {/* SELL BANNER */}
+      <section aria-labelledby="sell-h" className="bg-ink text-paper">
+        <Container className="py-14 grid gap-6 md:grid-cols-[minmax(0,1fr)_auto] items-center">
+          <div>
+            <p className="font-display text-xs font-semibold uppercase tracking-[0.2em] text-[#e8c39e]">Sell on ReWear</p>
+            <h2 id="sell-h" className="mt-2 text-3xl sm:text-4xl font-bold uppercase tracking-[0.04em]">
+              Your wardrobe can pay for your next outfit
+            </h2>
+            <p className="mt-3 max-w-xl text-paper/80">
+              List in a few minutes. Set a sale price, a rental price per day, or both. Our team checks it, buyers find it.
+            </p>
+          </div>
+          <Link to="/sell" className="btn btn-light self-start md:self-center">
+            Start selling
+          </Link>
+        </Container>
+      </section>
     </div>
   );
 };

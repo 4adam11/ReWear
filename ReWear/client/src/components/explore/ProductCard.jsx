@@ -26,6 +26,10 @@ const priceLines = (p, prefer) => {
   return { main: money(p.price), unit: "", extra: rent ? `or rent ${money(p.rent)}/day` : "" };
 };
 
+const Badge = ({ children, className = "" }) => (
+  <span className={`px-1.5 py-0.5 font-display text-[10px] font-semibold uppercase tracking-[0.12em] ${className}`}>{children}</span>
+);
+
 const ProductCard = ({ product, prefer }) => {
   const { wishlist, toggleWishlist } = useWishlist();
   const saved = wishlist.some((p) => p._id === product._id);
@@ -33,72 +37,66 @@ const ProductCard = ({ product, prefer }) => {
   const sold = product.status === "sold";
   const category = categoryInfo(product.category === "street wear" ? "streetwear" : product.category);
   const isNew = product.createdAt && new Date(product.createdAt).getTime() > NEW_SINCE;
+  const href = `/product/${product._id}`;
 
   return (
-    <article className="group relative flex flex-col bg-white border border-line rounded-lg overflow-hidden shadow-card hover:shadow-lift hover:-translate-y-0.5 transition duration-200">
-      <Link to={`/product/${product._id}`} className="flex flex-col flex-1 text-ink">
-        <div className="relative aspect-[3/4] bg-cream overflow-hidden">
+    <article className="group flex flex-col">
+      {/* PHOTO (the heart sits on it, bottom right) */}
+      <div className="relative aspect-[3/4] bg-cream overflow-hidden">
+        <Link to={href} tabIndex={-1} aria-hidden="true" className="block w-full h-full">
           <img
             src={cardImage(product.images?.[0], 400) || PLACEHOLDER_IMAGE}
             srcSet={cardSrcSet(product.images?.[0], 400)}
-            alt={product.title}
+            alt=""
             loading="lazy"
             decoding="async"
-            className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300"
+            className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500"
           />
+        </Link>
 
-          <span className="absolute top-2.5 left-2.5 flex flex-col items-start gap-1">
-            {isNew && !sold && (
-              <span className="px-2 py-0.5 rounded bg-accent text-white text-[11px] font-semibold">New</span>
-            )}
-            {canRent(product) && (
-              <span className="px-2 py-0.5 rounded bg-ink text-paper text-[11px] font-semibold">Rent</span>
-            )}
+        <span className="absolute top-2 left-2 flex flex-col items-start gap-1 pointer-events-none">
+          {isNew && !sold && <Badge className="bg-white text-ink">New in</Badge>}
+          {canRent(product) && !sold && <Badge className="bg-ink text-paper">Rent</Badge>}
+        </span>
+        {sold && (
+          <span className="absolute inset-0 bg-white/60 flex items-center justify-center pointer-events-none">
+            <Badge className="bg-ink text-paper text-[11px] px-2.5 py-1">Sold</Badge>
           </span>
-          {category && !sold && (
-            <span
-              className="absolute bottom-2.5 left-2.5 px-2 py-0.5 rounded text-white text-[11px] font-semibold"
-              style={{ backgroundColor: category.color }}
-            >
-              {category.label}
-            </span>
-          )}
-          {sold && (
-            <span className="absolute inset-x-0 bottom-0 py-1.5 bg-white/90 text-center text-xs font-semibold text-ink">
-              Sold
-            </span>
-          )}
-        </div>
+        )}
 
-        <div className="px-3 pt-2.5 pb-3.5 flex flex-col gap-0.5">
-          {product.sellerName && (
-            <span className="flex items-center gap-1.5 text-xs text-muted min-w-0">
-              <span className="truncate">{product.sellerName}</span>
-              <RatingBadge rating={product.sellerRating} className="flex-shrink-0" />
-            </span>
-          )}
-          <h3 className="text-sm font-medium truncate">{product.title}</h3>
-          <span className="text-xs text-muted">
+        <button
+          type="button"
+          onClick={() => toggleWishlist(product)}
+          aria-label={saved ? `Remove ${product.title} from wishlist` : `Save ${product.title} to wishlist`}
+          aria-pressed={saved}
+          className="absolute bottom-2 right-2 w-9 h-9 rounded-full bg-white flex items-center justify-center text-ink shadow-card hover:scale-105 transition-transform"
+        >
+          <Heart size={17} className={saved ? "fill-brand text-brand" : ""} />
+        </button>
+      </div>
+
+      {/* DETAILS */}
+      <Link to={href} className="pt-2.5 pr-1 flex flex-col gap-0.5 text-ink">
+        {category && (
+          <span className="font-display text-[11px] font-semibold uppercase tracking-[0.12em]" style={{ color: category.color }}>
+            {category.label}
+          </span>
+        )}
+        <h3 className="text-[13px] leading-snug line-clamp-2 group-hover:underline underline-offset-2">{product.title}</h3>
+        <p className="mt-0.5 text-[15px] font-bold">
+          {main}
+          {unit && <span className="text-xs font-medium text-muted"> {unit}</span>}
+        </p>
+        {extra && <span className="text-xs text-muted">{extra}</span>}
+        <span className="mt-0.5 flex items-center gap-1.5 text-[11px] text-muted min-w-0">
+          <span className="truncate">
             Size {product.size}
             {product.condition ? ` · ${product.condition}` : ""}
+            {product.sellerName ? ` · ${product.sellerName}` : ""}
           </span>
-          <p className="mt-1 text-base font-bold">
-            {main}
-            {unit && <span className="text-xs font-medium text-muted"> {unit}</span>}
-          </p>
-          {extra && <span className="text-xs text-muted">{extra}</span>}
-        </div>
+          <RatingBadge rating={product.sellerRating} className="flex-shrink-0" />
+        </span>
       </Link>
-
-      <button
-        type="button"
-        onClick={() => toggleWishlist(product)}
-        aria-label={saved ? "Remove from wishlist" : "Add to wishlist"}
-        aria-pressed={saved}
-        className="absolute top-2 right-2 w-9 h-9 rounded-full bg-white/90 flex items-center justify-center text-ink hover:bg-white shadow-sm"
-      >
-        <Heart size={17} className={saved ? "fill-brand text-brand" : ""} />
-      </button>
     </article>
   );
 };

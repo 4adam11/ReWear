@@ -231,7 +231,7 @@ const ProductDetail = () => {
                 <RatingBadge rating={product.seller.rating} />
               </span>
             )}
-            <h1 className="text-[28px] leading-tight font-bold tracking-tight">{product.title}</h1>
+            <h1 className="text-2xl sm:text-[28px] leading-tight font-semibold">{product.title}</h1>
             {approved && (
               <span className="inline-flex items-center gap-1.5 text-[13px] text-[#3f6b4a]">
                 <ShieldCheck size={16} />
@@ -298,7 +298,7 @@ const ProductDetail = () => {
           {isMine ? (
             <Link
               to={`/sell/${product._id}`}
-              className="h-12 rounded-md bg-brand text-white font-semibold flex items-center justify-center hover:bg-brand-dark"
+              className="btn btn-dark h-12 w-full"
             >
               Edit your listing
             </Link>
@@ -309,7 +309,7 @@ const ProductDetail = () => {
                   type="button"
                   disabled={!!blockedReason}
                   onClick={() => setAdded(addToCart(cartLine) === "updated" ? "Your bag has been updated" : "Added to your bag")}
-                  className="flex-1 h-12 rounded-md bg-brand text-white font-semibold hover:bg-brand-dark disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="btn btn-dark h-12 flex-1 px-4"
                 >
                   {mode === "rent" ? `Add rental to bag · ${money(totalRent)}` : `Add to bag · ${money(salePrice)}`}
                 </button>
@@ -318,7 +318,7 @@ const ProductDetail = () => {
                   onClick={() => toggleWishlist(product)}
                   aria-label={saved ? "Remove from wishlist" : "Add to wishlist"}
                   aria-pressed={saved}
-                  className="w-12 h-12 rounded-md border border-[#d9cbb9] bg-white flex items-center justify-center hover:border-brand"
+                  className="w-12 h-12 rounded-full border-2 border-line bg-white flex items-center justify-center hover:border-ink"
                 >
                   <Heart size={20} className={saved ? "fill-brand text-brand" : ""} />
                 </button>
@@ -327,7 +327,7 @@ const ProductDetail = () => {
                 type="button"
                 disabled={!!blockedReason}
                 onClick={() => navigate("/checkout", { state: { items: [cartLine] } })}
-                className="h-12 rounded-md border border-ink bg-white font-semibold hover:bg-cream disabled:opacity-40 disabled:cursor-not-allowed"
+                className="btn btn-outline h-12 bg-white"
               >
                 {mode === "rent" ? "Rent now" : "Buy now"}
               </button>

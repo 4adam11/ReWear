@@ -5,7 +5,6 @@ import { SlidersHorizontal, X, ChevronLeft, ChevronRight } from "lucide-react";
 
 import API from "../utils/api";
 import { CATEGORIES, SIZES, categoryLabel, categoryInfo } from "../utils/catalog";
-import { cardImage } from "../utils/image";
 import ProductCard from "../components/explore/ProductCard";
 import usePageTitle from "../hooks/usePageTitle";
 import { money } from "../utils/format";
@@ -28,9 +27,9 @@ const SORTS = [
 const list = (v) => (v ? v.split(",").filter(Boolean) : []);
 
 const FilterGroup = ({ title, children }) => (
-  <fieldset className="px-4 py-4 border-b border-[#efe6da] last:border-b-0">
+  <fieldset className="py-4 border-b border-line last:border-b-0">
     <legend className="sr-only">{title}</legend>
-    <p aria-hidden="true" className="text-xs font-bold tracking-[0.06em] uppercase text-muted mb-3">
+    <p aria-hidden="true" className="font-display text-xs font-semibold tracking-[0.14em] uppercase text-ink mb-3">
       {title}
     </p>
     {children}
@@ -135,7 +134,6 @@ const Explore = () => {
 
   // One occasion picked: show its banner
   const single = categories.length === 1 && !seller ? categoryInfo(categories[0]) : null;
-  const bannerImage = single ? result.items[0]?.images?.[0] : null;
   const counts = result.categoryCounts;
 
   const first = result.total ? (page - 1) * PER_PAGE + 1 : 0;
@@ -151,33 +149,24 @@ const Explore = () => {
         <span>{heading}</span>
       </nav>
 
-      {single ? (
-        <section
-          className="mt-3 mb-4 rounded-xl overflow-hidden text-white grid sm:grid-cols-[minmax(0,1fr)_220px]"
-          style={{ backgroundColor: single.color }}
-        >
-          <div className="p-6 sm:p-8 flex flex-col justify-center gap-2">
-            <span className="text-xs font-semibold tracking-[0.08em] uppercase text-white/75">Shop by occasion</span>
-            <h1 className="text-[28px] sm:text-3xl font-bold tracking-tight">{single.title}</h1>
-            <p className="text-[15px] leading-relaxed text-white/85 max-w-xl">{single.tagline}</p>
-            <p className="text-sm font-semibold text-white/90">
-              {loading ? "Loading…" : `${result.total} item${result.total === 1 ? "" : "s"}`}
-              {search && ` for “${search}”`}
-            </p>
+      <header className="mt-3 mb-5">
+        <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
+          <div>
+            {single && (
+              <p className="font-display text-xs font-semibold uppercase tracking-[0.2em]" style={{ color: single.color }}>
+                Shop by occasion
+              </p>
+            )}
+            <h1 className="mt-1 text-3xl sm:text-4xl font-bold uppercase tracking-[0.04em]">{heading}</h1>
+            <span aria-hidden="true" className="mt-2 block h-1 w-12" style={{ backgroundColor: single?.color || "#2b1d14" }} />
           </div>
-          {bannerImage && (
-            <img src={cardImage(bannerImage, 440)} alt="" className="hidden sm:block w-full h-full max-h-56 object-cover" />
-          )}
-        </section>
-      ) : (
-        <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 mt-2 mb-4">
-          <h1 className="text-[26px] font-bold tracking-tight">{heading}</h1>
-          <span className="text-sm text-muted">
-            {loading ? "Loading…" : `${result.total} item${result.total === 1 ? "" : "s"}`}
+          <p className="text-sm text-muted">
+            {loading ? "Loading…" : `${result.total} style${result.total === 1 ? "" : "s"} found`}
             {search && ` for “${search}”`}
-          </span>
+          </p>
         </div>
-      )}
+        {single && <p className="mt-3 max-w-2xl text-[15px] text-muted">{single.tagline}</p>}
+      </header>
 
       {/* CATEGORY PILLS with live counts */}
       <nav aria-label="Occasions" className="scroll-row -mx-4 px-4 sm:mx-0 sm:px-0 mb-5 flex gap-2 overflow-x-auto pb-2">
@@ -213,10 +202,10 @@ const Explore = () => {
         {/* FILTERS */}
         <aside
           aria-label="Filters"
-          className={`${showFilters ? "block" : "hidden"} lg:block w-full lg:w-64 flex-shrink-0 bg-white border border-line rounded-lg lg:sticky lg:top-36`}
+          className={`${showFilters ? "block" : "hidden"} lg:block w-full lg:w-60 flex-shrink-0 bg-white lg:bg-transparent border border-line lg:border-0 lg:border-r lg:pr-5 px-4 lg:px-0 rounded-lg lg:rounded-none lg:sticky lg:top-40`}
         >
-          <div className="flex items-center justify-between px-4 py-3 border-b border-[#efe6da]">
-            <span className="text-[15px] font-bold">Filters</span>
+          <div className="flex items-center justify-between py-3 border-b border-line">
+            <span className="font-display text-sm font-bold uppercase tracking-[0.14em]">Filters</span>
             <button
               type="button"
               onClick={() => setParams(search ? { search } : {})}
@@ -279,8 +268,8 @@ const Explore = () => {
             </div>
           </FilterGroup>
 
-          <div className="px-4 py-4">
-            <label htmlFor="max-price" className="block text-xs font-bold tracking-[0.06em] uppercase text-muted mb-3">
+          <div className="py-4">
+            <label htmlFor="max-price" className="block font-display text-xs font-semibold tracking-[0.14em] uppercase text-ink mb-3">
               Max price{mode === "rent" ? " per day" : ""}
             </label>
             <input
@@ -302,7 +291,7 @@ const Explore = () => {
 
         {/* RESULTS */}
         <section aria-label="Results" className="flex-1 min-w-0 w-full flex flex-col gap-4">
-          <div className="flex flex-wrap items-center justify-between gap-2.5 bg-white border border-line rounded-lg px-3.5 py-2.5">
+          <div className="flex flex-wrap items-center justify-between gap-2.5 border-y border-line py-2.5">
             <div className="flex flex-wrap items-center gap-2">
               <button
                 type="button"
@@ -348,9 +337,9 @@ const Explore = () => {
           </div>
 
           {loading ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-x-3 gap-y-8 sm:gap-x-4">
               {[...Array(8)].map((_, i) => (
-                <div key={i} className="aspect-[3/5] rounded-lg bg-white border border-line animate-pulse" />
+                <div key={i} className="aspect-[3/5] bg-white animate-pulse" />
               ))}
             </div>
           ) : result.items.length === 0 ? (
@@ -366,7 +355,7 @@ const Explore = () => {
               </button>
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-x-3 gap-y-8 sm:gap-x-4">
               {result.items.map((p) => (
                 <ProductCard key={p._id} product={p} prefer={mode === "rent" ? "rent" : undefined} />
               ))}

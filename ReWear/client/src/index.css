@@ -6,6 +6,30 @@ body {
   @apply bg-paper text-ink font-sans antialiased;
 }
 
+@layer base {
+  h1,
+  h2,
+  h3 {
+    @apply font-display;
+  }
+}
+
+@layer components {
+  /* Square, capitalised buttons used on the storefront */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 h-11 px-6 rounded-sm font-display font-semibold uppercase tracking-[0.08em] text-[13px] transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  .btn-dark {
+    @apply bg-ink text-paper hover:bg-brand;
+  }
+  .btn-light {
+    @apply bg-white text-ink hover:bg-paper;
+  }
+  .btn-outline {
+    @apply border-2 border-ink text-ink hover:bg-ink hover:text-paper;
+  }
+}
+
 /* Clear focus ring for keyboard users only */
 :focus-visible {
   outline: 2px solid #6b4430;

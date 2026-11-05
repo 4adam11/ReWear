@@ -67,20 +67,20 @@ const NotificationBell = () => {
       <button
         onClick={() => setOpen(!open)}
         aria-label={`Notifications${data.unread ? ` (${data.unread} unread)` : ""}`}
-        className="relative flex flex-col items-center gap-0.5 min-w-[40px] sm:min-w-[48px] px-1.5 sm:px-2 py-1 text-[12px] font-medium text-ink hover:text-brand"
+        title="Alerts"
+        className="relative flex items-center justify-center w-10 h-10 rounded-full text-paper hover:bg-white/10"
       >
-        <Bell size={20} strokeWidth={1.8} />
-        <span className="hidden sm:block">Alerts</span>
+        <Bell size={21} strokeWidth={1.8} />
 
         {data.unread > 0 && (
-          <span className="absolute top-0 right-1 min-w-[17px] h-[17px] px-1 rounded-full bg-brand text-white text-[10px] font-semibold flex items-center justify-center">
+          <span className="absolute top-0.5 right-0.5 min-w-[17px] h-[17px] px-1 rounded-full bg-[#e8c39e] text-ink text-[10px] font-bold flex items-center justify-center">
             {data.unread > 9 ? "9+" : data.unread}
           </span>
         )}
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-3 w-80 rounded-lg border border-line bg-white overflow-hidden z-50">
+        <div className="absolute right-0 mt-3 w-80 max-w-[calc(100vw-2rem)] rounded-lg border border-line bg-white shadow-lift overflow-hidden z-50">
           <div className="flex items-center justify-between px-4 py-3 border-b border-line">
             <p className="text-sm font-semibold text-ink">Notifications</p>
 

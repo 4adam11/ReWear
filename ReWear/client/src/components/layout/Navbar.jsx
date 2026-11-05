@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, NavLink, useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import {
   Search,
   Plus,
@@ -23,17 +23,17 @@ import { CATEGORIES } from "../../utils/catalog";
 import Logo from "../ui/Logo";
 import NotificationBell from "./NotificationBell";
 
-// Icon with a small label under it, like most shopping sites
+// Round icon button on the dark header bar (the name is read out to screen readers)
 export const HeaderIcon = ({ icon: Icon, label, count, as: Tag = Link, ...props }) => (
   <Tag
     aria-label={label}
+    title={label}
     {...props}
-    className="relative flex flex-col items-center gap-0.5 min-w-[40px] sm:min-w-[48px] px-1.5 sm:px-2 py-1 text-[12px] font-medium text-ink hover:text-brand"
+    className="relative flex items-center justify-center w-10 h-10 rounded-full text-paper hover:bg-white/10"
   >
-    <Icon size={20} strokeWidth={1.8} />
-    <span className="hidden sm:block">{label}</span>
+    <Icon size={21} strokeWidth={1.8} />
     {count > 0 && (
-      <span className="absolute top-0 right-1 min-w-[17px] h-[17px] px-1 rounded-full bg-brand text-white text-[10px] font-semibold flex items-center justify-center">
+      <span className="absolute top-0.5 right-0.5 min-w-[17px] h-[17px] px-1 rounded-full bg-[#e8c39e] text-ink text-[10px] font-bold flex items-center justify-center">
         {count > 9 ? "9+" : count}
       </span>
     )}
@@ -67,7 +67,7 @@ const SearchBar = () => {
   };
 
   return (
-    <form role="search" onSubmit={submit} className="flex flex-1 min-w-0 order-last basis-full md:order-none md:basis-auto">
+    <form role="search" onSubmit={submit} className="relative flex flex-1 min-w-0 max-w-2xl order-last basis-full md:order-none md:basis-auto">
       <label htmlFor="site-search" className="sr-only">
         Search ReWear
       </label>
@@ -77,12 +77,12 @@ const SearchBar = () => {
         value={text}
         onChange={(e) => setText(e.target.value)}
         placeholder="Search lehengas, sherwanis, sarees, kurtas…"
-        className="flex-1 min-w-0 h-11 px-4 rounded-l-md border border-r-0 border-[#d9cbb9] bg-paper text-sm text-ink placeholder:text-muted focus:outline-none focus:border-brand focus:bg-white"
+        className="flex-1 min-w-0 h-10 pl-5 pr-12 rounded-full bg-white text-sm text-ink placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-[#e8c39e]"
       />
       <button
         type="submit"
         aria-label="Search"
-        className="w-[52px] h-11 rounded-r-md bg-brand text-white flex items-center justify-center hover:bg-brand-dark"
+        className="absolute right-1 top-1 w-8 h-8 rounded-full text-ink flex items-center justify-center hover:bg-cream"
       >
         <Search size={18} />
       </button>
@@ -172,6 +172,23 @@ const AccountMenu = () => {
   );
 };
 
+// The two ways to shop, as tabs next to the logo
+const BuyRentSwitch = () => {
+  const location = useLocation();
+  const [params] = useSearchParams();
+  const mode = location.pathname === "/explore" ? params.get("mode") : null;
+
+  const cls = (active) =>
+    `h-[60px] -my-2.5 px-3 sm:px-4 flex items-center font-display text-[13px] font-semibold uppercase tracking-[0.12em] transition-colors ${active ? "bg-[#4a3426] text-white" : "text-paper/85 hover:text-white"}`;
+
+  return (
+    <nav aria-label="Shop" className="hidden sm:flex items-stretch">
+      <Link to="/explore?mode=sale" className={cls(mode === "sale")}>Buy</Link>
+      <Link to="/explore?mode=rent" className={cls(mode === "rent")}>Rent</Link>
+    </nav>
+  );
+};
+
 const CategoryBar = () => {
   const location = useLocation();
   const [params] = useSearchParams();
@@ -179,35 +196,25 @@ const CategoryBar = () => {
   const activeCategory = onExplore ? params.get("category") : null;
   const activeMode = onExplore ? params.get("mode") : null;
 
-  const linkClass = (active, accent) =>
-    `px-3 py-3 whitespace-nowrap text-sm ${active ? "font-semibold text-brand shadow-[inset_0_-2px_0_#6b4430]" : accent ? "font-semibold text-brand hover:text-brand-dark" : "font-medium text-ink hover:text-brand"}`;
+  const isNewIn = onExplore && !activeCategory && !activeMode && !params.get("search");
+  const linkClass = (active) =>
+    `px-3 py-2.5 whitespace-nowrap text-[13px] font-medium transition-colors ${active ? "bg-paper text-ink" : "text-paper/90 hover:bg-white/10 hover:text-white"}`;
 
   return (
-    <nav aria-label="Categories" className="border-t border-[#efe6da]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-stretch gap-1 overflow-x-auto">
+    <nav aria-label="Categories" className="bg-[#4a3426]">
+      <div className="scroll-row max-w-7xl mx-auto px-4 sm:px-6 flex items-stretch overflow-x-auto">
+        <Link to="/explore" className={linkClass(isNewIn)}>
+          New in
+        </Link>
         {CATEGORIES.map((c) => (
-          <Link
-            key={c.value}
-            to={`/explore?category=${c.value}`}
-            className={`${linkClass(activeCategory === c.value)} inline-flex items-center gap-1.5`}
-            style={activeCategory === c.value ? { color: c.color, boxShadow: `inset 0 -2px 0 ${c.color}` } : undefined}
-          >
-            <span aria-hidden="true" className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: c.color }} />
+          <Link key={c.value} to={`/explore?category=${c.value}`} className={`${linkClass(activeCategory === c.value)} inline-flex items-center gap-1.5`}>
+            <span aria-hidden="true" className="w-1.5 h-1.5 rounded-full ring-1 ring-white/40" style={{ backgroundColor: c.color }} />
             {c.label}
           </Link>
         ))}
-
-        <span className="w-px bg-line my-2.5 mx-2 flex-shrink-0" aria-hidden="true" />
-
-        <Link to="/explore?mode=rent" className={linkClass(!activeCategory && activeMode === "rent", true)}>
-          Rent an outfit
+        <Link to="/explore?mode=rent" className={linkClass(!activeCategory && activeMode === "rent")}>
+          Rentals
         </Link>
-        <Link to="/explore?mode=sale" className={linkClass(!activeCategory && activeMode === "sale", true)}>
-          Buy pre-loved
-        </Link>
-        <NavLink to="/howitworks" className={({ isActive }) => `${linkClass(isActive)} ml-auto hidden md:block`}>
-          How it works
-        </NavLink>
       </div>
     </nav>
   );
@@ -218,11 +225,26 @@ const Navbar = () => {
   const { wishlist } = useWishlist();
 
   return (
-    <header className="sticky top-0 z-40 bg-white border-b border-line">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2.5 flex flex-wrap items-center gap-x-4 sm:gap-x-6 gap-y-2.5">
+    <header className="sticky top-0 z-40">
+      {/* UTILITY STRIP */}
+      <div className="hidden md:block bg-paper border-b border-line text-xs">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-8 flex items-center justify-between">
+          <span className="text-muted">Every listing is checked by the ReWear team before it goes live</span>
+          <span className="flex items-center gap-5">
+            <Link to="/sell" className="font-medium text-ink hover:text-brand">Sell on ReWear</Link>
+            <Link to="/howitworks" className="font-medium text-ink hover:text-brand">How it works</Link>
+          </span>
+        </div>
+      </div>
+
+      {/* MAIN BAR */}
+      <div className="bg-ink">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2.5 flex flex-wrap items-center gap-x-4 sm:gap-x-8 gap-y-2.5">
         <Link to="/" aria-label="ReWear home" className="flex-shrink-0">
-          <Logo size={36} textClassName="text-[21px] font-bold tracking-tight text-ink" />
+          <Logo size={34} textClassName="font-display text-[22px] font-bold tracking-tight text-paper" />
         </Link>
+
+        <BuyRentSwitch />
 
         <SearchBar />
 
@@ -233,6 +255,7 @@ const Navbar = () => {
           <HeaderIcon icon={ShoppingBag} label="Bag" to="/cart" count={cartItems.length} />
           <AccountMenu />
         </nav>
+      </div>
       </div>
 
       <CategoryBar />
