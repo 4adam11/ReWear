@@ -11,6 +11,7 @@ import {
   LoaderCircle,
   CircleCheck,
   TriangleAlert,
+  Sparkles,
 } from "lucide-react";
 
 import "react-date-range/dist/styles.css";
@@ -18,7 +19,9 @@ import "react-date-range/dist/theme/default.css";
 
 import API from "../utils/api";
 import { resizeImage, thumb, PLACEHOLDER_IMAGE } from "../utils/image";
-import { CATEGORIES, SIZES, CONDITIONS } from "../utils/catalog";
+import { CATEGORIES, SIZES, CONDITIONS, MEASUREMENTS, categoryLabel } from "../utils/catalog";
+import { suggestOccasion } from "../utils/suggest";
+
 import { format } from "date-fns";
 import usePageTitle from "../hooks/usePageTitle";
 
@@ -55,7 +58,15 @@ const Sell = () => {
       price: "",
       rent: "",
       condition: "New",
+      fabric: "",
+      measurements: { bust: "", waist: "", hips: "", length: "", shoulder: "" },
     });
+
+  // "indian" or "western", guessed from the first photo by the server's AI check
+  const [photoStyle, setPhotoStyle] = useState(null);
+
+  // Until the seller picks an occasion themselves, it follows the title and photo
+  const [occasionTouched, setOccasionTouched] = useState(false);
 
   // Each photo: { id, preview, url, status: "checking" | "ok" | "rejected", message }
   const [images, setImages] =
@@ -100,6 +111,10 @@ const Sell = () => {
           price: data.price ?? "",
           rent: data.rent ?? "",
           condition: data.condition || "New",
+          fabric: data.fabric || "",
+          measurements: Object.fromEntries(
+            MEASUREMENTS.map(({ key }) => [key, data.measurements?.[key] ?? ""])
+          ),
         });
         setImages(
           (data.images || []).map((url, i) => ({
@@ -121,6 +136,13 @@ const Sell = () => {
       })
       .catch(() => setError("Could not load this listing"));
   }, [editId]);
+
+  // New listings only: suggest an occasion until the seller chooses one
+  const suggestion =
+    !editId && !occasionTouched
+      ? suggestOccasion({ title: form.title, description: form.description, style: photoStyle })
+      : null;
+  const category = suggestion?.category || form.category;
 
   // INPUT
   const handleChange = (e) => {
@@ -169,6 +191,11 @@ const Sell = () => {
         // The AI wasn't sure about this photo: allowed, but an admin will look closely
         aiNote: data.aiNote,
       });
+
+      // First hint wins: later photos are usually close-ups of the same item
+      if (data.suggestion?.style) {
+        setPhotoStyle((current) => current || data.suggestion.style);
+      }
     } catch (err) {
       updateImage(id, {
         status: "rejected",
@@ -309,11 +336,12 @@ const Sell = () => {
           ),
           rent: Number(form.rent),
           mode,
-          category:
-            form.category,
+          category,
           size: form.size,
           condition:
             form.condition,
+          fabric: form.fabric,
+          measurements: form.measurements,
           // Calendar days, so time zones can't shift them
           availability: {
             startDate: format(dateRange[0].startDate, "yyyy-MM-dd"),
@@ -593,22 +621,22 @@ const Sell = () => {
                 {/* CATEGORY */}
                 <div>
 
-                  <label className="text-sm font-medium text-gray-700">
-                    Category
+                  <label htmlFor="sell-occasion" className="text-sm font-medium text-gray-700">
+                    Occasion
                   </label>
 
                   <select
-                    value={
-                      form.category
-                    }
+                    id="sell-occasion"
+                    value={category}
 
-                    onChange={(e) =>
+                    onChange={(e) => {
+                      setOccasionTouched(true);
                       setForm({
                         ...form,
                         category:
                           e.target.value.toLowerCase(),
-                      })
-                    }
+                      });
+                    }}
 
                     className="w-full mt-2 border border-line rounded-lg px-4 py-3 text-sm focus:outline-none"
                   >
@@ -680,6 +708,69 @@ const Sell = () => {
 
                 </div>
 
+              </div>
+
+            </div>
+
+            {/* WHY THIS OCCASION WAS PICKED */}
+            {suggestion && (
+              <p role="status" className="-mt-3 flex items-start gap-2 text-[13px] text-muted">
+                <Sparkles size={15} className="text-accent flex-shrink-0 mt-0.5" />
+                <span>
+                  Occasion set to <strong className="text-ink">{categoryLabel(suggestion.category)}</strong>{" "}
+                  {suggestion.source === "title"
+                    ? "from the words in your listing."
+                    : `because your photo looks like ${photoStyle === "indian" ? "Indian" : "western"} wear.`}{" "}
+                  Change it above if that's wrong.
+                </span>
+              </p>
+            )}
+
+            {/* FABRIC + MEASUREMENTS */}
+            <div className="bg-white border border-line rounded-sm p-5 space-y-4">
+
+              <div>
+                <p className="text-sm font-medium text-gray-700">Fabric and measurements</p>
+                <p className="mt-0.5 text-xs text-muted">
+                  Optional, but buyers trust listings that have them. Lay the garment flat and measure in inches.
+                </p>
+              </div>
+
+              <div>
+                <label htmlFor="sell-fabric" className="text-xs font-medium text-gray-700">Fabric</label>
+                <input
+                  id="sell-fabric"
+                  name="fabric"
+                  maxLength={60}
+                  placeholder="e.g. Banarasi silk, cotton, georgette"
+                  value={form.fabric}
+                  onChange={handleChange}
+                  className="w-full mt-1.5 border border-line rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand/15"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                {MEASUREMENTS.map(({ key, label }) => (
+                  <div key={key}>
+                    <label htmlFor={`sell-m-${key}`} className="text-xs font-medium text-gray-700">{label}</label>
+                    <div className="relative mt-1.5">
+                      <input
+                        id={`sell-m-${key}`}
+                        type="number"
+                        inputMode="decimal"
+                        min="1"
+                        max="120"
+                        step="0.5"
+                        value={form.measurements[key]}
+                        onChange={(e) =>
+                          setForm({ ...form, measurements: { ...form.measurements, [key]: e.target.value } })
+                        }
+                        className="w-full border border-line rounded-lg pl-3 pr-8 py-2.5 text-sm focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand/15"
+                      />
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted" aria-hidden="true">in</span>
+                    </div>
+                  </div>
+                ))}
               </div>
 
             </div>
@@ -819,7 +910,7 @@ const Sell = () => {
                   </h3>
 
                   <p className="mt-2 text-sm text-muted capitalize">
-                    {form.category} •{" "}
+                    {categoryLabel(category)} •{" "}
                     {form.size}
                   </p>
 

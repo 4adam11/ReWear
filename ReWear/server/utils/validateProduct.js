@@ -18,6 +18,27 @@ const optionalPrice = (value) => {
   return n;
 };
 
+export const MEASUREMENT_KEYS = ["bust", "waist", "hips", "length", "shoulder"];
+
+// Inches, 1 to 120, at most one decimal. Returns { error } or { measurements } (undefined when none given).
+const readMeasurements = (raw) => {
+  if (raw === undefined || raw === null) return {};
+  if (typeof raw !== "object" || Array.isArray(raw)) return { error: "Invalid measurements" };
+
+  const out = {};
+  for (const key of MEASUREMENT_KEYS) {
+    const value = raw[key];
+    if (value === undefined || value === null || value === "") continue;
+    const n = Number(value);
+    if (!Number.isFinite(n) || n < 1 || n > 120) {
+      return { error: `Measurements are in inches, between 1 and 120 (check "${key}")` };
+    }
+    out[key] = Math.round(n * 10) / 10;
+  }
+
+  return { measurements: Object.keys(out).length ? out : undefined };
+};
+
 // Builds a product from an allow-list of fields so clients can't set _id, user, timestamps, etc.
 // Returns { error } or { data }.
 export const validateProduct = (body) => {
@@ -54,7 +75,8 @@ export const validateProduct = (body) => {
     description: optionalString(body.description, 2000),
     category: optionalString(body.category, 50),
     size: optionalString(body.size, 10),
-    condition: optionalString(body.condition, 30)
+    condition: optionalString(body.condition, 30),
+    fabric: optionalString(body.fabric, 60)
   };
   for (const [key, value] of Object.entries(fields)) {
     if (value === null) return { error: `Invalid ${key}` };
@@ -78,9 +100,13 @@ export const validateProduct = (body) => {
     availability = { startDate, endDate };
   }
 
+  const measured = readMeasurements(body.measurements);
+  if (measured.error) return { error: measured.error };
+
   return {
     data: {
       title,
+      measurements: measured.measurements,
       mode,
       price: mode === "rent" ? undefined : price,
       rent: mode === "sell" ? undefined : rent,

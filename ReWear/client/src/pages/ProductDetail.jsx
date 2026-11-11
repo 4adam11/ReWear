@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import { DateRange } from "react-date-range";
@@ -10,20 +10,24 @@ import {
   startOfToday,
   max as maxDate,
 } from "date-fns";
-import { ShieldCheck, Heart, Truck, RotateCcw, CreditCard, CircleCheck } from "lucide-react";
+import { ShieldCheck, Heart, Truck, RotateCcw, CreditCard, CircleCheck, Maximize2, Ruler, MessageCircle } from "lucide-react";
 
 import "react-date-range/dist/styles.css";
 import "react-date-range/dist/theme/default.css";
 
 import API from "../utils/api";
 import { thumb, cardImage, photoSrcSet, PLACEHOLDER_IMAGE } from "../utils/image";
-import { categoryLabel } from "../utils/catalog";
+import { categoryLabel, MEASUREMENTS } from "../utils/catalog";
+import { recordView } from "../utils/recent";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import { useWishlist } from "../context/WishListContext";
 import ProductCard from "../components/explore/ProductCard";
 import { money } from "../utils/format";
 import OfferBox from "../components/product/OfferBox";
+import SizeGuide from "../components/product/SizeGuide";
+import RecentlyViewed from "../components/explore/RecentlyViewed";
+import Lightbox from "../components/ui/Lightbox";
 import usePageTitle from "../hooks/usePageTitle";
 import { RatingBadge, Stars } from "../components/ui/Stars";
 
@@ -69,6 +73,11 @@ const ProductDetail = () => {
   const [loading, setLoading] = useState(true);
   const [added, setAdded] = useState("");
   const [offer, setOffer] = useState(null);
+  // Index of the photo open in the full-screen viewer (null = closed)
+  const [zoom, setZoom] = useState(null);
+  const [sizeGuide, setSizeGuide] = useState(false);
+  const closeZoom = useCallback(() => setZoom(null), []);
+  const closeSizeGuide = useCallback(() => setSizeGuide(false), []);
   usePageTitle(product?.title);
   const [dateRange, setDateRange] = useState([{ startDate: new Date(), endDate: new Date(), key: "selection" }]);
 
@@ -95,6 +104,8 @@ const ProductDetail = () => {
         // Start on an option this listing actually offers
         setMode(data.mode === "sell" || data.mode === "sale" ? "sale" : "rent");
         setActiveImage(data.images?.[0] || "");
+        // Only listings shoppers can see go in "Recently viewed"
+        if (["live", "available", "sold"].includes(data.status)) recordView(data._id);
 
         axios
           .get(`${API}/products`, { params: { mode: "all", categories: data.category, limit: 6 } })
@@ -182,6 +193,7 @@ const ProductDetail = () => {
   };
 
   const saved = wishlist.some((p) => p._id === product._id);
+  const measured = MEASUREMENTS.filter(({ key }) => product.measurements?.[key] > 0);
   const images = product.images?.length ? product.images : [""];
 
   return (
@@ -215,9 +227,17 @@ const ProductDetail = () => {
               ))}
             </div>
           )}
-          <div className="flex-1 aspect-[4/5] rounded-lg overflow-hidden bg-cream border border-line">
+          <button
+            type="button"
+            onClick={() => setZoom(Math.max(images.indexOf(activeImage), 0))}
+            aria-label="View photo full screen"
+            className="group relative flex-1 aspect-[4/5] overflow-hidden bg-cream border border-line cursor-zoom-in"
+          >
             <img src={thumb(activeImage, 900) || PLACEHOLDER_IMAGE} srcSet={photoSrcSet(activeImage, 900)} alt={product.title} className="w-full h-full object-contain" />
-          </div>
+            <span aria-hidden="true" className="absolute bottom-3 right-3 w-10 h-10 rounded-full bg-white shadow-card flex items-center justify-center text-ink group-hover:scale-105 transition-transform">
+              <Maximize2 size={17} />
+            </span>
+          </button>
         </div>
 
         {/* BUY BOX */}
@@ -248,8 +268,18 @@ const ProductDetail = () => {
           <div className="flex flex-wrap gap-6">
             <Fact label="Size" value={product.size} />
             <Fact label="Condition" value={product.condition || "Good"} />
-            <Fact label="Category" value={categoryLabel(product.category)} />
+            <Fact label="Occasion" value={categoryLabel(product.category)} />
+            {product.fabric && <Fact label="Fabric" value={product.fabric} />}
           </div>
+
+          <button
+            type="button"
+            onClick={() => setSizeGuide(true)}
+            className="-mt-2 self-start inline-flex items-center gap-2 text-sm font-semibold text-brand hover:underline"
+          >
+            <Ruler size={16} />
+            {measured.length ? "Size guide and this item's measurements" : "Size guide"}
+          </button>
 
           {mode === "rent" && canRent && (
             <div className="bg-white border border-line rounded-sm overflow-hidden">
@@ -338,6 +368,13 @@ const ProductDetail = () => {
                   <Link to="/cart" className="font-semibold text-brand hover:underline">View bag</Link>
                 </p>
               )}
+              <Link
+                to={`/messages/new?product=${product._id}`}
+                className="self-start inline-flex items-center gap-2 text-sm font-semibold text-brand hover:underline"
+              >
+                <MessageCircle size={16} />
+                Ask the seller a question
+              </Link>
             </div>
           )}
 
@@ -366,8 +403,20 @@ const ProductDetail = () => {
             {product.description || "The seller hasn't added a description. Check the photos, size and condition before ordering."}
           </p>
           <dl className="mt-5 grid grid-cols-[130px_1fr] gap-x-4 gap-y-2.5 text-sm">
-            <dt className="text-muted">Category</dt>
+            <dt className="text-muted">Occasion</dt>
             <dd>{categoryLabel(product.category)}</dd>
+            {product.fabric && (
+              <>
+                <dt className="text-muted">Fabric</dt>
+                <dd>{product.fabric}</dd>
+              </>
+            )}
+            {measured.map(({ key, label }) => (
+              <div key={key} className="contents">
+                <dt className="text-muted">{label}</dt>
+                <dd>{product.measurements[key]} in</dd>
+              </div>
+            ))}
             <dt className="text-muted">Size</dt>
             <dd>{product.size}</dd>
             <dt className="text-muted">Condition</dt>
@@ -406,6 +455,12 @@ const ProductDetail = () => {
             <Link to={`/seller/${product.seller._id}`} className="text-sm font-semibold text-brand hover:underline">
               Visit the seller's shop
             </Link>
+            {!isMine && (
+              <Link to={`/messages/new?product=${product._id}`} className="btn btn-outline btn-sm self-start">
+                <MessageCircle size={15} />
+                Message seller
+              </Link>
+            )}
           </div>
         )}
       </section>
@@ -420,6 +475,11 @@ const ProductDetail = () => {
           </div>
         </section>
       )}
+
+      <RecentlyViewed exclude={product._id} />
+
+      {zoom !== null && <Lightbox images={images} start={zoom} alt={product.title} onClose={closeZoom} />}
+      {sizeGuide && <SizeGuide product={product} onClose={closeSizeGuide} />}
     </div>
   );
 };

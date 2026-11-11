@@ -13,24 +13,35 @@
 ## 1. Shopping (buyer)
 
 - Home page: occasion tiles, "Fresh on ReWear", rentals row.
+- Type "red sar" in the search box: suggestions appear as you type (arrow keys and Enter work), and recent searches show when the box is empty.
 - Search "saree", filter by **Rent only** and a size, sort by price. Show the URL keeps the filters.
 - Open a product: photos, seller rating, Rent/Buy prices, the booking calendar with booked days greyed out.
+- Click the photo for the full-screen viewer, then open **Size guide** (the item's own measurements plus a size chart).
+- Go back to the home page: the item now appears under **Recently viewed**.
 - Show the seller's shop page from "Visit the seller's shop" (rating breakdown and reviews).
 
 ## 2. Listing an item (seller) and admin approval
 
 - As **seller**: Sell → upload a clothing photo. The local AI check blocks explicit images and flags non-clothing ones.
+- Type a title such as "Red bridal lehenga": the occasion switches to Wedding by itself. With no keyword in the title, the photo decides (Indian wear → Ethnic, western wear → Casual).
+- Add fabric and measurements (optional).
 - The listing is **In review**, not public.
 - As **admin**: Admin panel → Review queue → approve (or reject with a reason the seller sees).
 - Show the **Activity log**: every admin decision with who and when.
 
-## 3. Make an offer
+## 3. Ask the seller (chat)
+
+- As **buyer** on the seller's item: **Ask the seller a question** and send a message.
+- As **seller**: the chat icon in the header shows an unread count; open **Messages** and reply.
+- Back as buyer: the reply appears in the open chat within a few seconds, without reloading.
+
+## 4. Make an offer
 
 - As **buyer** on the seller's item: **Make an offer** below the price.
 - As **seller**: Offers → Offers on your items → **Counter**.
 - As **buyer**: accept the counter. The product page and bag now use the agreed price for 48 hours.
 
-## 4. Order workflow
+## 5. Order workflow
 
 - Buyer: checkout with a saved address, cash on delivery → order confirmation.
 - Seller: Orders to fulfil → **Accept** → **Mark as shipped** (courier + tracking number).
@@ -38,14 +49,14 @@
 - Buyer: **Rate the seller** (stars + comment). The rating appears on the shop page and product cards.
 - Every step sends an alert to the other person (bell icon).
 
-## 5. Problem reports (disputes)
+## 6. Problem reports (disputes)
 
 - On a shipped or delivered order, buyer clicks **Report a problem** (e.g. "Not as described").
 - The order can't be completed while the report is open.
 - Admin → **Problem reports** → write a decision → **Refund the buyer** or **Reject report**.
   Both sides are notified, and the decision is in the activity log.
 
-## 6. Admin overview
+## 7. Admin overview
 
 - Counts of listings by status, users, orders and sales value.
 - Charts for the last 30 days: orders, sales value, new listings, new users.

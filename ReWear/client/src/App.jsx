@@ -27,6 +27,7 @@ const SellerOrders = lazy(() => import("./pages/SellerOrders"));
 const SellerShop = lazy(() => import("./pages/SellerShop"));
 const Account = lazy(() => import("./pages/Account"));
 const Offers = lazy(() => import("./pages/Offers"));
+const Messages = lazy(() => import("./pages/Messages"));
 const AdminDisputes = lazy(() => import("./pages/admin/AdminDisputes"));
 const AdminActivity = lazy(() => import("./pages/admin/AdminActivity"));
 const AdminLayout = lazy(() => import("./pages/admin/AdminLayout"));
@@ -72,6 +73,15 @@ function App() {
             element={
               <ProtectedRoute>
                 <Account />
+              </ProtectedRoute>
+            }
+          />
+          {/* /messages, /messages/<chat id>, /messages/new?product=<listing id> */}
+          <Route
+            path="/messages/:id?"
+            element={
+              <ProtectedRoute>
+                <Messages />
               </ProtectedRoute>
             }
           />

@@ -15,6 +15,7 @@ import notificationRoutes from "./routes/notificationRoutes.js";
 import reviewRoutes from "./routes/reviewRoutes.js";
 import disputeRoutes from "./routes/disputeRoutes.js";
 import offerRoutes from "./routes/offerRoutes.js";
+import chatRoutes from "./routes/chatRoutes.js";
 import Product from "./models/Product.js";
 import Order from "./models/Order.js";
 import { loadModels } from "./utils/imageModeration.js";
@@ -58,6 +59,7 @@ app.use("/api/notifications", notificationRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/disputes", disputeRoutes);
 app.use("/api/offers", offerRoutes);
+app.use("/api/chats", chatRoutes);
 
 app.get("/", (req, res) => res.send("API Running"));
 

@@ -20,6 +20,15 @@ const productSchema = new mongoose.Schema({
   category: { type: String, trim: true, maxlength: 50 },
   size: { type: String, trim: true, maxlength: 10 },
   condition: { type: String, trim: true, maxlength: 30 },
+  fabric: { type: String, trim: true, maxlength: 60 },
+  // The garment's own measurements in inches (all optional)
+  measurements: {
+    bust: Number,
+    waist: Number,
+    hips: Number,
+    length: Number,
+    shoulder: Number,
+  },
   availability: {
     startDate: Date,
     endDate: Date

@@ -67,7 +67,8 @@ router.post("/", protect, uploadLimiter, async (req, res) => {
     aiNote,
   });
 
-  res.status(201).json({ url, aiFlagged: !!aiNote, aiNote });
+  // "style" helps the sell form pre-pick an occasion; the seller can always change it
+  res.status(201).json({ url, aiFlagged: !!aiNote, aiNote, suggestion: verdict.style ? { style: verdict.style } : null });
 });
 
 export default router;

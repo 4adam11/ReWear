@@ -178,6 +178,12 @@ const OrderCard = ({ order, onUpdate }) => {
             </button>
           )}
 
+          {order.items[0]?.product && (
+            <Link to={`/messages/new?product=${order.items[0].product}`} className="text-sm font-semibold text-brand hover:underline">
+              Message seller
+            </Link>
+          )}
+
           <button
             onClick={() => setOpen(!open)}
             className="ml-auto inline-flex items-center gap-1 text-sm text-gray-600 hover:text-ink"

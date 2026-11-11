@@ -9,6 +9,7 @@ import { CATEGORIES, SIZES, normalizeCategory } from "../utils/catalog.js";
 import { upcomingRentals } from "../utils/bookings.js";
 import { deleteImage } from "../utils/cloudinary.js";
 import { notifyAdmins } from "../utils/notify.js";
+import rateLimit from "../middleware/rateLimit.js";
 
 const router = express.Router();
 
@@ -40,6 +41,18 @@ const withSellerNames = async (items) => {
 };
 
 const escapeRegex = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+// Up to 5 words of 2+ characters from a search box
+const searchWords = (text) =>
+  text
+    .split(/\s+/)
+    .filter((w) => w.length >= 2)
+    .slice(0, 5);
+
+// Matches a word from its start, so "red" finds "Red saree" but not "Embroidered"
+const wordStart = (word) => ({ $regex: `\\b${escapeRegex(word)}`, $options: "i" });
+
+const suggestLimiter = rateLimit({ windowMs: 60 * 1000, max: 120, message: "Too many searches, please slow down" });
 
 const toDay = (d) => (d ? new Date(d).toISOString().slice(0, 10) : undefined);
 
@@ -92,9 +105,12 @@ router.get("/", async (req, res) => {
     filter.mode = { $in: mode === "rent" ? ["rent", "both"] : ["sell", "sale", "both"] };
   }
 
+  // Every word must appear in the title, description, fabric or occasion ("red saree" finds "Red Silk Wedding Saree")
+  const and = [];
   const search = typeof req.query.search === "string" ? req.query.search.trim().slice(0, 60) : "";
-  if (search) {
-    filter.title = { $regex: escapeRegex(search), $options: "i" };
+  for (const word of searchWords(search)) {
+    const rx = wordStart(word);
+    and.push({ $or: [{ title: rx }, { description: rx }, { fabric: rx }, { category: rx }] });
   }
 
   const categories = listParam(
@@ -124,11 +140,13 @@ router.get("/", async (req, res) => {
   if (Number.isFinite(maxPrice) && maxPrice > 0) {
     if (mode === "all") {
       // Either price can match (rent-only listings have no sale price)
-      filter.$or = [{ price: { $lte: maxPrice } }, { rent: { $lte: maxPrice } }];
+      and.push({ $or: [{ price: { $lte: maxPrice } }, { rent: { $lte: maxPrice } }] });
     } else {
       filter[priceField] = { $lte: maxPrice };
     }
   }
+
+  if (and.length) filter.$and = and;
 
   const sort =
     req.query.sort === "low" ? { [priceField]: 1, _id: 1 }
@@ -163,6 +181,47 @@ router.get("/", async (req, res) => {
     pages: Math.max(Math.ceil(total / limit), 1),
     categoryCounts,
   });
+});
+
+//
+// SEARCH SUGGESTIONS while typing: matching occasions and up to 6 live listings
+// GET /api/products/suggest?q=sar
+//
+router.get("/suggest", suggestLimiter, async (req, res) => {
+  const q = typeof req.query.q === "string" ? req.query.q.trim().slice(0, 60) : "";
+  const words = searchWords(q);
+  if (!words.length) return res.json({ categories: [], items: [] });
+
+  const and = words.map((word) => {
+    const rx = wordStart(word);
+    return { $or: [{ title: rx }, { category: rx }, { fabric: rx }] };
+  });
+
+  const items = await listQuery(
+    Product.find({ status: { $in: LIVE }, $and: and }).sort({ createdAt: -1 }).limit(6)
+  );
+
+  const first = words[0].toLowerCase();
+  res.json({
+    categories: CATEGORIES.filter((c) => c.startsWith(first)),
+    items: items.map((p) => ({ _id: p._id, title: p.title, image: p.images?.[0], category: p.category, price: p.price, rent: p.rent, mode: p.mode })),
+  });
+});
+
+//
+// A FEW LISTINGS BY ID, in the order asked for (the "Recently viewed" row).
+// Only items shoppers may see; anything deleted or hidden is simply left out.
+// GET /api/products/by-ids?ids=a,b,c
+//
+router.get("/by-ids", async (req, res) => {
+  const ids = (typeof req.query.ids === "string" ? req.query.ids.split(",") : [])
+    .filter((id) => mongoose.isValidObjectId(id))
+    .slice(0, 12);
+  if (!ids.length) return res.json([]);
+
+  const found = await listQuery(Product.find({ _id: { $in: ids }, status: { $in: [...LIVE, "sold"] } }));
+  const byId = new Map(found.map((p) => [p._id.toString(), p]));
+  res.json(await withSellerNames(ids.map((id) => byId.get(id)).filter(Boolean)));
 });
 
 //

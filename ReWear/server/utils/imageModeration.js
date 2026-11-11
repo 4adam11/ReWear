@@ -54,6 +54,15 @@ const LABELS = {
 
 const ALL_LABELS = Object.values(LABELS).flat();
 
+// A coarse hint for the sell form: is this Indian or western wear?
+// (Tested on the site's own listings: right for 27 of 28 photos. Finer guesses such as
+// "saree vs lehenga" or the colour were wrong too often to show to sellers.)
+const STYLE_LABELS = {
+  indian: "traditional Indian clothing such as a saree, kurta, lehenga or sherwani",
+  western: "western clothing such as a t-shirt, hoodie, jeans or jacket",
+};
+const STYLE_CONFIDENCE = Number(process.env.STYLE_CONFIDENCE || 0.75);
+
 let modelsPromise;
 
 export const loadModels = () => {
@@ -121,5 +130,16 @@ export const moderateImage = async (buffer) => {
     };
   }
 
-  return { ok: true, scores };
+  // Only worth guessing the style for photos that passed as clothing
+  let style = null;
+  try {
+    const [top] = await clip(image, Object.values(STYLE_LABELS));
+    if (top && top.score >= STYLE_CONFIDENCE) {
+      style = top.label === STYLE_LABELS.indian ? "indian" : "western";
+    }
+  } catch (err) {
+    console.warn("Style hint failed:", err.message);
+  }
+
+  return { ok: true, scores, style };
 };

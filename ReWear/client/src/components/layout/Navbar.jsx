@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import {
-  Search,
   Plus,
+  MessageCircle,
   Heart,
   ShoppingBag,
   User,
@@ -22,6 +22,9 @@ import { useWishlist } from "../../context/WishListContext";
 import { CATEGORIES } from "../../utils/catalog";
 import Logo from "../ui/Logo";
 import NotificationBell from "./NotificationBell";
+import SearchBar from "./SearchBar";
+import API from "../../utils/api";
+import axios from "axios";
 
 // Round icon button on the dark header bar (the name is read out to screen readers)
 export const HeaderIcon = ({ icon: Icon, label, count, as: Tag = Link, ...props }) => (
@@ -39,56 +42,6 @@ export const HeaderIcon = ({ icon: Icon, label, count, as: Tag = Link, ...props 
     )}
   </Tag>
 );
-
-const SearchBar = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const [params] = useSearchParams();
-
-  const current = location.pathname === "/explore" ? params.get("search") || "" : "";
-  const [text, setText] = useState(current);
-
-  // Keep the box in step with the URL (back button, category links)
-  useEffect(() => {
-    setText(current);
-  }, [current]);
-
-  const submit = (e) => {
-    e.preventDefault();
-
-    const next = new URLSearchParams(location.pathname === "/explore" ? params : undefined);
-    const q = text.trim();
-
-    if (q) next.set("search", q);
-    else next.delete("search");
-    next.delete("page");
-
-    navigate(`/explore?${next}`);
-  };
-
-  return (
-    <form role="search" onSubmit={submit} className="relative flex flex-1 min-w-0 max-w-2xl order-last basis-full md:order-none md:basis-auto">
-      <label htmlFor="site-search" className="sr-only">
-        Search ReWear
-      </label>
-      <input
-        id="site-search"
-        type="search"
-        value={text}
-        onChange={(e) => setText(e.target.value)}
-        placeholder="Search lehengas, sherwanis, sarees, kurtas…"
-        className="flex-1 min-w-0 h-10 pl-5 pr-12 rounded-full bg-white text-sm text-ink placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-[#e8c39e]"
-      />
-      <button
-        type="submit"
-        aria-label="Search"
-        className="absolute right-1 top-1 w-8 h-8 rounded-full text-ink flex items-center justify-center hover:bg-cream"
-      >
-        <Search size={18} />
-      </button>
-    </form>
-  );
-};
 
 const AccountMenu = () => {
   const navigate = useNavigate();
@@ -118,6 +71,7 @@ const AccountMenu = () => {
     { icon: Package, label: "My orders", path: "/orders" },
     { icon: ListChecks, label: "My listings", path: "/seller/listings" },
     { icon: Truck, label: "Orders to fulfil", path: "/seller/orders" },
+    { icon: MessageCircle, label: "Messages", path: "/messages" },
     { icon: HandCoins, label: "Offers", path: "/offers" },
     { icon: Settings, label: "Account settings", path: "/account" },
     ...(isAdmin ? [{ icon: ShieldCheck, label: "Admin panel", path: "/admin" }] : []),
@@ -169,6 +123,37 @@ const AccountMenu = () => {
         </div>
       )}
     </div>
+  );
+};
+
+// Chat icon with the number of unread messages (checked every minute while logged in)
+const MessagesIcon = () => {
+  const { user, authHeader } = useAuth();
+  const location = useLocation();
+  const [unread, setUnread] = useState(0);
+
+  useEffect(() => {
+    if (!user) return;
+
+    const load = () =>
+      axios
+        .get(`${API}/chats/unread`, authHeader)
+        .then(({ data }) => setUnread(data.unread))
+        .catch(() => {});
+
+    load();
+    const timer = setInterval(load, 60000);
+    return () => clearInterval(timer);
+    // Also re-check when moving between pages (e.g. after reading a chat)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.token, location.pathname]);
+
+  if (!user) return null;
+
+  return (
+    <span className="hidden sm:block">
+      <HeaderIcon icon={MessageCircle} label={unread ? `Messages (${unread} unread)` : "Messages"} to="/messages" count={unread} />
+    </span>
   );
 };
 
@@ -251,6 +236,7 @@ const Navbar = () => {
         <nav aria-label="Account" className="flex items-center gap-0.5 ml-auto md:ml-0">
           <HeaderIcon icon={Plus} label="Sell" to="/sell" />
           <HeaderIcon icon={Heart} label="Wishlist" to="/wishlist" count={wishlist.length} />
+          <MessagesIcon />
           <NotificationBell />
           <HeaderIcon icon={ShoppingBag} label="Bag" to="/cart" count={cartItems.length} />
           <AccountMenu />

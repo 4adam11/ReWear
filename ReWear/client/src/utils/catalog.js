@@ -13,6 +13,15 @@ export const SIZES = ["S", "M", "L", "XL", "XXL"];
 
 export const CONDITIONS = ["New", "Like New", "Good", "Used"];
 
+// Optional garment measurements a seller can add (inches)
+export const MEASUREMENTS = [
+  { key: "bust", label: "Bust / chest" },
+  { key: "waist", label: "Waist" },
+  { key: "hips", label: "Hips" },
+  { key: "length", label: "Length" },
+  { key: "shoulder", label: "Shoulder" },
+];
+
 export const categoryInfo = (value) => CATEGORIES.find((c) => c.value === value);
 
 export const categoryLabel = (value) => categoryInfo(value)?.label || value;

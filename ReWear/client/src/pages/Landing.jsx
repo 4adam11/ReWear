@@ -7,6 +7,7 @@ import API from "../utils/api";
 import { CATEGORIES } from "../utils/catalog";
 import { thumb, cardImage, cardSrcSet, photoSrcSet, PLACEHOLDER_IMAGE } from "../utils/image";
 import ProductCard from "../components/explore/ProductCard";
+import RecentlyViewed from "../components/explore/RecentlyViewed";
 import usePageTitle from "../hooks/usePageTitle";
 
 // Real features, shown as the dark strip under the hero
@@ -173,6 +174,11 @@ const Landing = () => {
           </div>
         </Container>
       </section>
+
+      {/* PICK UP WHERE YOU LEFT OFF (only shown once something has been viewed) */}
+      <Container className="pb-12 empty:hidden">
+        <RecentlyViewed centered />
+      </Container>
 
       {/* ONE ROW PER OCCASION */}
       {rows.map((c, i) => (
