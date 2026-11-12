@@ -6,6 +6,7 @@ import { format } from "date-fns";
 import API from "../utils/api";
 import ProductCard from "../components/explore/ProductCard";
 import { Stars } from "../components/ui/Stars";
+import VerifiedBadge from "../components/ui/VerifiedBadge";
 import { NotFound } from "../components/ErrorBoundary";
 import usePageTitle from "../hooks/usePageTitle";
 
@@ -63,6 +64,7 @@ const SellerShop = ({ id }) => {
         </span>
         <div className="flex-1 min-w-[200px]">
           <h1 className="text-2xl font-bold tracking-tight">{seller.name}</h1>
+          {seller.verified && <VerifiedBadge size={16} label className="mt-1" />}
           <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted">
             {rating.count ? (
               <>

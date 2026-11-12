@@ -10,7 +10,7 @@ import {
   startOfToday,
   max as maxDate,
 } from "date-fns";
-import { ShieldCheck, Heart, Truck, RotateCcw, CreditCard, CircleCheck, Maximize2, Ruler, MessageCircle } from "lucide-react";
+import { ShieldCheck, Heart, Truck, RotateCcw, CreditCard, CircleCheck, Maximize2, Ruler, MessageCircle, Flag } from "lucide-react";
 
 import "react-date-range/dist/styles.css";
 import "react-date-range/dist/theme/default.css";
@@ -30,6 +30,8 @@ import RecentlyViewed from "../components/explore/RecentlyViewed";
 import Lightbox from "../components/ui/Lightbox";
 import usePageTitle from "../hooks/usePageTitle";
 import { RatingBadge, Stars } from "../components/ui/Stars";
+import VerifiedBadge from "../components/ui/VerifiedBadge";
+import ReportListing from "../components/product/ReportListing";
 
 const PriceOption = ({ active, disabled, onClick, label, price, unit }) => (
   <button
@@ -76,6 +78,8 @@ const ProductDetail = () => {
   // Index of the photo open in the full-screen viewer (null = closed)
   const [zoom, setZoom] = useState(null);
   const [sizeGuide, setSizeGuide] = useState(false);
+  const [reporting, setReporting] = useState(false);
+  const closeReport = useCallback(() => setReporting(false), []);
   const closeZoom = useCallback(() => setZoom(null), []);
   const closeSizeGuide = useCallback(() => setSizeGuide(false), []);
   usePageTitle(product?.title);
@@ -106,6 +110,8 @@ const ProductDetail = () => {
         setActiveImage(data.images?.[0] || "");
         // Only listings shoppers can see go in "Recently viewed"
         if (["live", "available", "sold"].includes(data.status)) recordView(data._id);
+        // Counts towards the seller's view stats (once per person per day; the server ignores the seller)
+        axios.post(`${API}/products/${data._id}/view`, {}, user ? authHeader : undefined).catch(() => {});
 
         axios
           .get(`${API}/products`, { params: { mode: "all", categories: data.category, limit: 6 } })
@@ -248,6 +254,7 @@ const ProductDetail = () => {
                 <Link to={`/seller/${product.seller._id}`} className="text-sm font-semibold text-brand hover:underline">
                   {product.seller.name}
                 </Link>
+                {product.seller.verified && <VerifiedBadge label />}
                 <RatingBadge rating={product.seller.rating} />
               </span>
             )}
@@ -389,7 +396,7 @@ const ProductDetail = () => {
             </li>
             <li className="flex gap-3">
               <CreditCard size={19} className="text-brand flex-shrink-0 mt-0.5" />
-              <span>Pay by UPI, card or cash on delivery.</span>
+              <span>Pay cash on delivery. UPI and card payments are coming soon.</span>
             </li>
           </ul>
         </div>
@@ -440,7 +447,10 @@ const ProductDetail = () => {
                 {product.seller.name?.[0]?.toUpperCase() || "R"}
               </span>
               <div>
-                <p className="font-semibold">{product.seller.name}</p>
+                <p className="flex items-center gap-1.5 font-semibold">
+                  {product.seller.name}
+                  {product.seller.verified && <VerifiedBadge />}
+                </p>
                 {product.seller.rating?.count > 0 && (
                   <p className="flex items-center gap-1.5 text-[13px] text-muted">
                     <Stars value={product.seller.rating.avg} size={13} />
@@ -476,7 +486,24 @@ const ProductDetail = () => {
         </section>
       )}
 
+      {!isMine && approved && (
+        <p className="-mt-4 text-center text-[13px] text-muted">
+          Something wrong with this listing?{" "}
+          {user ? (
+            <button type="button" onClick={() => setReporting(true)} className="inline-flex items-center gap-1 font-semibold text-brand hover:underline">
+              <Flag size={13} />
+              Report it
+            </button>
+          ) : (
+            <Link to="/login" state={{ from: `/product/${product._id}` }} className="font-semibold text-brand hover:underline">
+              Log in to report it
+            </Link>
+          )}
+        </p>
+      )}
+
       <RecentlyViewed exclude={product._id} />
+      {reporting && <ReportListing product={product} onClose={closeReport} />}
 
       {zoom !== null && <Lightbox images={images} start={zoom} alt={product.title} onClose={closeZoom} />}
       {sizeGuide && <SizeGuide product={product} onClose={closeSizeGuide} />}

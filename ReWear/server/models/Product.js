@@ -33,6 +33,9 @@ const productSchema = new mongoose.Schema({
     startDate: Date,
     endDate: Date
   },
+  // Seller stats: page views (one per visitor per day) and who saved it to their wishlist
+  views: { type: Number, default: 0 },
+  savedBy: { type: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }], select: false },
   status: {
     type: String,
     enum: ["pending", "live", "rejected", "paused", "sold", "available"],

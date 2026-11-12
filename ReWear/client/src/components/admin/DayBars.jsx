@@ -1,20 +1,22 @@
 import { useState } from "react";
 import { format, parseISO } from "date-fns";
 
-// One series per chart: a bar per day for the last 30 days, with a hover tooltip
+const dayLabel = (day) => format(parseISO(day), "d MMM");
+
+// One series per chart: a bar per period (days by default), with a hover tooltip
 // and a hidden table for screen readers.
-const DayBars = ({ title, series, field, formatValue = (v) => v, total }) => {
+const DayBars = ({ title, series, field, formatValue = (v) => v, total, period = "Last 30 days", labelOf = dayLabel, endLabel = "Today" }) => {
   const [hover, setHover] = useState(null);
   const max = Math.max(1, ...series.map((d) => d[field]));
   const height = 140;
   const slot = 100 / series.length;
 
   return (
-    <figure className="bg-white border border-line rounded-lg p-5 m-0">
+    <figure className="bg-white border border-line rounded-sm p-5 m-0">
       <figcaption className="flex items-baseline justify-between gap-3">
         <span className="text-sm font-semibold">{title}</span>
         <span className="text-xs text-muted">
-          Last 30 days · <span className="font-semibold text-ink">{formatValue(total)}</span>
+          {period} · <span className="font-semibold text-ink">{formatValue(total)}</span>
         </span>
       </figcaption>
 
@@ -53,22 +55,22 @@ const DayBars = ({ title, series, field, formatValue = (v) => v, total }) => {
             className="absolute -top-2 -translate-y-full -translate-x-1/2 whitespace-nowrap rounded-md bg-ink text-paper text-xs px-2.5 py-1.5 pointer-events-none"
             style={{ left: `${Math.min(92, Math.max(8, (hover + 0.5) * slot))}%` }}
           >
-            {format(parseISO(series[hover].day), "d MMM")} · <span className="font-semibold">{formatValue(series[hover][field])}</span>
+            {labelOf(series[hover].day)} · <span className="font-semibold">{formatValue(series[hover][field])}</span>
           </div>
         )}
       </div>
 
       <div className="mt-1.5 flex justify-between text-[11px] text-muted" aria-hidden="true">
-        <span>{format(parseISO(series[0].day), "d MMM")}</span>
-        <span>Today</span>
+        <span>{labelOf(series[0].day)}</span>
+        <span>{endLabel}</span>
       </div>
 
       <table className="sr-only">
-        <caption>{title} per day</caption>
+        <caption>{title}, {period.toLowerCase()}</caption>
         <tbody>
           {series.map((d) => (
             <tr key={d.day}>
-              <th scope="row">{d.day}</th>
+              <th scope="row">{labelOf(d.day)}</th>
               <td>{formatValue(d[field])}</td>
             </tr>
           ))}

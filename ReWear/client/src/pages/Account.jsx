@@ -6,6 +6,7 @@ import { Trash2 } from "lucide-react";
 import API from "../utils/api";
 import { useAuth } from "../context/AuthContext";
 import usePageTitle from "../hooks/usePageTitle";
+import VerificationCard from "../components/account/VerificationCard";
 
 const inputClass =
   "h-11 w-full px-3.5 rounded-md border border-[#d9cbb9] bg-white text-sm text-ink placeholder:text-[#a8998b] focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand/15 disabled:bg-[#f6f1ea] disabled:text-muted";
@@ -207,6 +208,9 @@ const Account = () => {
           <Message msg={msg.address} />
         </div>
       </Card>
+
+      {/* Remounts after the phone number changes, so the checklist updates */}
+      <VerificationCard key={profile.phone || "no-phone"} />
 
       <Card title="Change password">
         <form onSubmit={savePassword} className="grid gap-4 sm:grid-cols-2">

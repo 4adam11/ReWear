@@ -5,7 +5,9 @@ import {
   useEffect,
 } from "react";
 
+import axios from "axios";
 import { useAuth } from "./AuthContext";
+import API from "../utils/api";
 
 const WishlistContext =
   createContext();
@@ -68,6 +70,13 @@ export const WishlistProvider = ({
 
       return;
     }
+
+    // Tell the server too, so sellers can see how many people saved a listing
+    const id = product._id || product.id;
+    const saving = !wishlist.some((p) => (p._id || p.id) === id);
+    axios
+      .post(`${API}/products/${id}/save`, { saved: saving }, { headers: { Authorization: `Bearer ${user?.token}` } })
+      .catch(() => {});
 
     setWishlist((prev) => {
       const exists = prev.find(

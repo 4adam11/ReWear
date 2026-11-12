@@ -6,6 +6,7 @@ import Order from "../models/Order.js";
 import protect, { requireAdmin } from "../middleware/authMiddleware.js";
 import Dispute, { DISPUTE_REASONS } from "../models/Dispute.js";
 import AdminLog from "../models/AdminLog.js";
+import ListingReport, { REPORT_REASONS } from "../models/ListingReport.js";
 import { notify } from "../utils/notify.js";
 import { logAdmin } from "../utils/adminLog.js";
 
@@ -23,7 +24,7 @@ const readReason = (body) =>
 // DASHBOARD NUMBERS
 //
 router.get("/stats", async (req, res) => {
-  const [byStatus, flagged, users, blocked, orders, revenue, openDisputes] = await Promise.all([
+  const [byStatus, flagged, users, blocked, orders, revenue, openDisputes, reportedListings, pendingVerifications] = await Promise.all([
     Product.aggregate([{ $group: { _id: "$status", n: { $sum: 1 } } }]),
     Product.countDocuments({ status: "pending", "review.aiFlagged": true }),
     User.countDocuments(),
@@ -34,6 +35,8 @@ router.get("/stats", async (req, res) => {
       { $group: { _id: null, total: { $sum: "$total" } } },
     ]),
     Dispute.countDocuments({ status: "open" }),
+    ListingReport.distinct("product", { status: "open" }).then((ids) => ids.length),
+    User.countDocuments({ "verification.status": "pending" }),
   ]);
 
   const listings = Object.fromEntries(byStatus.map((s) => [s._id, s.n]));
@@ -52,7 +55,171 @@ router.get("/stats", async (req, res) => {
     orders,
     revenue: revenue[0]?.total || 0,
     openDisputes,
+    reportedListings,
+    pendingVerifications,
   });
+});
+
+//
+// REPORTED LISTINGS, one card per listing with every report on it
+// GET /api/admin/reports?status=open|closed
+//
+router.get("/reports", async (req, res) => {
+  const open = req.query.status !== "closed";
+  const reports = await ListingReport.find(open ? { status: "open" } : { status: { $ne: "open" } })
+    .sort({ createdAt: open ? 1 : -1 })
+    .limit(300)
+    .populate("reporter", "name email")
+    .populate("resolvedBy", "name")
+    .lean();
+
+  const productIds = [...new Set(reports.map((r) => r.product.toString()))];
+  const products = await Product.find({ _id: { $in: productIds } })
+    .select("title images price rent mode status category user review.everApproved")
+    .populate("user", "name email verification.status")
+    .lean();
+  const productOf = new Map(products.map((p) => [p._id.toString(), p]));
+
+  const groups = new Map();
+  for (const r of reports) {
+    const key = r.product.toString();
+    if (!groups.has(key)) groups.set(key, { product: productOf.get(key) || { _id: key, title: "(deleted listing)" }, reports: [] });
+    groups.get(key).reports.push({ ...r, reasonLabel: REPORT_REASONS[r.reason] });
+  }
+
+  res.json([...groups.values()]);
+});
+
+// decision: "take_down" (listing rejected with the note as the reason) or "dismiss" (listing stays)
+router.patch("/reports/product/:productId", async (req, res) => {
+  if (!mongoose.isValidObjectId(req.params.productId)) {
+    return res.status(404).json({ message: "Listing not found" });
+  }
+
+  const { decision } = req.body;
+  const note = readReason({ reason: req.body.note });
+  if (!["take_down", "dismiss"].includes(decision)) {
+    return res.status(400).json({ message: "Choose to take the listing down or dismiss the reports" });
+  }
+  if (note.length < 5) {
+    return res.status(400).json({ message: "Please explain your decision (at least 5 characters)" });
+  }
+
+  const open = await ListingReport.find({ product: req.params.productId, status: "open" });
+  if (!open.length) return res.status(400).json({ message: "There are no open reports on this listing" });
+
+  const product = await Product.findById(req.params.productId);
+
+  if (decision === "take_down" && product && product.status !== "sold") {
+    product.status = "rejected";
+    product.review.rejectReason = note;
+    product.review.reviewedBy = req.user._id;
+    product.review.reviewedAt = new Date();
+    await product.save();
+
+    notify(product.user, {
+      type: "listing_rejected",
+      title: "Your listing was taken down",
+      message: `"${product.title}" was reported and removed by an admin: ${note}`,
+      link: `/sell/${product._id}`,
+    });
+  }
+
+  const status = decision === "take_down" ? "taken_down" : "dismissed";
+  await ListingReport.updateMany(
+    { _id: { $in: open.map((r) => r._id) } },
+    { $set: { status, resolution: note, resolvedBy: req.user._id, resolvedAt: new Date() } }
+  );
+
+  // Let the people who reported it know it was looked at
+  for (const reporter of new Set(open.map((r) => r.reporter.toString()))) {
+    notify(reporter, {
+      type: "report_resolved",
+      title: decision === "take_down" ? "Thanks, the listing was removed" : "Thanks for your report",
+      message: decision === "take_down"
+        ? `An admin removed "${product?.title || "the listing"}" after your report.`
+        : `An admin checked "${product?.title || "the listing"}" and decided it can stay.`,
+      link: product ? `/product/${product._id}` : "/",
+    });
+  }
+
+  logAdmin(req.user, decision === "take_down" ? "take_down_listing" : "dismiss_reports", "listing", req.params.productId,
+    `${decision === "take_down" ? "Took down" : "Dismissed reports on"} "${product?.title || "deleted listing"}" (${open.length} report${open.length > 1 ? "s" : ""}): ${note}`);
+
+  res.json({ status, reports: open.length });
+});
+
+//
+// SELLER VERIFICATION QUEUE
+// GET /api/admin/verifications?status=pending|verified|rejected
+//
+router.get("/verifications", async (req, res) => {
+  const status = ["verified", "rejected"].includes(req.query.status) ? req.query.status : "pending";
+  const users = await User.find({ "verification.status": status })
+    .select("name email phone createdAt rating verification blocked")
+    .sort({ [status === "pending" ? "verification.requestedAt" : "verification.reviewedAt"]: status === "pending" ? 1 : -1 })
+    .limit(100)
+    .lean();
+
+  const ids = users.map((u) => u._id);
+  const [listings, sales] = await Promise.all([
+    Product.aggregate([
+      { $match: { user: { $in: ids } } },
+      { $group: { _id: "$user", total: { $sum: 1 }, live: { $sum: { $cond: [{ $in: ["$status", LIVE] }, 1, 0] } }, sold: { $sum: { $cond: [{ $eq: ["$status", "sold"] }, 1, 0] } }, rejected: { $sum: { $cond: [{ $eq: ["$status", "rejected"] }, 1, 0] } } } },
+    ]),
+    Order.aggregate([
+      { $match: { seller: { $in: ids } } },
+      { $group: { _id: "$seller", completed: { $sum: { $cond: [{ $eq: ["$status", "completed"] }, 1, 0] } }, cancelled: { $sum: { $cond: [{ $eq: ["$status", "cancelled"] }, 1, 0] } }, refunded: { $sum: { $cond: [{ $eq: ["$status", "refunded"] }, 1, 0] } } } },
+    ]),
+  ]);
+
+  const listingsOf = new Map(listings.map((l) => [l._id.toString(), l]));
+  const salesOf = new Map(sales.map((s) => [s._id.toString(), s]));
+
+  res.json(
+    users.map((u) => ({
+      ...u,
+      listings: listingsOf.get(u._id.toString()) || { total: 0, live: 0, sold: 0, rejected: 0 },
+      orders: salesOf.get(u._id.toString()) || { completed: 0, cancelled: 0, refunded: 0 },
+    }))
+  );
+});
+
+// decision: "approve" | "reject" (pending requests) or "revoke" (verified sellers)
+router.patch("/verifications/:userId", async (req, res) => {
+  if (!mongoose.isValidObjectId(req.params.userId)) {
+    return res.status(404).json({ message: "User not found" });
+  }
+
+  const { decision } = req.body;
+  const note = readReason({ reason: req.body.note });
+  const user = await User.findById(req.params.userId);
+  if (!user) return res.status(404).json({ message: "User not found" });
+
+  const status = user.verification?.status || "none";
+  const allowed = (status === "pending" && ["approve", "reject"].includes(decision)) || (status === "verified" && decision === "revoke");
+  if (!allowed) return res.status(400).json({ message: `This seller's verification is ${status}` });
+  if (decision !== "approve" && note.length < 5) {
+    return res.status(400).json({ message: "Please give the seller a reason (at least 5 characters)" });
+  }
+
+  user.verification.status = decision === "approve" ? "verified" : decision === "reject" ? "rejected" : "none";
+  user.verification.reviewedAt = new Date();
+  user.verification.reviewedBy = req.user._id;
+  user.verification.reason = note || undefined;
+  await user.save();
+
+  notify(user._id, {
+    type: "verification_" + decision,
+    title: decision === "approve" ? "You're a verified seller" : decision === "reject" ? "Verification not approved" : "Verified badge removed",
+    message: decision === "approve" ? "The verified badge now shows on your listings and shop." : note,
+    link: "/account",
+  });
+
+  logAdmin(req.user, `${decision}_verification`, "user", user._id,
+    `${decision === "approve" ? "Verified" : decision === "reject" ? "Declined verification for" : "Removed the badge from"} ${user.name} (${user.email})${note ? `: ${note}` : ""}`);
+
+  res.json({ _id: user._id, verification: user.verification });
 });
 
 //

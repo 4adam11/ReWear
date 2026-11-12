@@ -35,6 +35,15 @@ const userSchema = new mongoose.Schema({
     state: { type: String, required: true, maxlength: 80 },
     pincode: { type: String, required: true, maxlength: 6 },
   }],
+  // "Verified seller" badge: the seller asks, an admin checks and decides
+  verification: {
+    status: { type: String, enum: ["none", "pending", "verified", "rejected"], default: "none" },
+    note: { type: String, maxlength: 500 },
+    requestedAt: Date,
+    reviewedAt: Date,
+    reviewedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    reason: { type: String, maxlength: 500 },
+  },
   // Seller rating from buyer reviews (kept up to date when a review is posted)
   rating: {
     avg: { type: Number, default: 0 },

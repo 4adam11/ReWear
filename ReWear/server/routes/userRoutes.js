@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 import User from "../models/User.js";
 import Product, { LIVE } from "../models/Product.js";
+import { notifyAdmins } from "../utils/notify.js";
 import Review from "../models/Review.js";
 import protect from "../middleware/authMiddleware.js";
 import rateLimit from "../middleware/rateLimit.js";
@@ -40,14 +41,60 @@ const profileOf = (u) => ({
   addresses: u.addresses || [],
   rating: u.rating,
   since: u.createdAt,
+  verification: {
+    status: u.verification?.status || "none",
+    requestedAt: u.verification?.requestedAt,
+    reviewedAt: u.verification?.reviewedAt,
+    reason: u.verification?.reason,
+  },
 });
+
+// What a seller needs before asking for the badge
+const verificationChecks = async (user) => {
+  const approved = await Product.countDocuments({ user: user._id, "review.everApproved": true });
+  return [
+    { key: "phone", label: "A mobile number in your account details", done: !!user.phone },
+    { key: "listing", label: "At least one listing approved by an admin", done: approved > 0 },
+    { key: "age", label: "An account at least 1 day old", done: Date.now() - new Date(user.createdAt) >= 24 * 60 * 60 * 1000 },
+  ];
+};
 
 //
 // MY ACCOUNT
 //
 router.get("/me", protect, async (req, res) => {
   const user = await User.findById(req.user._id).lean();
-  res.json(profileOf(user));
+  res.json({ ...profileOf(user), verificationChecks: await verificationChecks(user) });
+});
+
+//
+// ASK FOR THE VERIFIED SELLER BADGE (an admin reviews it)
+//
+router.post("/me/verification", protect, rateLimit({ windowMs: 60 * 60 * 1000, max: 5 }), async (req, res) => {
+  const user = await User.findById(req.user._id);
+  const status = user.verification?.status || "none";
+
+  if (status === "verified") return res.status(400).json({ message: "You're already a verified seller" });
+  if (status === "pending") return res.status(400).json({ message: "Your request is already waiting for an admin" });
+
+  const checks = await verificationChecks(user);
+  const missing = checks.filter((c) => !c.done);
+  if (missing.length) {
+    return res.status(400).json({ message: `Not yet: ${missing.map((c) => c.label.toLowerCase()).join("; ")}.` });
+  }
+
+  const note = typeof req.body.note === "string" ? req.body.note.trim().slice(0, 500) : "";
+  user.verification = { status: "pending", note: note || undefined, requestedAt: new Date() };
+  await user.save();
+
+  notifyAdmins({
+    type: "verification_requested",
+    title: "Seller asked to be verified",
+    message: `${user.name} would like the verified seller badge.`,
+    link: "/admin/verification",
+  });
+
+  res.json(profileOf(user.toObject()));
 });
 
 router.patch("/me", protect, async (req, res) => {
@@ -113,7 +160,7 @@ router.get("/:id/public", async (req, res) => {
     return res.status(404).json({ message: "Seller not found" });
   }
 
-  const user = await User.findById(req.params.id).select("name createdAt rating blocked").lean();
+  const user = await User.findById(req.params.id).select("name createdAt rating blocked verification.status").lean();
   if (!user || user.blocked) {
     return res.status(404).json({ message: "Seller not found" });
   }
@@ -129,6 +176,7 @@ router.get("/:id/public", async (req, res) => {
     name: user.name,
     since: user.createdAt,
     rating: user.rating || { avg: 0, count: 0 },
+    verified: user.verification?.status === "verified",
     liveCount,
     soldCount,
     reviews: reviews.map((r) => ({

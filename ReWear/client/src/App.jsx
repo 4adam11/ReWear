@@ -28,6 +28,9 @@ const SellerShop = lazy(() => import("./pages/SellerShop"));
 const Account = lazy(() => import("./pages/Account"));
 const Offers = lazy(() => import("./pages/Offers"));
 const Messages = lazy(() => import("./pages/Messages"));
+const SellerEarnings = lazy(() => import("./pages/SellerEarnings"));
+const AdminReports = lazy(() => import("./pages/admin/AdminReports"));
+const AdminVerification = lazy(() => import("./pages/admin/AdminVerification"));
 const AdminDisputes = lazy(() => import("./pages/admin/AdminDisputes"));
 const AdminActivity = lazy(() => import("./pages/admin/AdminActivity"));
 const AdminLayout = lazy(() => import("./pages/admin/AdminLayout"));
@@ -132,6 +135,15 @@ function App() {
           />
 
           <Route
+            path="/seller/earnings"
+            element={
+              <ProtectedRoute>
+                <SellerEarnings />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
             path="/seller/orders"
             element={
               <ProtectedRoute>
@@ -154,6 +166,8 @@ function App() {
             <Route path="users" element={<AdminUsers />} />
             <Route path="orders" element={<AdminOrders />} />
             <Route path="disputes" element={<AdminDisputes />} />
+            <Route path="reports" element={<AdminReports />} />
+            <Route path="verification" element={<AdminVerification />} />
             <Route path="activity" element={<AdminActivity />} />
           </Route>
 

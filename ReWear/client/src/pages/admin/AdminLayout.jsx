@@ -1,5 +1,5 @@
 import { NavLink, Outlet } from "react-router-dom";
-import { LayoutDashboard, ClipboardCheck, Users, Package, ShieldCheck, TriangleAlert, History } from "lucide-react";
+import { LayoutDashboard, ClipboardCheck, Users, Package, ShieldCheck, TriangleAlert, History, Flag, BadgeCheck } from "lucide-react";
 
 const LINKS = [
   { to: "/admin", label: "Overview", icon: LayoutDashboard, end: true },
@@ -7,6 +7,8 @@ const LINKS = [
   { to: "/admin/users", label: "Users", icon: Users },
   { to: "/admin/orders", label: "Orders", icon: Package },
   { to: "/admin/disputes", label: "Problem reports", icon: TriangleAlert },
+  { to: "/admin/reports", label: "Reported listings", icon: Flag },
+  { to: "/admin/verification", label: "Seller verification", icon: BadgeCheck },
   { to: "/admin/activity", label: "Activity log", icon: History },
 ];
 

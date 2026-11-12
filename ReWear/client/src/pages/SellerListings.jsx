@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import { formatDistanceToNow } from "date-fns";
-import { Plus, Pencil, Pause, Play, Trash2, ExternalLink, IndianRupee } from "lucide-react";
+import { Plus, Pencil, Pause, Play, Trash2, ExternalLink, IndianRupee, Eye, Heart, MessageCircle } from "lucide-react";
 
 import API from "../utils/api";
 import { useAuth } from "../context/AuthContext";
@@ -236,6 +236,23 @@ const SellerListings = () => {
                       {canRent(p) && p.rent ? `₹${p.rent.toLocaleString("en-IN")}/day rent` : ""}
                       <span className="text-gray-400"> · {categoryLabel(p.category)} · Size {p.size}</span>
                     </p>
+
+                    {(isLive(p) || p.status === "sold" || p.views > 0) && (
+                      <p className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-[13px] text-muted">
+                        <span className="inline-flex items-center gap-1.5" title="Views (each person counted once a day)">
+                          <Eye size={14} aria-hidden="true" />
+                          {p.views || 0} view{p.views === 1 ? "" : "s"}
+                        </span>
+                        <span className="inline-flex items-center gap-1.5" title="People who saved it to their wishlist">
+                          <Heart size={14} aria-hidden="true" />
+                          {p.saves || 0} saved
+                        </span>
+                        <span className="inline-flex items-center gap-1.5" title="Buyers who messaged you about it">
+                          <MessageCircle size={14} aria-hidden="true" />
+                          {p.questions || 0} question{p.questions === 1 ? "" : "s"}
+                        </span>
+                      </p>
+                    )}
 
                     {note && (
                       <p className={`mt-1.5 text-sm ${p.status === "rejected" ? "text-red-700" : "text-muted"}`}>{note}</p>

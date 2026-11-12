@@ -107,7 +107,7 @@ const Dashboard = () => {
         <Stat label="Live listings" value={live.length} to="/seller/listings" />
         <Stat label="Waiting for review" value={pending.length} to="/seller/listings" note={rejected.length ? `${rejected.length} need changes` : undefined} />
         <Stat label="Orders to fulfil" value={toAct.length} to="/seller/orders" />
-        <Stat label="Earnings" value={money(earnings)} to="/seller/orders" note="From orders not cancelled" />
+        <Stat label="Earnings" value={money(earnings)} to="/seller/earnings" note="See the breakdown" />
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2 items-start">

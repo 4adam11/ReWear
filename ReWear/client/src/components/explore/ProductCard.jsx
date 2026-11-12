@@ -4,6 +4,7 @@ import { Heart } from "lucide-react";
 import { useWishlist } from "../../context/WishListContext";
 import { cardImage, cardSrcSet, PLACEHOLDER_IMAGE } from "../../utils/image";
 import { RatingBadge } from "../ui/Stars";
+import VerifiedBadge from "../ui/VerifiedBadge";
 import { money } from "../../utils/format";
 import { categoryInfo } from "../../utils/catalog";
 
@@ -94,6 +95,7 @@ const ProductCard = ({ product, prefer }) => {
             {product.condition ? ` · ${product.condition}` : ""}
             {product.sellerName ? ` · ${product.sellerName}` : ""}
           </span>
+          {product.sellerVerified && <VerifiedBadge size={12} className="flex-shrink-0" />}
           <RatingBadge rating={product.sellerRating} className="flex-shrink-0" />
         </span>
       </Link>

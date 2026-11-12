@@ -10,6 +10,9 @@ import { upcomingRentals } from "../utils/bookings.js";
 import { deleteImage } from "../utils/cloudinary.js";
 import { notifyAdmins } from "../utils/notify.js";
 import rateLimit from "../middleware/rateLimit.js";
+import ProductView from "../models/ProductView.js";
+import Conversation from "../models/Conversation.js";
+import crypto from "node:crypto";
 
 const router = express.Router();
 
@@ -32,11 +35,16 @@ const listParam = (value, allowed) =>
 // Adds each listing's seller name (kept separate from "user" so owner checks still compare ids)
 const withSellerNames = async (items) => {
   const ids = [...new Set(items.map((p) => p.user?.toString()).filter(Boolean))];
-  const users = await User.find({ _id: { $in: ids } }).select("name rating").lean();
+  const users = await User.find({ _id: { $in: ids } }).select("name rating verification.status").lean();
   const byId = new Map(users.map((u) => [u._id.toString(), u]));
   return items.map((p) => {
     const u = byId.get(p.user?.toString());
-    return { ...p, sellerName: u?.name || "ReWear seller", sellerRating: u?.rating?.count ? u.rating : null };
+    return {
+      ...p,
+      sellerName: u?.name || "ReWear seller",
+      sellerRating: u?.rating?.count ? u.rating : null,
+      sellerVerified: u?.verification?.status === "verified",
+    };
   });
 };
 
@@ -274,12 +282,83 @@ router.get("/home", async (req, res) => {
 // MY LISTINGS (seller), every status, with review feedback
 //
 router.get("/mine", protect, async (req, res) => {
-  const products = await listQuery(
-    Product.find({ user: req.user._id }).sort({ createdAt: -1 }),
-    "review.rejectReason review.aiFlagged review.everApproved review.submittedAt updatedAt"
+  const [products, saves, chats] = await Promise.all([
+    listQuery(
+      Product.find({ user: req.user._id }).sort({ createdAt: -1 }),
+      "review.rejectReason review.aiFlagged review.everApproved review.submittedAt updatedAt views"
+    ),
+    // How many people saved each listing (the ids themselves stay private)
+    Product.aggregate([
+      { $match: { user: req.user._id } },
+      { $project: { n: { $size: { $ifNull: ["$savedBy", []] } } } },
+    ]),
+    // How many buyers have asked about each listing
+    Conversation.aggregate([
+      { $match: { seller: req.user._id } },
+      { $group: { _id: "$product", n: { $sum: 1 } } },
+    ]),
+  ]);
+
+  const savesOf = new Map(saves.map((s) => [s._id.toString(), s.n]));
+  const chatsOf = new Map(chats.map((c) => [c._id.toString(), c.n]));
+
+  res.json(
+    products.map((p) => ({
+      ...p,
+      views: p.views || 0,
+      saves: savesOf.get(p._id.toString()) || 0,
+      questions: chatsOf.get(p._id.toString()) || 0,
+    }))
+  );
+});
+
+//
+// COUNT A VIEW: once per visitor per listing per day; the seller's own visits don't count
+//
+const viewLimiter = rateLimit({ windowMs: 60 * 1000, max: 60, message: "Too many requests" });
+
+router.post("/:id/view", viewLimiter, optionalAuth, async (req, res) => {
+  if (!mongoose.isValidObjectId(req.params.id)) return res.status(204).end();
+
+  const product = await Product.findById(req.params.id).select("user status").lean();
+  if (!product || !LIVE.includes(product.status) || isOwner(product, req.user)) {
+    return res.status(204).end();
+  }
+
+  const visitor = req.user
+    ? `u:${req.user._id}`
+    : `a:${crypto.createHash("sha256").update(String(req.ip)).digest("hex").slice(0, 32)}`;
+  const day = new Date().toISOString().slice(0, 10);
+
+  try {
+    await ProductView.create({ product: product._id, visitor, day });
+    // timestamps: false so a view doesn't look like the seller edited the listing
+    await Product.updateOne({ _id: product._id }, { $inc: { views: 1 } }, { timestamps: false });
+  } catch (err) {
+    // Already counted today
+    if (err.code !== 11000) throw err;
+  }
+
+  res.status(204).end();
+});
+
+//
+// SAVE / UNSAVE (the wishlist heart), so sellers can see how many people saved a listing
+//
+router.post("/:id/save", protect, async (req, res) => {
+  if (!mongoose.isValidObjectId(req.params.id)) {
+    return res.status(404).json({ message: "Listing not found" });
+  }
+
+  const saved = req.body.saved !== false;
+  const result = await Product.updateOne(
+    { _id: req.params.id },
+    saved ? { $addToSet: { savedBy: req.user._id } } : { $pull: { savedBy: req.user._id } },
+    { timestamps: false }
   );
 
-  res.json(products);
+  if (!result.matchedCount) return res.status(404).json({ message: "Listing not found" });
+  res.json({ saved });
 });
 
 //
@@ -337,12 +416,14 @@ router.get("/:id", optionalAuth, async (req, res) => {
     end: toDay(b.end),
   }));
 
-  const seller = await User.findById(product.user).select("name createdAt rating").lean();
+  const seller = await User.findById(product.user).select("name createdAt rating verification.status").lean();
 
   res.json({
     ...product,
     bookings,
-    seller: seller ? { _id: seller._id, name: seller.name, since: seller.createdAt, rating: seller.rating } : null,
+    seller: seller
+      ? { _id: seller._id, name: seller.name, since: seller.createdAt, rating: seller.rating, verified: seller.verification?.status === "verified" }
+      : null,
   });
 });
 

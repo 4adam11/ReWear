@@ -384,6 +384,68 @@ router.get("/sales", protect, async (req, res) => {
 });
 
 //
+// SELLER EARNINGS: totals, the last 12 months and every order
+// Amounts are what buyers pay for this seller's items, after any promo discount.
+//
+router.get("/earnings", protect, async (req, res) => {
+  const orders = await Order.find({
+    $or: [{ seller: req.user._id }, { seller: { $exists: false }, "items.seller": req.user._id }],
+  })
+    .sort({ createdAt: -1 })
+    .populate("user", "name")
+    .lean();
+
+  const me = req.user._id.toString();
+  const rows = orders.map((o) => {
+    const items = o.items.filter((i) => i.seller?.toString() === me);
+    const status = o.status === "placed" ? "confirmed" : o.status;
+    return {
+      _id: o._id,
+      createdAt: o.createdAt,
+      status,
+      buyer: o.user?.name?.split(" ")[0] || "Buyer",
+      items: items.map((i) => ({ title: i.title, mode: i.mode, days: i.days })),
+      kind: items.some((i) => i.mode === "rent") ? "rent" : "sale",
+      amount: Math.max(items.reduce((s, i) => s + i.lineTotal, 0) - (o.discount || 0), 0),
+      paymentMethod: o.paymentMethod,
+    };
+  });
+
+  const sum = (list) => list.reduce((s, r) => s + r.amount, 0);
+  const earned = rows.filter((r) => r.status === "completed");
+  const pending = rows.filter((r) => ["confirmed", "accepted", "shipped", "delivered"].includes(r.status));
+  const lost = rows.filter((r) => ["cancelled", "refunded"].includes(r.status));
+
+  // Last 12 calendar months (UTC), oldest first: what was earned and what is still on the way
+  const now = new Date();
+  const months = [...Array(12)].map((_, i) => {
+    const d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 11 + i, 1));
+    return d.toISOString().slice(0, 7);
+  });
+  const byMonth = Object.fromEntries(months.map((m) => [m, { earned: 0, pending: 0 }]));
+  for (const r of [...earned, ...pending]) {
+    const m = new Date(r.createdAt).toISOString().slice(0, 7);
+    if (byMonth[m]) byMonth[m][r.status === "completed" ? "earned" : "pending"] += r.amount;
+  }
+
+  res.json({
+    totals: {
+      earned: sum(earned),
+      pending: sum(pending),
+      completedOrders: earned.length,
+      pendingOrders: pending.length,
+      lostOrders: lost.length,
+      lostAmount: sum(lost),
+      fromSales: sum(earned.filter((r) => r.kind === "sale")),
+      fromRentals: sum(earned.filter((r) => r.kind === "rent")),
+      average: earned.length ? Math.round(sum(earned) / earned.length) : 0,
+    },
+    months: months.map((m) => ({ day: `${m}-01`, ...byMonth[m] })),
+    orders: rows.slice(0, 200),
+  });
+});
+
+//
 // STATUS CHANGES
 // Each action says who may do it and from which statuses.
 //

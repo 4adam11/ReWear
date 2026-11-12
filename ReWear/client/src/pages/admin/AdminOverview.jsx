@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
-import { AlertTriangle, ArrowRight } from "lucide-react";
+import { AlertTriangle, ArrowRight, BadgeCheck } from "lucide-react";
 
 import API from "../../utils/api";
 import { useAuth } from "../../context/AuthContext";
@@ -58,6 +58,32 @@ const AdminOverview = () => {
           <span className="flex items-center gap-3 text-sm font-medium">
             <AlertTriangle size={18} />
             {stats.openDisputes} open problem report{stats.openDisputes === 1 ? "" : "s"} from buyers or sellers
+          </span>
+          <ArrowRight size={18} />
+        </Link>
+      )}
+
+      {stats.reportedListings > 0 && (
+        <Link
+          to="/admin/reports"
+          className="flex items-center justify-between gap-4 rounded-sm border border-red-200 bg-red-50 px-5 py-4 text-red-800 hover:bg-red-100 transition"
+        >
+          <span className="flex items-center gap-3 text-sm font-medium">
+            <AlertTriangle size={18} />
+            {stats.reportedListings} listing{stats.reportedListings === 1 ? " has" : "s have"} been reported by shoppers
+          </span>
+          <ArrowRight size={18} />
+        </Link>
+      )}
+
+      {stats.pendingVerifications > 0 && (
+        <Link
+          to="/admin/verification"
+          className="flex items-center justify-between gap-4 rounded-sm border border-sky-200 bg-sky-50 px-5 py-4 text-sky-900 hover:bg-sky-100 transition"
+        >
+          <span className="flex items-center gap-3 text-sm font-medium">
+            <BadgeCheck size={18} />
+            {stats.pendingVerifications} seller{stats.pendingVerifications === 1 ? " is" : "s are"} waiting to be verified
           </span>
           <ArrowRight size={18} />
         </Link>
