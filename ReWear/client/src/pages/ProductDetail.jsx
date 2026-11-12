@@ -84,7 +84,23 @@ const ProductDetail = () => {
   const closeReport = useCallback(() => setReporting(false), []);
   const closeZoom = useCallback(() => setZoom(null), []);
   const closeSizeGuide = useCallback(() => setSizeGuide(false), []);
-  usePageTitle(product?.title);
+  // "Like New · Size M · ₹2,400 or rent ₹450/day" plus the start of the description
+  const productDescription = product?.title
+    ? [
+        [
+          product.condition,
+          product.size && `Size ${product.size}`,
+          product.price > 0 && ["sale", "sell", "both"].includes(product.mode) && money(product.price),
+          product.rent > 0 && ["rent", "both"].includes(product.mode) && `rent ${money(product.rent)}/day`,
+        ]
+          .filter(Boolean)
+          .join(" · "),
+        product.description,
+      ]
+        .filter(Boolean)
+        .join(". ")
+    : undefined;
+  usePageTitle(product?.title, productDescription);
   const [dateRange, setDateRange] = useState([{ startDate: new Date(), endDate: new Date(), key: "selection" }]);
 
   useEffect(() => {

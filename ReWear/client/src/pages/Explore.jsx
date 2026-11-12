@@ -120,7 +120,12 @@ const Explore = () => {
           : mode === "sale" ? "Buy pre-loved"
             : "All fashion";
 
-  usePageTitle(search ? `"${search}"` : heading);
+  const pageDescription =
+    search ? `Pre-loved results for "${search}" on ReWear. Buy to keep or rent for your dates.`
+      : categories.length === 1 ? categoryInfo(categories[0])?.tagline
+        : mode === "rent" ? "Rent wedding, party and festive outfits by the day from real wardrobes, checked by the ReWear team."
+          : undefined;
+  usePageTitle(search ? `"${search}"` : heading, pageDescription);
 
   // Active filter chips
   const chips = [

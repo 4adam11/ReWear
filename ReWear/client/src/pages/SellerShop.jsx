@@ -17,7 +17,12 @@ const SellerShop = ({ id }) => {
   const [items, setItems] = useState({ items: [], total: 0, pages: 1 });
   const [page, setPage] = useState(1);
   const [tab, setTab] = useState("items");
-  usePageTitle(seller?.name ? `${seller.name}'s shop` : "Seller");
+  usePageTitle(
+    seller?.name ? `${seller.name}'s shop` : "Seller",
+    seller?.name
+      ? `Pre-loved fashion from ${seller.name} on ReWear${seller.rating?.count ? `, rated ${seller.rating.avg.toFixed(1)} from ${seller.rating.count} review${seller.rating.count === 1 ? "" : "s"}` : ""}.`
+      : undefined
+  );
 
   useEffect(() => {
     axios

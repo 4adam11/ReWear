@@ -89,7 +89,8 @@ const Landing = () => {
             </div>
           ))}
         </div>
-        <div className="absolute inset-0 bg-black/35 flex flex-col items-center justify-center text-center px-6">
+        {/* Darker behind the words, lighter at the edges, so the text stays readable on any photo */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_55%_at_center,rgba(0,0,0,0.6),rgba(0,0,0,0.25))] flex flex-col items-center justify-center text-center px-6">
           <p className="enter font-display text-xs sm:text-sm font-semibold uppercase tracking-[0.3em] text-gold">Pre-loved Indian fashion</p>
           <h1 className="enter enter-2 mt-3 text-white text-5xl sm:text-7xl font-extrabold uppercase tracking-[0.04em] leading-none">
             Wear it again

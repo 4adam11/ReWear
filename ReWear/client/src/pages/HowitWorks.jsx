@@ -149,7 +149,7 @@ const Journey = ({ steps }) => (
 // ---------------------------------------------------------------------------
 
 const HowItWorks = () => {
-  usePageTitle("How it works");
+  usePageTitle("How it works", "How buying, renting and selling pre-loved Indian fashion works on ReWear: checked listings, rent by the day, offers, tracked delivery and problem reports.");
   const [tab, setTab] = useState("buy");
   const [photos, setPhotos] = useState([]);
   const journey = JOURNEYS[tab];

@@ -144,7 +144,7 @@ const DoDont = ({ good, children }) => (
 );
 
 const Brand = () => {
-  usePageTitle("Brand kit");
+  usePageTitle("Brand kit", "The ReWear brand kit: logo files, colours, type, components, motion, photography and voice.");
   const [photos, setPhotos] = useState([]);
   const [swept, setSwept] = useState(false);
 
