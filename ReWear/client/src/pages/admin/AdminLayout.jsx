@@ -31,7 +31,7 @@ const AdminLayout = () => (
               to={to}
               end={end}
               className={({ isActive }) =>
-                `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium whitespace-nowrap transition ${isActive
+                `flex items-center gap-3 px-3 py-2.5 rounded-sm text-sm font-medium whitespace-nowrap transition-colors ${isActive
                   ? "bg-cream text-brand font-semibold"
                   : "text-muted hover:bg-cream hover:text-ink"
                 }`

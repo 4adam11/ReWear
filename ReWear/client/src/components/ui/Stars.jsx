@@ -8,7 +8,7 @@ export const Stars = ({ value = 0, size = 14 }) => (
         key={n}
         size={size}
         aria-hidden="true"
-        className={n <= Math.round(value) ? "fill-[#c0834f] text-[#c0834f]" : "fill-[#efe6da] text-[#e2d3c1]"}
+        className={n <= Math.round(value) ? "fill-caramel text-caramel" : "fill-line-soft text-line-strong"}
       />
     ))}
   </span>
@@ -18,7 +18,7 @@ export const Stars = ({ value = 0, size = 14 }) => (
 export const RatingBadge = ({ rating, className = "" }) =>
   rating?.count ? (
     <span className={`inline-flex items-center gap-1 text-xs text-muted ${className}`}>
-      <Star size={12} aria-hidden="true" className="fill-[#c0834f] text-[#c0834f]" />
+      <Star size={12} aria-hidden="true" className="fill-caramel text-caramel" />
       <span className="font-semibold text-ink">{rating.avg.toFixed(1)}</span>({rating.count})
     </span>
   ) : null;
@@ -36,7 +36,7 @@ export const StarPicker = ({ value, onChange }) => (
         onClick={() => onChange(n)}
         className="p-1"
       >
-        <Star size={26} className={n <= value ? "fill-[#c0834f] text-[#c0834f]" : "fill-white text-[#d9cbb9] hover:text-[#c0834f]"} />
+        <Star size={26} className={n <= value ? "fill-caramel text-caramel" : "fill-white text-line-strong hover:text-caramel"} />
       </button>
     ))}
   </div>

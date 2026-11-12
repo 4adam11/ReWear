@@ -2,8 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+/* The values here come from DESIGN.md at the repo root. */
+
 body {
   @apply bg-paper text-ink font-sans antialiased;
+  -webkit-tap-highlight-color: transparent;
 }
 
 @layer base {
@@ -11,13 +14,24 @@ body {
   h2,
   h3 {
     @apply font-display;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
   }
 }
 
 @layer components {
-  /* Square, capitalised buttons used on the storefront */
+  /* Square, capitalised buttons. They press down slightly (0.96) unless disabled. */
   .btn {
-    @apply inline-flex items-center justify-center gap-2 h-11 px-6 rounded-sm font-display font-semibold uppercase tracking-[0.08em] text-[13px] transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center gap-2 h-11 px-6 rounded-sm font-display font-semibold uppercase tracking-[0.08em] text-[13px] disabled:opacity-50 disabled:cursor-not-allowed;
+    transition-property: background-color, color, border-color, scale;
+    transition-duration: 150ms;
+    transition-timing-function: cubic-bezier(0.2, 0, 0, 1);
+  }
+  .btn:not(:disabled):active {
+    scale: 0.96;
   }
   .btn-dark {
     @apply bg-ink text-paper hover:bg-brand;
@@ -28,8 +42,25 @@ body {
   .btn-outline {
     @apply border-2 border-ink text-ink hover:bg-ink hover:text-paper;
   }
+  .btn-danger {
+    @apply bg-danger text-white hover:bg-danger-strong;
+  }
   .btn-sm {
     @apply h-9 px-4 text-[12px];
+  }
+
+  /* Text inputs, selects and text areas */
+  .field {
+    @apply w-full rounded-sm border border-field bg-white px-3.5 text-sm text-ink placeholder:text-faint focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand/15 disabled:bg-cream disabled:text-muted;
+    transition-property: border-color, box-shadow;
+    transition-duration: 150ms;
+  }
+  /* :where() keeps these as weak as .field, so h-9 or py-2 on an element still wins */
+  .field:where(input, select) {
+    @apply h-11;
+  }
+  .field:where(textarea) {
+    @apply py-2.5;
   }
 
   /* Page heading used across the inner pages, with a short bar under it */
@@ -41,12 +72,19 @@ body {
     @apply block w-12 h-1 mt-2 bg-ink;
   }
 
+  /* Small uppercase label above a heading ("Pre-loved Indian fashion") */
+  .kicker {
+    @apply font-display text-xs font-semibold uppercase tracking-[0.2em];
+  }
+
   /* Underlined tabs (orders, listings, admin queues) */
   .tab-bar {
     @apply flex gap-1 overflow-x-auto overflow-y-hidden shadow-[inset_0_-1px_0_#e7ddd0];
   }
   .tab {
-    @apply px-3 sm:px-4 py-2.5 border-b-2 border-transparent font-display text-[12.5px] font-semibold uppercase tracking-[0.08em] whitespace-nowrap text-muted hover:text-ink transition-colors;
+    @apply px-3 sm:px-4 py-2.5 border-b-2 border-transparent font-display text-[12.5px] font-semibold uppercase tracking-[0.08em] whitespace-nowrap text-muted hover:text-ink;
+    transition-property: color, border-color;
+    transition-duration: 150ms;
   }
   .tab-active {
     @apply border-ink text-ink;
@@ -55,6 +93,28 @@ body {
   /* Plain white box for forms, order cards and lists */
   .panel {
     @apply bg-white border border-line rounded-sm;
+  }
+
+  /* Small status pill (StatusBadge, verified, AI checks) */
+  .chip {
+    @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-sm border text-xs font-medium whitespace-nowrap;
+  }
+
+  /* A thin neutral edge so pale garments don't melt into the cream page */
+  .photo-edge {
+    @apply relative;
+  }
+  .photo-edge::after {
+    content: "";
+    @apply pointer-events-none absolute inset-0;
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08);
+  }
+}
+
+@layer utilities {
+  /* Prices and counts line up in columns */
+  .nums {
+    font-variant-numeric: tabular-nums;
   }
 }
 
@@ -73,6 +133,29 @@ body {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+  .btn:not(:disabled):active {
+    scale: none;
+  }
+}
+
+/* Staged entrance for first-load hero content only (never routine UI) */
+@media (prefers-reduced-motion: no-preference) {
+  .enter {
+    animation: enter 300ms cubic-bezier(0.2, 0, 0, 1) both;
+  }
+  .enter-2 {
+    animation-delay: 100ms;
+  }
+  .enter-3 {
+    animation-delay: 200ms;
+  }
+  @keyframes enter {
+    from {
+      opacity: 0;
+      filter: blur(4px);
+      translate: 0 12px;
+    }
+  }
 }
 
 /* Thin, warm scrollbar for sideways product rows */
@@ -88,7 +171,28 @@ body {
   border-radius: 999px;
 }
 
-/* Booking calendars in the brand colour */
+/* Booking calendars in the brand colours, with readable text (the library's greys fall below 4.5:1) */
 .rdrDayToday .rdrDayNumber span:after {
   background: #6b4430;
+}
+.rdrCalendarWrapper .rdrWeekDay,
+.rdrCalendarWrapper .rdrMonthAndYearPickers select {
+  color: #6e5d50;
+}
+.rdrCalendarWrapper .rdrDateDisplayItem input {
+  color: #2b1d14;
+}
+.rdrCalendarWrapper .rdrDateDisplayItem input::placeholder {
+  color: #7f6e60;
+}
+.rdrCalendarWrapper .rdrDateDisplayWrapper {
+  background-color: #f6efe5;
+}
+/* Booked or past days: struck through as well as faded, so it isn't colour alone */
+.rdrCalendarWrapper .rdrDayDisabled {
+  background-color: #f6efe5;
+}
+.rdrCalendarWrapper .rdrDayDisabled .rdrDayNumber span {
+  color: #a8998b;
+  text-decoration: line-through;
 }

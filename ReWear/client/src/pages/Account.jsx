@@ -9,7 +9,7 @@ import usePageTitle from "../hooks/usePageTitle";
 import VerificationCard from "../components/account/VerificationCard";
 
 const inputClass =
-  "h-11 w-full px-3.5 rounded-md border border-[#d9cbb9] bg-white text-sm text-ink placeholder:text-[#a8998b] focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand/15 disabled:bg-[#f6f1ea] disabled:text-muted";
+  "field";
 
 const Field = ({ id, label, className = "", children }) => (
   <div className={`flex flex-col gap-1.5 ${className}`}>
@@ -22,7 +22,7 @@ const Field = ({ id, label, className = "", children }) => (
 
 const Card = ({ title, text, children }) => (
   <section className="bg-white border border-line rounded-sm">
-    <div className="px-5 py-4 border-b border-[#efe6da]">
+    <div className="px-5 py-4 border-b border-line-soft">
       <h2 className="text-base font-bold">{title}</h2>
       {text && <p className="text-[13px] text-muted">{text}</p>}
     </div>
@@ -32,7 +32,7 @@ const Card = ({ title, text, children }) => (
 
 const Message = ({ msg }) =>
   msg ? (
-    <p role="status" className={`text-sm ${msg.ok ? "text-[#3f6b4a]" : "text-red-700"}`}>
+    <p role="status" className={`text-sm ${msg.ok ? "text-success" : "text-danger"}`}>
       {msg.text}
     </p>
   ) : null;
@@ -158,19 +158,19 @@ const Account = () => {
           {profile.addresses.length === 0 && !adding && <p className="text-sm text-muted">You haven't saved any addresses yet.</p>}
 
           {profile.addresses.map((a) => (
-            <div key={a._id} className="flex gap-3 rounded-md border border-line p-3.5">
+            <div key={a._id} className="flex gap-3 rounded-sm border border-line p-3.5">
               <div className="flex-1 text-sm">
                 <p className="font-semibold">{a.name} · {a.phone}</p>
                 <p className="text-muted">{formatAddress(a)}</p>
               </div>
-              <button type="button" onClick={() => removeAddress(a._id)} aria-label={`Remove address for ${a.name}`} className="w-9 h-9 flex items-center justify-center text-muted hover:text-red-700">
+              <button type="button" onClick={() => removeAddress(a._id)} aria-label={`Remove address for ${a.name}`} className="w-9 h-9 flex items-center justify-center text-muted hover:text-danger">
                 <Trash2 size={16} />
               </button>
             </div>
           ))}
 
           {adding ? (
-            <form onSubmit={addAddress} className="grid gap-4 sm:grid-cols-2 rounded-md border border-line p-4">
+            <form onSubmit={addAddress} className="grid gap-4 sm:grid-cols-2 rounded-sm border border-line p-4">
               <Field id="ad-name" label="Full name">
                 <input id="ad-name" value={address.name} onChange={setA("name")} className={inputClass} />
               </Field>

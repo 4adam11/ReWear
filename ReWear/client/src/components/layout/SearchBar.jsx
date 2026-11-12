@@ -179,18 +179,18 @@ const SearchBar = () => {
         onFocus={() => setOpen(true)}
         onKeyDown={onKeyDown}
         placeholder="Search lehengas, sherwanis, sarees, kurtas…"
-        className="flex-1 min-w-0 h-10 pl-5 pr-20 rounded-full bg-white text-sm text-ink placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-[#e8c39e]"
+        className="flex-1 min-w-0 h-10 pl-5 pr-20 rounded-full bg-white text-sm text-ink placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-gold"
       />
       <button
         type="submit"
         aria-label="Search"
-        className="absolute right-1 top-1 w-8 h-8 rounded-full text-ink flex items-center justify-center hover:bg-cream"
+        className="absolute right-1 top-1 w-8 h-8 rounded-full text-ink flex items-center justify-center hover:bg-cream after:absolute after:-inset-1.5 after:content-['']"
       >
         <Search size={18} />
       </button>
 
       {showList && (
-        <div className="absolute left-0 right-0 top-full mt-2 bg-white border border-line rounded-sm shadow-lift overflow-hidden z-50">
+        <div className="absolute left-0 right-0 top-full mt-2 bg-white border border-transparent rounded-sm shadow-menu overflow-hidden z-50">
           {!typing && (
             <div className="flex items-center justify-between px-4 pt-3 pb-1">
               <span className="font-display text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">Recent searches</span>
@@ -200,7 +200,7 @@ const SearchBar = () => {
             </div>
           )}
 
-          <ul id="search-suggestions" role="listbox" aria-label="Search suggestions" className="max-h-[70vh] overflow-y-auto py-1">
+          <ul id="search-suggestions" role="listbox" aria-label="Search suggestions" className="max-h-[70vh] overflow-y-auto overscroll-contain py-1">
             {rows.map((row, i) => (
               <li
                 key={row.key}
@@ -279,7 +279,7 @@ const SearchBar = () => {
             setActive(-1);
             document.getElementById("site-search")?.focus();
           }}
-          className="absolute right-10 top-1 w-8 h-8 rounded-full text-muted flex items-center justify-center hover:text-ink"
+          className="absolute right-10 top-1 w-8 h-8 rounded-full text-muted flex items-center justify-center hover:text-ink after:absolute after:-inset-1.5 after:content-['']"
         >
           <X size={16} />
         </button>

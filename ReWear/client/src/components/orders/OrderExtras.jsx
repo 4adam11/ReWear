@@ -69,10 +69,10 @@ export const ReviewBox = ({ order, onDone }) => {
           rows={3}
           maxLength={1000}
           placeholder="Was it as described? How was the packing and delivery?"
-          className="rounded-md border border-[#d9cbb9] px-3 py-2 focus:outline-none focus:border-brand"
+          className="field px-3 py-2"
         />
       </label>
-      {error && <p className="text-[13px] text-red-700">{error}</p>}
+      {error && <p className="text-[13px] text-danger">{error}</p>}
       <div className="flex gap-2">
         <button type="submit" disabled={busy || !rating} className="btn btn-dark btn-sm">
           Post review
@@ -125,7 +125,7 @@ export const ProblemBox = ({ order, role, onDone }) => {
       {reasons.length > 1 && (
         <label className="flex flex-col gap-1.5 text-sm">
           <span className="font-medium">What went wrong?</span>
-          <select value={reason} onChange={(e) => setReason(e.target.value)} className="h-10 rounded-md border border-[#d9cbb9] px-3 bg-white">
+          <select value={reason} onChange={(e) => setReason(e.target.value)} className="h-10 rounded-sm border border-line-strong px-3 bg-white">
             {reasons.map((r) => (
               <option key={r} value={r}>
                 {DISPUTE_REASONS[r]}
@@ -142,10 +142,10 @@ export const ProblemBox = ({ order, role, onDone }) => {
           rows={3}
           maxLength={1000}
           placeholder={role === "seller" ? "When was it due back? Have you contacted the buyer?" : "Describe what happened"}
-          className="rounded-md border border-[#d9cbb9] px-3 py-2 focus:outline-none focus:border-brand"
+          className="field px-3 py-2"
         />
       </label>
-      {error && <p className="text-[13px] text-red-700">{error}</p>}
+      {error && <p className="text-[13px] text-danger">{error}</p>}
       <div className="flex gap-2">
         <button type="submit" disabled={busy || details.trim().length < 10} className="btn btn-dark btn-sm">
           Send report
@@ -164,7 +164,7 @@ export const DisputeBanner = ({ dispute }) => {
 
   const open = dispute.status === "open";
   return (
-    <div className={`rounded-md border px-4 py-3 text-sm ${open ? "bg-amber-50 border-amber-200 text-amber-900" : "bg-cream border-line"}`}>
+    <div className={`rounded-sm border px-4 py-3 text-sm ${open ? "bg-warning-tint border-warning-line text-warning-strong" : "bg-cream border-line"}`}>
       <p className="font-semibold">
         {open ? "Problem reported" : dispute.status === "refunded" ? "Resolved: buyer refunded" : "Report closed by ReWear"} ·{" "}
         {DISPUTE_REASONS[dispute.reason]}

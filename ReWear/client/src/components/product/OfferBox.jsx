@@ -42,9 +42,9 @@ const OfferBox = ({ product, offer, setOffer }) => {
 
   if (offer?.status === "accepted") {
     return (
-      <div className={`${box} border-[#bcd3c0] bg-[#f3f8f3]`}>
-        <p className="font-semibold text-[#2f5a3a]">Your offer of {money(offer.amount)} was accepted</p>
-        <p className="mt-1 text-[13px] text-[#3f6b4a]">
+      <div className={`${box} border-success-line bg-success-tint`}>
+        <p className="font-semibold text-success-strong">Your offer of {money(offer.amount)} was accepted</p>
+        <p className="mt-1 text-[13px] text-success">
           The bag and checkout use this price. It's yours for {formatDistanceToNowStrict(new Date(offer.expiresAt))} more.
         </p>
       </div>
@@ -56,7 +56,7 @@ const OfferBox = ({ product, offer, setOffer }) => {
       <div className={box}>
         <p className="font-semibold">You offered {money(offer.amount)}</p>
         <p className="mt-1 text-[13px] text-muted">Waiting for the seller to reply. We'll send you an alert.</p>
-        {error && <p className="mt-2 text-[13px] text-red-700">{error}</p>}
+        {error && <p className="mt-2 text-[13px] text-danger">{error}</p>}
         <button type="button" disabled={busy} onClick={() => respond("withdraw")} className="mt-2 text-[13px] font-semibold text-brand hover:underline">
           Withdraw offer
         </button>
@@ -69,7 +69,7 @@ const OfferBox = ({ product, offer, setOffer }) => {
       <div className={box}>
         <p className="font-semibold">The seller countered with {money(offer.counterAmount)}</p>
         <p className="mt-1 text-[13px] text-muted">You offered {money(offer.amount)}.</p>
-        {error && <p className="mt-2 text-[13px] text-red-700">{error}</p>}
+        {error && <p className="mt-2 text-[13px] text-danger">{error}</p>}
         <div className="mt-3 flex gap-2">
           <button type="button" disabled={busy} onClick={() => respond("accept")} className="btn btn-dark btn-sm">
             Accept {money(offer.counterAmount)}
@@ -125,7 +125,7 @@ const OfferBox = ({ product, offer, setOffer }) => {
             max={product.price - 1}
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
-            className="h-10 w-full pl-7 pr-3 rounded-md border border-[#d9cbb9] focus:outline-none focus:border-brand"
+            className="field h-10 pl-7 pr-3"
           />
         </div>
         <button type="submit" disabled={busy || !amount} className="btn btn-dark btn-sm">
@@ -135,7 +135,7 @@ const OfferBox = ({ product, offer, setOffer }) => {
           Cancel
         </button>
       </div>
-      {error && <p className="mt-2 text-[13px] text-red-700">{error}</p>}
+      {error && <p className="mt-2 text-[13px] text-danger">{error}</p>}
     </form>
   );
 };

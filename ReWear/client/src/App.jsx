@@ -4,6 +4,7 @@ import MainLayout from "./components/layout/MainLayout";
 
 import Landing from "./pages/Landing";
 import ScrollToTop from "./components/ui/ScrolltoTop";
+import FeedbackHost from "./components/ui/FeedbackHost";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminRoute from "./components/AdminRoute";
@@ -18,6 +19,7 @@ const Checkout = lazy(() => import("./pages/Checkout"));
 const OrderSuccess = lazy(() => import("./pages/OrderSuccess"));
 const Orders = lazy(() => import("./pages/Orders"));
 const HowItWorks = lazy(() => import("./pages/HowitWorks"));
+const Brand = lazy(() => import("./pages/Brand"));
 const Sell = lazy(() => import("./pages/Sell"));
 const Cart = lazy(() => import("./pages/Cart"));
 const Wishlist = lazy(() => import("./pages/WishList"));
@@ -40,8 +42,9 @@ const AdminUsers = lazy(() => import("./pages/admin/AdminUsers"));
 const AdminOrders = lazy(() => import("./pages/admin/AdminOrders"));
 
 const PageLoader = () => (
-  <div className="min-h-[60vh] flex items-center justify-center">
-    <div className="w-8 h-8 rounded-full border-2 border-gray-200 border-t-[#2b1d14] animate-spin" />
+  <div role="status" className="min-h-[60vh] flex items-center justify-center">
+    <div className="w-8 h-8 rounded-full border-2 border-line-strong border-t-ink animate-spin" aria-hidden="true" />
+    <span className="sr-only">Loading</span>
   </div>
 );
 
@@ -56,7 +59,8 @@ function App() {
     <Router>
 
       {/* GLOBAL UI */}
-      <ScrollToTop/>
+      <ScrollToTop />
+      <FeedbackHost />
 
       <MainLayout>
         <PageBoundary>
@@ -68,6 +72,7 @@ function App() {
           <Route path="/explore" element={<Explore />} />
           <Route path="/product/:id" element={<ProductDetail />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/brand" element={<Brand />} />
           <Route path="/howitworks" element={<HowItWorks />} />
           <Route path="/wishlist" element={<Wishlist />} />
           <Route path="/seller/:id" element={<SellerShop />} />

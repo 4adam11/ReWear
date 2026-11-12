@@ -42,7 +42,7 @@ const ReportListing = ({ product, onClose }) => {
     <Modal title="Report this listing" onClose={onClose}>
       {done ? (
         <div className="flex flex-col items-start gap-3">
-          <CircleCheck size={32} className="text-[#3f6b4a]" />
+          <CircleCheck size={32} className="text-success" />
           <p className="text-[15px]">{done}</p>
           <p className="text-sm text-muted">You'll get an alert when it has been reviewed.</p>
           <button type="button" onClick={onClose} className="btn btn-dark btn-sm mt-2">
@@ -68,7 +68,7 @@ const ReportListing = ({ product, onClose }) => {
                   value={value}
                   checked={reason === value}
                   onChange={() => setReason(value)}
-                  className="w-4 h-4 accent-[#6b4430]"
+                  className="w-4 h-4 accent-brand"
                 />
                 {label}
               </label>
@@ -85,11 +85,11 @@ const ReportListing = ({ product, onClose }) => {
               value={details}
               onChange={(e) => setDetails(e.target.value)}
               placeholder="What did you notice?"
-              className="rounded-sm border border-[#d9cbb9] px-3 py-2 focus:outline-none focus:border-brand"
+              className="field px-3 py-2"
             />
           </label>
 
-          {error && <p role="alert" className="text-[13px] text-red-700">{error}</p>}
+          {error && <p role="alert" className="text-[13px] text-danger">{error}</p>}
 
           <div className="flex gap-2">
             <button

@@ -31,6 +31,7 @@ import Lightbox from "../components/ui/Lightbox";
 import usePageTitle from "../hooks/usePageTitle";
 import { RatingBadge, Stars } from "../components/ui/Stars";
 import VerifiedBadge from "../components/ui/VerifiedBadge";
+import useCalendarLabels from "../hooks/useCalendarLabels";
 import ReportListing from "../components/product/ReportListing";
 
 const PriceOption = ({ active, disabled, onClick, label, price, unit }) => (
@@ -40,13 +41,13 @@ const PriceOption = ({ active, disabled, onClick, label, price, unit }) => (
     aria-selected={active}
     disabled={disabled}
     onClick={onClick}
-    className={`flex flex-col items-start gap-1 px-4 py-3.5 rounded-lg text-left transition ${active ? "border-2 border-brand bg-cream" : "border border-[#d9cbb9] bg-white m-px hover:border-brand"} disabled:opacity-45 disabled:cursor-not-allowed disabled:hover:border-[#d9cbb9]`}
+    className={`flex flex-col items-start gap-1 px-4 py-3.5 rounded-sm text-left transition-colors ${active ? "border-2 border-brand bg-cream" : "border border-line-strong bg-white m-px hover:border-brand"} disabled:opacity-45 disabled:cursor-not-allowed disabled:hover:border-line-strong`}
   >
     <span className="text-[13px] font-semibold">{label}</span>
     {disabled ? (
       <span className="text-sm text-muted">Not offered</span>
     ) : (
-      <span className="text-[22px] font-bold leading-none">
+      <span className="text-[22px] font-bold leading-none nums">
         {money(price)}
         {unit && <span className="text-[13px] font-medium">{unit}</span>}
       </span>
@@ -79,6 +80,7 @@ const ProductDetail = () => {
   const [zoom, setZoom] = useState(null);
   const [sizeGuide, setSizeGuide] = useState(false);
   const [reporting, setReporting] = useState(false);
+  const calendarRef = useCalendarLabels();
   const closeReport = useCallback(() => setReporting(false), []);
   const closeZoom = useCallback(() => setZoom(null), []);
   const closeSizeGuide = useCallback(() => setSizeGuide(false), []);
@@ -226,7 +228,7 @@ const ProductDetail = () => {
                   onClick={() => setActiveImage(img)}
                   aria-label={`Photo ${i + 1}`}
                   aria-pressed={activeImage === img}
-                  className={`flex-shrink-0 w-[68px] h-[85px] rounded-md overflow-hidden bg-cream ${activeImage === img ? "ring-2 ring-brand" : "border border-line"}`}
+                  className={`flex-shrink-0 w-[68px] h-[85px] rounded-sm overflow-hidden bg-cream ${activeImage === img ? "ring-2 ring-brand" : "border border-line"}`}
                 >
                   <img src={cardImage(img, 140)} alt="" loading="lazy" className="w-full h-full object-cover" />
                 </button>
@@ -240,7 +242,7 @@ const ProductDetail = () => {
             className="group relative flex-1 aspect-[4/5] overflow-hidden bg-cream border border-line cursor-zoom-in"
           >
             <img src={thumb(activeImage, 900) || PLACEHOLDER_IMAGE} srcSet={photoSrcSet(activeImage, 900)} alt={product.title} className="w-full h-full object-contain" />
-            <span aria-hidden="true" className="absolute bottom-3 right-3 w-10 h-10 rounded-full bg-white shadow-card flex items-center justify-center text-ink group-hover:scale-105 transition-transform">
+            <span aria-hidden="true" className="absolute bottom-3 right-3 w-10 h-10 rounded-full bg-white shadow-card flex items-center justify-center text-ink motion-safe:group-hover:scale-105 transition-transform">
               <Maximize2 size={17} />
             </span>
           </button>
@@ -260,7 +262,7 @@ const ProductDetail = () => {
             )}
             <h1 className="text-2xl sm:text-[28px] leading-tight font-semibold">{product.title}</h1>
             {approved && (
-              <span className="inline-flex items-center gap-1.5 text-[13px] text-[#3f6b4a]">
+              <span className="inline-flex items-center gap-1.5 text-[13px] text-success">
                 <ShieldCheck size={16} />
                 Photos and details reviewed by the ReWear team
               </span>
@@ -291,7 +293,7 @@ const ProductDetail = () => {
           {mode === "rent" && canRent && (
             <div className="bg-white border border-line rounded-sm overflow-hidden">
               <p className="px-4 pt-3.5 text-sm font-semibold">Pick your dates</p>
-              <div className="flex justify-center rewear-calendar">
+              <div ref={calendarRef} className="flex justify-center rewear-calendar">
                 <DateRange
                   ranges={dateRange}
                   onChange={(item) => setDateRange([item.selection])}
@@ -303,11 +305,11 @@ const ProductDetail = () => {
                   showDateDisplay={false}
                 />
               </div>
-              <div className="mx-4 py-3 border-t border-[#efe6da] flex justify-between text-sm">
+              <div className="mx-4 py-3 border-t border-line-soft flex justify-between text-sm">
                 <span className="text-muted">
                   {format(start, "d MMM")} – {format(end, "d MMM")} · {days} day{days > 1 ? "s" : ""} × {money(rentPerDay)}
                 </span>
-                <span className="font-bold">{money(totalRent)}</span>
+                <span className="font-bold nums">{money(totalRent)}</span>
               </div>
               {bookings.length > 0 && (
                 <p className="px-4 pb-3 text-xs text-muted">Greyed-out days are already booked by someone else.</p>
@@ -329,7 +331,7 @@ const ProductDetail = () => {
           )}
 
           {blockedReason && (
-            <p className="rounded-md bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-800">{blockedReason}</p>
+            <p className="rounded-sm bg-warning-tint border border-warning-line px-4 py-3 text-sm text-warning-strong">{blockedReason}</p>
           )}
 
           {isMine ? (
@@ -369,7 +371,7 @@ const ProductDetail = () => {
                 {mode === "rent" ? "Rent now" : "Buy now"}
               </button>
               {added && (
-                <p role="status" className="flex items-center gap-2 text-sm text-[#3f6b4a]">
+                <p role="status" className="flex items-center gap-2 text-sm text-success">
                   <CircleCheck size={16} />
                   {added} ·
                   <Link to="/cart" className="font-semibold text-brand hover:underline">View bag</Link>
@@ -406,7 +408,7 @@ const ProductDetail = () => {
       <section className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] items-start">
         <div className="bg-white border border-line rounded-sm p-6">
           <h2 className="text-lg font-bold">Product details</h2>
-          <p className="mt-3 text-[15px] leading-relaxed text-[#4a3a2e] whitespace-pre-line">
+          <p className="mt-3 text-[15px] leading-relaxed text-ink-soft whitespace-pre-line">
             {product.description || "The seller hasn't added a description. Check the photos, size and condition before ordering."}
           </p>
           <dl className="mt-5 grid grid-cols-[130px_1fr] gap-x-4 gap-y-2.5 text-sm">
@@ -443,7 +445,7 @@ const ProductDetail = () => {
           <div className="bg-white border border-line rounded-sm p-6 flex flex-col gap-3">
             <h2 className="text-lg font-bold">About the seller</h2>
             <div className="flex items-center gap-3">
-              <span aria-hidden="true" className="w-11 h-11 rounded-full bg-[#f1e6d8] text-brand font-bold flex items-center justify-center">
+              <span aria-hidden="true" className="w-11 h-11 rounded-full bg-sand text-brand font-bold flex items-center justify-center">
                 {product.seller.name?.[0]?.toUpperCase() || "R"}
               </span>
               <div>

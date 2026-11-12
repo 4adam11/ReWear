@@ -1,4 +1,4 @@
-# ReWear demo script (about 10 minutes)
+# ReWear demo script (about 12 minutes)
 
 ## Before the demo
 
@@ -43,11 +43,12 @@
 
 ## 5. Order workflow
 
-- Buyer: checkout with a saved address, cash on delivery → order confirmation.
+- Buyer: checkout with a saved address, cash on delivery → a warm brand-coloured band sweeps across and the order confirmation appears behind it (skipped if the computer has reduced motion turned on).
 - Seller: Orders to fulfil → **Accept** → **Mark as shipped** (courier + tracking number).
 - Buyer: My orders shows the progress bar and tracking → **I've received it** → **Complete order**.
 - Buyer: **Rate the seller** (stars + comment). The rating appears on the shop page and product cards.
 - Every step sends an alert to the other person (bell icon).
+- Cancelling or completing an order asks first in a ReWear dialog, and results show as a small note at the bottom of the screen (no browser pop-ups).
 
 ## 6. Problem reports (disputes)
 
@@ -56,10 +57,27 @@
 - Admin → **Problem reports** → write a decision → **Refund the buyer** or **Reject report**.
   Both sides are notified, and the decision is in the activity log.
 
-## 7. Admin overview
+## 7. Report a listing and verified sellers
 
-- Counts of listings by status, users, orders and sales value.
+- As **buyer** on any live item: **Report it** under the details (fake, misdescribed, not allowed...). Reporting twice is refused politely.
+- As **admin**: **Reported listings** groups reports per item → **Take listing down** (the seller sees the reason) or **Dismiss**.
+- As **seller**: Account → **Verified seller** shows a checklist (mobile number, an approved listing, account a day old) → **Ask to be verified**.
+- As **admin**: **Seller verification** shows the seller's record → **Approve badge**. The blue tick now shows on their cards, product pages and shop.
+
+## 8. Seller stats and earnings
+
+- As **seller**: My listings shows views (one per person per day), wishlist saves and questions for each item.
+- Account menu → **Earnings**: earned, on the way, average per order, a 12-month chart, sales vs rentals, and a CSV download.
+
+## 9. Admin overview
+
+- Counts of listings by status, users, orders and sales value, plus banners for open reports and verification requests.
 - Charts for the last 30 days: orders, sales value, new listings, new users.
+
+## 10. Brand kit
+
+- Footer → **Brand kit** (`/brand`): logo files to download, the colour palette (click a swatch to copy it, with its contrast rating), type, components, motion (press **Play it** to see the milestone sweep), photography, icons and voice.
+- The same rules are written down in `DESIGN.md` for anyone building the site; the colours on the page are read straight from the Tailwind config, so the two can't drift apart.
 
 ## What's not in this version
 

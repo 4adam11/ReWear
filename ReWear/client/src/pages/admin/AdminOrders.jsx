@@ -32,10 +32,10 @@ const AdminOrders = () => {
         <p className="mt-1 text-sm text-muted">The 100 most recent orders across the marketplace.</p>
       </div>
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm text-danger">{error}</p>}
 
       <div className="bg-white border border-line rounded-sm overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="w-full text-sm nums">
           <thead>
             <tr className="text-left text-muted border-b border-line">
               <th className="px-4 py-3 font-medium">Order</th>
@@ -48,10 +48,10 @@ const AdminOrders = () => {
             </tr>
           </thead>
 
-          <tbody className="divide-y divide-gray-100">
+          <tbody className="divide-y divide-line-soft">
             {loading ? (
               <tr>
-                <td colSpan={7} className="px-4 py-10 text-center text-gray-400">Loading…</td>
+                <td colSpan={7} className="px-4 py-10 text-center text-faint">Loading…</td>
               </tr>
             ) : orders.length === 0 ? (
               <tr>
@@ -59,14 +59,14 @@ const AdminOrders = () => {
               </tr>
             ) : (
               orders.map((o) => (
-                <tr key={o._id} className="hover:bg-gray-50 align-top">
-                  <td className="px-4 py-3 font-mono text-xs text-gray-700">#{o._id.slice(-6).toUpperCase()}</td>
-                  <td className="px-4 py-3 text-gray-600 whitespace-nowrap">{format(new Date(o.createdAt), "d MMM yyyy, HH:mm")}</td>
+                <tr key={o._id} className="hover:bg-cream align-top">
+                  <td className="px-4 py-3 font-mono text-xs text-ink-soft">#{o._id.slice(-6).toUpperCase()}</td>
+                  <td className="px-4 py-3 text-muted whitespace-nowrap">{format(new Date(o.createdAt), "d MMM yyyy, HH:mm")}</td>
                   <td className="px-4 py-3">
                     <p className="text-ink">{o.user?.name || "Deleted user"}</p>
                     <p className="text-xs text-muted">{o.user?.email}</p>
                   </td>
-                  <td className="px-4 py-3 text-gray-700">
+                  <td className="px-4 py-3 text-ink-soft">
                     {(o.items || []).map((i, idx) => (
                       <p key={idx} className="whitespace-nowrap">
                         {i.title || "Item"}
@@ -77,7 +77,7 @@ const AdminOrders = () => {
                       </p>
                     ))}
                   </td>
-                  <td className="px-4 py-3 text-gray-600">{PAYMENT[o.paymentMethod] || "—"}</td>
+                  <td className="px-4 py-3 text-muted">{PAYMENT[o.paymentMethod] || "—"}</td>
                   <td className="px-4 py-3 text-right tabular-nums font-medium">₹{(o.total || 0).toLocaleString("en-IN")}</td>
                   <td className="px-4 py-3">
                     <StatusBadge status={o.status || "placed"} />

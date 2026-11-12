@@ -10,7 +10,7 @@ import usePageTitle from "../../hooks/usePageTitle";
 
 const Stat = ({ label, value, to, tone = "text-ink" }) => {
   const body = (
-    <div className="bg-white border border-line rounded-sm p-5 h-full hover:border-gray-300 transition">
+    <div className="bg-white border border-line rounded-sm p-5 h-full hover:border-line-strong transition-colors">
       <p className="text-sm text-muted">{label}</p>
       <p className={`mt-2 text-3xl font-semibold tabular-nums ${tone}`}>{value}</p>
     </div>
@@ -38,7 +38,7 @@ const AdminOverview = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  if (error) return <p className="text-sm text-red-600">{error}</p>;
+  if (error) return <p className="text-sm text-danger">{error}</p>;
   if (!stats) return <div className="h-40 rounded-sm bg-white border border-line animate-pulse" />;
 
   const { listings } = stats;
@@ -53,7 +53,7 @@ const AdminOverview = () => {
       {stats.openDisputes > 0 && (
         <Link
           to="/admin/disputes"
-          className="flex items-center justify-between gap-4 rounded-lg border border-red-200 bg-red-50 px-5 py-4 text-red-800 hover:bg-red-100 transition"
+          className="flex items-center justify-between gap-4 rounded-sm border border-danger-line bg-danger-tint px-5 py-4 text-danger-strong hover:bg-danger-wash transition-colors"
         >
           <span className="flex items-center gap-3 text-sm font-medium">
             <AlertTriangle size={18} />
@@ -66,7 +66,7 @@ const AdminOverview = () => {
       {stats.reportedListings > 0 && (
         <Link
           to="/admin/reports"
-          className="flex items-center justify-between gap-4 rounded-sm border border-red-200 bg-red-50 px-5 py-4 text-red-800 hover:bg-red-100 transition"
+          className="flex items-center justify-between gap-4 rounded-sm border border-danger-line bg-danger-tint px-5 py-4 text-danger-strong hover:bg-danger-wash transition-colors"
         >
           <span className="flex items-center gap-3 text-sm font-medium">
             <AlertTriangle size={18} />
@@ -79,7 +79,7 @@ const AdminOverview = () => {
       {stats.pendingVerifications > 0 && (
         <Link
           to="/admin/verification"
-          className="flex items-center justify-between gap-4 rounded-sm border border-sky-200 bg-sky-50 px-5 py-4 text-sky-900 hover:bg-sky-100 transition"
+          className="flex items-center justify-between gap-4 rounded-sm border border-info-line bg-info-tint px-5 py-4 text-info-strong hover:bg-info-wash transition-colors"
         >
           <span className="flex items-center gap-3 text-sm font-medium">
             <BadgeCheck size={18} />
@@ -92,7 +92,7 @@ const AdminOverview = () => {
       {listings.pending > 0 && (
         <Link
           to="/admin/listings"
-          className="flex items-center justify-between gap-4 rounded-lg border border-amber-200 bg-amber-50 px-5 py-4 text-amber-800 hover:bg-amber-100 transition"
+          className="flex items-center justify-between gap-4 rounded-sm border border-warning-line bg-warning-tint px-5 py-4 text-warning-strong hover:bg-warning-wash transition-colors"
         >
           <span className="flex items-center gap-3 text-sm font-medium">
             <AlertTriangle size={18} />
@@ -104,10 +104,10 @@ const AdminOverview = () => {
       )}
 
       <section>
-        <h2 className="text-sm font-semibold text-gray-700 mb-3">Listings</h2>
+        <h2 className="text-sm font-semibold text-ink-soft mb-3">Listings</h2>
         <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-          <Stat label="In review" value={listings.pending} to="/admin/listings" tone="text-amber-700" />
-          <Stat label="Live" value={listings.live} to="/admin/listings?status=live" tone="text-emerald-700" />
+          <Stat label="In review" value={listings.pending} to="/admin/listings" tone="text-warning" />
+          <Stat label="Live" value={listings.live} to="/admin/listings?status=live" tone="text-success" />
           <Stat label="Rejected" value={listings.rejected} to="/admin/listings?status=rejected" />
           <Stat label="Paused" value={listings.paused} to="/admin/listings?status=paused" />
           <Stat label="Sold" value={listings.sold} to="/admin/listings?status=sold" />
@@ -115,7 +115,7 @@ const AdminOverview = () => {
       </section>
 
       <section>
-        <h2 className="text-sm font-semibold text-gray-700 mb-3">Marketplace</h2>
+        <h2 className="text-sm font-semibold text-ink-soft mb-3">Marketplace</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <Stat label="Users" value={stats.users} to="/admin/users" />
           <Stat label="Blocked users" value={stats.blocked} to="/admin/users" />
@@ -126,7 +126,7 @@ const AdminOverview = () => {
 
       {charts && (
         <section>
-          <h2 className="text-sm font-semibold text-gray-700 mb-3">Activity</h2>
+          <h2 className="text-sm font-semibold text-ink-soft mb-3">Activity</h2>
           <div className="grid gap-3 lg:grid-cols-2">
             <DayBars title="Orders" series={charts.series} field="orders" total={charts.series.reduce((s, d) => s + d.orders, 0)} />
             <DayBars

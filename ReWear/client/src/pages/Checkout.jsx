@@ -11,6 +11,7 @@ import { thumb, PLACEHOLDER_IMAGE } from "../utils/image";
 import { money } from "../utils/format";
 import API from "../utils/api";
 import usePageTitle from "../hooks/usePageTitle";
+import { playMilestone, preloadMilestone } from "../components/ui/Milestone";
 
 const PAYMENT_OPTIONS = [
   { id: "cod", label: "Cash on delivery", note: "Pay the courier when it arrives", icon: Banknote },
@@ -20,7 +21,7 @@ const PAYMENT_OPTIONS = [
 ];
 
 const inputClass =
-  "h-11 w-full px-3.5 rounded-md border border-[#d9cbb9] bg-white text-sm text-ink placeholder:text-[#a8998b] focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand/15";
+  "field";
 
 const Field = ({ id, label, error, className = "", children }) => (
   <div className={`flex flex-col gap-1.5 ${className}`}>
@@ -28,14 +29,14 @@ const Field = ({ id, label, error, className = "", children }) => (
       {label}
     </label>
     {children}
-    {error && <p className="text-xs text-red-700">{error}</p>}
+    {error && <p className="text-xs text-danger">{error}</p>}
   </div>
 );
 
 const Step = ({ n, title, children }) => (
   <section className="bg-white border border-line rounded-sm">
-    <h2 className="flex items-center gap-3 px-5 py-4 border-b border-[#efe6da] text-base font-bold">
-      <span className="w-7 h-7 rounded-full bg-[#f1e6d8] text-brand text-sm flex items-center justify-center">{n}</span>
+    <h2 className="flex items-center gap-3 px-5 py-4 border-b border-line-soft text-base font-bold">
+      <span className="w-7 h-7 rounded-full bg-sand text-brand text-sm flex items-center justify-center">{n}</span>
       {title}
     </h2>
     <div className="p-5">{children}</div>
@@ -82,6 +83,12 @@ const Checkout = () => {
   const [saved, setSaved] = useState([]);
   const [chosen, setChosen] = useState("new");
   const [saveAddress, setSaveAddress] = useState(true);
+
+  // Get the sweep and the confirmation page ready while the shopper fills in the form
+  useEffect(() => {
+    preloadMilestone();
+    import("./OrderSuccess");
+  }, []);
 
   // Saved addresses: pick one instead of typing
   useEffect(() => {
@@ -190,12 +197,13 @@ const Checkout = () => {
       // Remember a newly typed address for next time
       if (chosen === "new" && saveAddress && saved.length < 5) {
         axios
-          .post(`${API}/users/me/addresses`, { ...address, phone: address.phone.replace(/s/g, "") }, authHeader)
+          .post(`${API}/users/me/addresses`, { ...address, phone: address.phone.replace(/\s/g, "") }, authHeader)
           .catch(() => {});
       }
 
       clearCart();
-      navigate("/success", { replace: true, state: { orders: data.orders, paymentMethod } });
+      // Placing an order is a milestone: the brand sweep plays and the confirmation appears behind it
+      playMilestone(() => navigate("/success", { replace: true, state: { orders: data.orders, paymentMethod } }));
     } catch (err) {
       setError(err.response?.data?.message || "We couldn't place your order. Please try again.");
     } finally {
@@ -214,7 +222,7 @@ const Checkout = () => {
       </div>
 
       {error && (
-        <p role="alert" className="mb-5 rounded-md bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-800">
+        <p role="alert" className="mb-5 rounded-sm bg-danger-tint border border-danger-line px-4 py-3 text-sm text-danger-strong">
           {error}
         </p>
       )}
@@ -228,16 +236,16 @@ const Checkout = () => {
                   {saved.map((a) => (
                     <label
                       key={a._id}
-                      className={`flex gap-3 px-4 py-3 rounded-md border cursor-pointer ${chosen === a._id ? "border-brand bg-cream" : "border-line hover:border-brand"}`}
+                      className={`flex gap-3 px-4 py-3 rounded-sm border cursor-pointer ${chosen === a._id ? "border-brand bg-cream" : "border-line hover:border-brand"}`}
                     >
-                      <input type="radio" name="saved-address" checked={chosen === a._id} onChange={() => pickSaved(a)} className="mt-1 w-4 h-4 accent-[#6b4430]" />
+                      <input type="radio" name="saved-address" checked={chosen === a._id} onChange={() => pickSaved(a)} className="mt-1 w-4 h-4 accent-brand" />
                       <span className="text-sm">
                         <span className="block font-semibold">{a.name} · {a.phone}</span>
                         <span className="block text-muted">{a.line}, {a.city}, {a.state} - {a.pincode}</span>
                       </span>
                     </label>
                   ))}
-                  <label className={`flex items-center gap-3 px-4 py-3 rounded-md border cursor-pointer ${chosen === "new" ? "border-brand bg-cream" : "border-line hover:border-brand"}`}>
+                  <label className={`flex items-center gap-3 px-4 py-3 rounded-sm border cursor-pointer ${chosen === "new" ? "border-brand bg-cream" : "border-line hover:border-brand"}`}>
                     <input
                       type="radio"
                       name="saved-address"
@@ -246,7 +254,7 @@ const Checkout = () => {
                         setChosen("new");
                         setAddress({ name: user?.name || "", phone: "", line: "", city: "", state: "", pincode: "" });
                       }}
-                      className="w-4 h-4 accent-[#6b4430]"
+                      className="w-4 h-4 accent-brand"
                     />
                     <span className="text-sm font-semibold">Deliver to a new address</span>
                   </label>
@@ -277,7 +285,7 @@ const Checkout = () => {
                 </div>
                 {saved.length < 5 && (
                   <label className="sm:col-span-2 flex items-center gap-2.5 text-sm cursor-pointer">
-                    <input type="checkbox" checked={saveAddress} onChange={(e) => setSaveAddress(e.target.checked)} className="w-4 h-4 accent-[#6b4430]" />
+                    <input type="checkbox" checked={saveAddress} onChange={(e) => setSaveAddress(e.target.checked)} className="w-4 h-4 accent-brand" />
                     Save this address for next time
                   </label>
                 )}
@@ -293,7 +301,7 @@ const Checkout = () => {
                 return (
                   <label
                     key={id}
-                    className={`flex items-center gap-3.5 px-4 py-3 rounded-md border ${active ? "border-brand bg-cream" : "border-line"} ${disabled ? "opacity-55 cursor-not-allowed" : "cursor-pointer hover:border-brand"}`}
+                    className={`flex items-center gap-3.5 px-4 py-3 rounded-sm border ${active ? "border-brand bg-cream" : "border-line"} ${disabled ? "opacity-55 cursor-not-allowed" : "cursor-pointer hover:border-brand"}`}
                   >
                     <input
                       type="radio"
@@ -302,7 +310,7 @@ const Checkout = () => {
                       checked={active}
                       disabled={disabled}
                       onChange={() => setPaymentMethod(id)}
-                      className="w-4 h-4 accent-[#6b4430]"
+                      className="w-4 h-4 accent-brand"
                     />
                     <Icon size={20} className="text-brand" />
                     <span className="flex-1">
@@ -316,13 +324,13 @@ const Checkout = () => {
           </Step>
 
           <Step n="3" title="Review items">
-            <ul className="divide-y divide-[#efe6da]">
+            <ul className="divide-y divide-line-soft">
               {items.map((item, i) => (
                 <li key={i} className="py-3 first:pt-0 last:pb-0 flex gap-4">
                   <img
                     src={thumb(item.image || item.images?.[0], 200) || PLACEHOLDER_IMAGE}
                     alt=""
-                    className="w-16 h-20 rounded-md object-cover bg-cream border border-line flex-shrink-0"
+                    className="w-16 h-20 rounded-sm object-cover bg-cream border border-line flex-shrink-0"
                   />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold truncate">{item.title}</p>
@@ -333,7 +341,7 @@ const Checkout = () => {
                       {item.size ? ` · Size ${item.size}` : ""}
                     </p>
                   </div>
-                  <p className="text-sm font-semibold whitespace-nowrap">{money(getItemPrice(item))}</p>
+                  <p className="text-sm font-semibold whitespace-nowrap nums">{money(getItemPrice(item))}</p>
                 </li>
               ))}
             </ul>
@@ -362,15 +370,15 @@ const Checkout = () => {
               Apply
             </button>
           </div>
-          {promoMessage && <p className={`-mt-2 text-xs ${appliedPromo ? "text-[#3f6b4a]" : "text-red-700"}`}>{promoMessage}</p>}
+          {promoMessage && <p className={`-mt-2 text-xs ${appliedPromo ? "text-success" : "text-danger"}`}>{promoMessage}</p>}
 
-          <dl className="flex flex-col gap-2 text-sm border-t border-[#efe6da] pt-4">
+          <dl className="nums flex flex-col gap-2 text-sm border-t border-line-soft pt-4">
             <div className="flex justify-between">
               <dt className="text-muted">Items ({items.length})</dt>
               <dd>{money(subtotal)}</dd>
             </div>
             {discount > 0 && (
-              <div className="flex justify-between text-[#3f6b4a]">
+              <div className="flex justify-between text-success">
                 <dt>Discount</dt>
                 <dd>−{money(discount)}</dd>
               </div>
@@ -379,7 +387,7 @@ const Checkout = () => {
               <dt className="text-muted">Delivery</dt>
               <dd>Free</dd>
             </div>
-            <div className="flex justify-between text-base font-bold border-t border-[#efe6da] pt-3 mt-1">
+            <div className="flex justify-between text-base font-bold border-t border-line-soft pt-3 mt-1">
               <dt>Total</dt>
               <dd>{money(total)}</dd>
             </div>

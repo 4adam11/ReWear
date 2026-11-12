@@ -18,7 +18,7 @@ const TABS = [
 const Fact = ({ label, value, warn }) => (
   <div>
     <dt className="text-xs text-muted">{label}</dt>
-    <dd className={`text-sm font-semibold ${warn ? "text-red-700" : ""}`}>{value}</dd>
+    <dd className={`text-sm font-semibold ${warn ? "text-danger" : ""}`}>{value}</dd>
   </div>
 );
 
@@ -47,14 +47,14 @@ const SellerCard = ({ seller, tab, onDecided }) => {
     <article className="panel p-5 grid gap-5 md:grid-cols-[minmax(0,1fr)_280px]">
       <div className="min-w-0 flex flex-col gap-4">
         <div className="flex items-center gap-3">
-          <span aria-hidden="true" className="w-11 h-11 rounded-full bg-[#f1e6d8] text-brand font-bold flex items-center justify-center flex-shrink-0">
+          <span aria-hidden="true" className="w-11 h-11 rounded-full bg-sand text-brand font-bold flex items-center justify-center flex-shrink-0">
             {seller.name?.[0]?.toUpperCase()}
           </span>
           <div className="min-w-0">
             <p className="flex items-center gap-1.5 font-semibold">
               {seller.name}
               {tab === "verified" && <VerifiedBadge />}
-              {seller.blocked && <span className="text-xs font-semibold text-red-700">Blocked</span>}
+              {seller.blocked && <span className="text-xs font-semibold text-danger">Blocked</span>}
             </p>
             <p className="text-[13px] text-muted truncate" title={seller.email}>{seller.email}</p>
             <p className="text-[13px] text-muted">{seller.phone || "No phone"}</p>
@@ -111,9 +111,9 @@ const SellerCard = ({ seller, tab, onDecided }) => {
             value={note}
             onChange={(e) => setNote(e.target.value)}
             placeholder={tab === "pending" ? "Needed when declining, e.g. Too few completed orders yet." : "Why, e.g. Several refunded orders."}
-            className="rounded-sm border border-[#d9cbb9] px-3 py-2 text-sm focus:outline-none focus:border-brand"
+            className="field px-3 py-2"
           />
-          {error && <p role="alert" className="text-[13px] text-red-700">{error}</p>}
+          {error && <p role="alert" className="text-[13px] text-danger">{error}</p>}
           {tab === "pending" ? (
             <>
               <button type="button" disabled={busy} onClick={() => decide("approve")} className="btn btn-dark btn-sm">
@@ -169,7 +169,7 @@ const AdminVerification = () => {
       {!sellers ? (
         <div className="h-40 panel animate-pulse" />
       ) : sellers.length === 0 ? (
-        <div className="rounded-sm border border-dashed border-[#d9cbb9] bg-white py-14 text-center text-sm text-muted">
+        <div className="rounded-sm border border-dashed border-line-strong bg-white py-14 text-center text-sm text-muted">
           {tab === "pending" ? "No sellers waiting." : tab === "verified" ? "No verified sellers yet." : "No declined requests."}
         </div>
       ) : (

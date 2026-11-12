@@ -33,11 +33,11 @@ export const HeaderIcon = ({ icon: Icon, label, count, as: Tag = Link, ...props 
     aria-label={label}
     title={label}
     {...props}
-    className="relative flex items-center justify-center w-10 h-10 rounded-full text-paper hover:bg-white/10"
+    className="relative flex items-center justify-center w-11 h-11 rounded-full text-paper hover:bg-white/10 transition-colors"
   >
     <Icon size={21} strokeWidth={1.8} />
     {count > 0 && (
-      <span className="absolute top-0.5 right-0.5 min-w-[17px] h-[17px] px-1 rounded-full bg-[#e8c39e] text-ink text-[10px] font-bold flex items-center justify-center">
+      <span className="absolute top-0.5 right-0.5 min-w-[17px] h-[17px] px-1 rounded-full bg-gold text-ink text-[10px] font-bold flex items-center justify-center">
         {count > 9 ? "9+" : count}
       </span>
     )}
@@ -92,7 +92,7 @@ const AccountMenu = () => {
       />
 
       {open && (
-        <div role="menu" className="absolute right-0 mt-2 w-60 rounded-lg border border-line bg-white shadow-lg py-2 z-50">
+        <div role="menu" className="absolute right-0 mt-2 w-60 rounded-sm border border-transparent bg-white shadow-menu py-2 z-50">
           <div className="px-4 pb-2 mb-1 border-b border-line">
             <p className="text-sm font-semibold text-ink truncate">{user.name}</p>
             <p className="text-xs text-muted truncate">{isAdmin ? "Admin" : user.email}</p>
@@ -117,7 +117,7 @@ const AccountMenu = () => {
               logout();
               navigate("/login");
             }}
-            className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-700 hover:bg-red-50 border-t border-line mt-1"
+            className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-danger hover:bg-danger-tint border-t border-line mt-1"
           >
             <LogOut size={17} />
             Log out
@@ -166,7 +166,7 @@ const BuyRentSwitch = () => {
   const mode = location.pathname === "/explore" ? params.get("mode") : null;
 
   const cls = (active) =>
-    `h-[60px] -my-2.5 px-3 sm:px-4 flex items-center font-display text-[13px] font-semibold uppercase tracking-[0.12em] transition-colors ${active ? "bg-[#4a3426] text-white" : "text-paper/85 hover:text-white"}`;
+    `h-[60px] -my-2.5 px-3 sm:px-4 flex items-center font-display text-[13px] font-semibold uppercase tracking-[0.12em] transition-colors ${active ? "bg-night-soft text-white" : "text-paper/85 hover:text-white"}`;
 
   return (
     <nav aria-label="Shop" className="hidden sm:flex items-stretch">
@@ -188,7 +188,7 @@ const CategoryBar = () => {
     `px-3 py-2.5 whitespace-nowrap text-[13px] font-medium transition-colors ${active ? "bg-paper text-ink" : "text-paper/90 hover:bg-white/10 hover:text-white"}`;
 
   return (
-    <nav aria-label="Categories" className="bg-[#4a3426]">
+    <nav aria-label="Categories" className="bg-night-soft">
       <div className="scroll-row max-w-7xl mx-auto px-4 sm:px-6 flex items-stretch overflow-x-auto">
         <Link to="/explore" className={linkClass(isNewIn)}>
           New in
@@ -218,8 +218,8 @@ const Navbar = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-8 flex items-center justify-between">
           <span className="text-muted">Every listing is checked by the ReWear team before it goes live</span>
           <span className="flex items-center gap-5">
-            <Link to="/sell" className="font-medium text-ink hover:text-brand">Sell on ReWear</Link>
-            <Link to="/howitworks" className="font-medium text-ink hover:text-brand">How it works</Link>
+            <Link to="/sell" className="inline-flex items-center min-h-6 font-medium text-ink hover:text-brand">Sell on ReWear</Link>
+            <Link to="/howitworks" className="inline-flex items-center min-h-6 font-medium text-ink hover:text-brand">How it works</Link>
           </span>
         </div>
       </div>

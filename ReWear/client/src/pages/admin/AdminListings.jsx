@@ -85,7 +85,7 @@ const ListingReview = ({ item, onDone }) => {
           <div className="flex flex-wrap items-center gap-2">
             <StatusBadge status={item.status} />
             {item.review?.aiFlagged && <StatusBadge status="flagged" />}
-            <span className="text-xs text-gray-400">
+            <span className="text-xs text-faint">
               {item.review?.submittedAt
                 ? `Submitted ${formatDistanceToNow(new Date(item.review.submittedAt), { addSuffix: true })}`
                 : `Created ${formatDistanceToNow(new Date(item.createdAt), { addSuffix: true })}`}
@@ -93,25 +93,25 @@ const ListingReview = ({ item, onDone }) => {
           </div>
 
           <h3 className="mt-2 text-lg font-semibold text-ink">{item.title}</h3>
-          <p className="mt-1 text-sm text-gray-600">
+          <p className="mt-1 text-sm text-muted">
             {categoryLabel(item.category)} · Size {item.size} · {item.condition} · {price(item)}
           </p>
 
           {item.description && (
-            <p className="mt-3 text-sm text-gray-700 whitespace-pre-line line-clamp-4">{item.description}</p>
+            <p className="mt-3 text-sm text-ink-soft whitespace-pre-line line-clamp-4">{item.description}</p>
           )}
 
           <p className="mt-3 text-sm text-muted">
-            Seller: <span className="text-gray-800 font-medium">{item.user?.name || "Unknown"}</span>
+            Seller: <span className="text-ink-soft font-medium">{item.user?.name || "Unknown"}</span>
             {item.user?.email && <span> · {item.user.email}</span>}
             {item.user?.blocked && <StatusBadge status="blocked" className="ml-2" />}
           </p>
 
           {/* AI CHECK: advice for the admin, not a decision */}
           <div
-            className={`mt-4 flex items-start gap-2 rounded-lg px-3 py-2.5 text-sm ${item.review?.aiFlagged
-              ? "bg-orange-50 text-orange-800 border border-orange-200"
-              : "bg-gray-50 text-gray-600 border border-line"
+            className={`mt-4 flex items-start gap-2 rounded-sm px-3 py-2.5 text-sm ${item.review?.aiFlagged
+              ? "bg-warning-tint text-warning-strong border border-warning-line"
+              : "bg-cream text-muted border border-line"
               }`}
           >
             <Bot size={16} className="mt-0.5 flex-shrink-0" />
@@ -124,17 +124,17 @@ const ListingReview = ({ item, onDone }) => {
           </div>
 
           {item.status === "rejected" && item.review?.rejectReason && (
-            <p className="mt-3 text-sm text-red-700">
+            <p className="mt-3 text-sm text-danger">
               Rejected{item.review.reviewedBy?.name ? ` by ${item.review.reviewedBy.name}` : ""}: {item.review.rejectReason}
             </p>
           )}
 
-          {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
+          {error && <p className="mt-3 text-sm text-danger">{error}</p>}
 
           {/* REJECT FORM */}
           {rejecting && (
             <div className="mt-4 rounded-sm border border-line p-3">
-              <p className="text-sm font-medium text-gray-800">
+              <p className="text-sm font-medium text-ink-soft">
                 {isLive ? "Why are you taking this listing down?" : "Why are you rejecting this listing?"}
               </p>
               <p className="text-xs text-muted mt-0.5">The seller will see this message.</p>
@@ -144,7 +144,7 @@ const ListingReview = ({ item, onDone }) => {
                   <button
                     key={r}
                     onClick={() => setReason(r)}
-                    className={`px-2.5 py-1 rounded-md border text-xs transition ${reason === r ? "border-ink bg-ink text-paper" : "border-line text-gray-700 hover:border-gray-400"}`}
+                    className={`px-2.5 py-1 rounded-sm border text-xs transition-colors ${reason === r ? "border-ink bg-ink text-paper" : "border-line text-ink-soft hover:border-field"}`}
                   >
                     {r}
                   </button>
@@ -157,14 +157,14 @@ const ListingReview = ({ item, onDone }) => {
                 rows={2}
                 maxLength={500}
                 placeholder="Or write your own reason"
-                className="mt-3 w-full rounded-sm border border-line px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                className="field mt-3 px-3 py-2"
               />
 
               <div className="mt-3 flex gap-2">
                 <button
                   disabled={busy || reason.trim().length < 5}
                   onClick={() => act("reject", { reason })}
-                  className="px-4 py-2 rounded-lg bg-red-600 text-white text-sm font-medium hover:bg-red-700 disabled:opacity-40"
+                  className="px-4 py-2 rounded-sm bg-danger text-white text-sm font-medium hover:bg-danger-strong disabled:opacity-40"
                 >
                   {isLive ? "Take down" : "Reject listing"}
                 </button>
@@ -186,7 +186,7 @@ const ListingReview = ({ item, onDone }) => {
               <button
                 disabled={busy}
                 onClick={() => act("approve", {})}
-                className="flex-1 md:flex-none inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700 disabled:opacity-40"
+                className="flex-1 md:flex-none inline-flex items-center justify-center gap-2 px-4 py-2 rounded-sm bg-success text-white text-sm font-medium hover:bg-success-strong disabled:opacity-40"
               >
                 <Check size={16} />
                 Approve
@@ -197,7 +197,7 @@ const ListingReview = ({ item, onDone }) => {
               <button
                 disabled={busy}
                 onClick={() => setRejecting(true)}
-                className="flex-1 md:flex-none inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg border border-red-200 text-red-700 text-sm font-medium hover:bg-red-50 disabled:opacity-40"
+                className="flex-1 md:flex-none inline-flex items-center justify-center gap-2 px-4 py-2 rounded-sm border border-danger-line text-danger text-sm font-medium hover:bg-danger-tint disabled:opacity-40"
               >
                 <X size={16} />
                 {isLive ? "Take down" : "Reject"}
@@ -206,7 +206,7 @@ const ListingReview = ({ item, onDone }) => {
 
             <Link
               to={`/product/${item._id}`}
-              className="flex-1 md:flex-none inline-flex items-center justify-center gap-2 px-4 py-2 rounded-sm border border-line text-gray-700 text-sm hover:bg-gray-50"
+              className="flex-1 md:flex-none inline-flex items-center justify-center gap-2 px-4 py-2 rounded-sm border border-line text-ink-soft text-sm hover:bg-cream"
             >
               <ExternalLink size={16} />
               View page
@@ -305,17 +305,17 @@ const AdminListings = () => {
           }}
           className="relative md:w-64"
         >
-          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-faint" />
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search titles"
-            className="w-full pl-9 pr-3 py-2 rounded-sm border border-line bg-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-200"
+            className="field pl-9 pr-3 py-2"
           />
         </form>
       </div>
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm text-danger">{error}</p>}
 
       {loading ? (
         <div className="space-y-3">
@@ -324,7 +324,7 @@ const AdminListings = () => {
           ))}
         </div>
       ) : result.items.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-gray-300 bg-white py-16 text-center">
+        <div className="rounded-sm border border-dashed border-line-strong bg-white py-16 text-center">
           <p className="text-ink font-medium">Nothing here</p>
           <p className="mt-1 text-sm text-muted">
             {tab === "pending" ? "All caught up: no listings are waiting for review." : "No listings match this view."}

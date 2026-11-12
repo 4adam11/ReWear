@@ -83,20 +83,21 @@ const Landing = () => {
       <section aria-label="Featured" className="relative bg-ink">
         <div className="grid grid-cols-1 sm:grid-cols-2 h-[460px] sm:h-[560px]">
           {[heroLeft, heroRight].map((src, i) => (
-            <div key={i} className={`bg-[#3b2a1f] overflow-hidden ${i === 1 ? "hidden sm:block" : ""}`}>
-              {src && <img src={thumb(src, 900)} srcSet={photoSrcSet(src, 900)} alt="" className="w-full h-full object-cover" />}
+            <div key={i} className={`bg-night overflow-hidden ${i === 1 ? "hidden sm:block" : ""}`}>
+              {/* The first photo is the largest thing on screen, so it loads first */}
+              {src && <img src={thumb(src, 900)} srcSet={photoSrcSet(src, 900)} alt="" fetchPriority={i === 0 ? "high" : "auto"} className="w-full h-full object-cover" />}
             </div>
           ))}
         </div>
         <div className="absolute inset-0 bg-black/35 flex flex-col items-center justify-center text-center px-6">
-          <p className="font-display text-xs sm:text-sm font-semibold uppercase tracking-[0.3em] text-[#f3dcc3]">Pre-loved Indian fashion</p>
-          <h1 className="mt-3 text-white text-5xl sm:text-7xl font-extrabold uppercase tracking-[0.04em] leading-none">
+          <p className="enter font-display text-xs sm:text-sm font-semibold uppercase tracking-[0.3em] text-gold">Pre-loved Indian fashion</p>
+          <h1 className="enter enter-2 mt-3 text-white text-5xl sm:text-7xl font-extrabold uppercase tracking-[0.04em] leading-none">
             Wear it again
           </h1>
-          <p className="mt-4 max-w-md text-white/90 text-[15px] sm:text-base">
+          <p className="enter enter-3 mt-4 max-w-md text-white/90 text-[15px] sm:text-base">
             Lehengas, sherwanis, sarees and streetwear from real wardrobes. Buy to keep, or rent for your dates.
           </p>
-          <div className="mt-7 flex flex-wrap justify-center gap-3">
+          <div className="enter enter-3 mt-7 flex flex-wrap justify-center gap-3">
             <Link to="/explore?mode=sale" className="btn btn-light min-w-[150px]">
               Shop to buy
             </Link>
@@ -113,7 +114,7 @@ const Landing = () => {
           {PERKS.map(({ icon: Icon, title, text, to }) => (
             <li key={title}>
               <Link to={to} className="h-full bg-ink text-paper flex flex-col items-center justify-center gap-1.5 px-4 py-6 text-center hover:bg-brand transition-colors">
-                <Icon size={22} className="text-[#e8c39e]" />
+                <Icon size={22} className="text-gold" />
                 <span className="font-display text-[13px] font-semibold uppercase tracking-[0.12em]">{title}</span>
                 <span className="text-xs text-paper/75">{text}</span>
               </Link>
@@ -205,7 +206,7 @@ const Landing = () => {
       <section aria-labelledby="sell-h" className="bg-ink text-paper">
         <Container className="py-14 grid gap-6 md:grid-cols-[minmax(0,1fr)_auto] items-center">
           <div>
-            <p className="font-display text-xs font-semibold uppercase tracking-[0.2em] text-[#e8c39e]">Sell on ReWear</p>
+            <p className="font-display text-xs font-semibold uppercase tracking-[0.2em] text-gold">Sell on ReWear</p>
             <h2 id="sell-h" className="mt-2 text-3xl sm:text-4xl font-bold uppercase tracking-[0.04em]">
               Your wardrobe can pay for your next outfit
             </h2>

@@ -59,7 +59,7 @@ const SellerShop = ({ id }) => {
       </nav>
 
       <section className="bg-white border border-line rounded-sm p-6 flex flex-wrap items-center gap-6">
-        <span aria-hidden="true" className="w-16 h-16 rounded-full bg-[#f1e6d8] text-brand text-2xl font-bold flex items-center justify-center">
+        <span aria-hidden="true" className="w-16 h-16 rounded-full bg-sand text-brand text-2xl font-bold flex items-center justify-center">
           {seller.name?.[0]?.toUpperCase()}
         </span>
         <div className="flex-1 min-w-[200px]">
@@ -127,7 +127,7 @@ const SellerShop = ({ id }) => {
                     type="button"
                     aria-current={page === i + 1 ? "page" : undefined}
                     onClick={() => setPage(i + 1)}
-                    className={`min-w-[44px] h-10 rounded-md text-sm ${page === i + 1 ? "bg-ink text-paper font-semibold" : "bg-white border border-line"}`}
+                    className={`min-w-[44px] h-10 rounded-sm text-sm ${page === i + 1 ? "bg-ink text-paper font-semibold" : "bg-white border border-line"}`}
                   >
                     {i + 1}
                   </button>
@@ -148,8 +148,8 @@ const SellerShop = ({ id }) => {
               {spread.map(({ n, count }) => (
                 <li key={n} className="flex items-center gap-2 text-xs">
                   <span className="w-6">{n}★</span>
-                  <span className="flex-1 h-2 rounded bg-[#efe6da] overflow-hidden">
-                    <span className="block h-full bg-[#c0834f]" style={{ width: `${seller.reviews.length ? (count / seller.reviews.length) * 100 : 0}%` }} />
+                  <span className="flex-1 h-2 rounded-sm bg-line-soft overflow-hidden">
+                    <span className="block h-full bg-caramel" style={{ width: `${seller.reviews.length ? (count / seller.reviews.length) * 100 : 0}%` }} />
                   </span>
                   <span className="w-5 text-right text-muted">{count}</span>
                 </li>
@@ -157,7 +157,7 @@ const SellerShop = ({ id }) => {
             </ul>
           </div>
 
-          <ul className="bg-white border border-line rounded-sm divide-y divide-[#efe6da]">
+          <ul className="bg-white border border-line rounded-sm divide-y divide-line-soft">
             {seller.reviews.map((r) => (
               <li key={r._id} className="p-5">
                 <div className="flex flex-wrap items-center gap-2">

@@ -9,13 +9,13 @@ const Column = ({ title, children }) => (
 );
 
 const FooterLink = ({ to, children }) => (
-  <Link to={to} className="text-sm text-[#e3d5c4] hover:text-white">
+  <Link to={to} className="text-sm text-ondark hover:text-white">
     {children}
   </Link>
 );
 
 const Footer = () => (
-  <footer className="mt-16 bg-ink text-[#e3d5c4]">
+  <footer className="mt-16 bg-ink text-ondark">
     <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-12 pb-8 grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1.4fr]">
       <div className="flex flex-col gap-3">
         <span className="inline-flex items-center gap-2.5">
@@ -32,6 +32,7 @@ const Footer = () => (
         <FooterLink to="/explore?mode=sale">Buy pre-loved</FooterLink>
         <FooterLink to="/explore?category=wedding">Wedding wear</FooterLink>
         <FooterLink to="/howitworks">How it works</FooterLink>
+        <FooterLink to="/brand">Brand kit</FooterLink>
       </Column>
 
       <Column title="Sell">
@@ -49,7 +50,7 @@ const Footer = () => (
     </div>
 
     <div className="border-t border-white/10">
-      <p className="max-w-7xl mx-auto px-4 sm:px-6 py-5 text-xs text-[#bfae9c]">
+      <p className="max-w-7xl mx-auto px-4 sm:px-6 py-5 text-xs text-ondark-muted">
         © {new Date().getFullYear()} ReWear
       </p>
     </div>

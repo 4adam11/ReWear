@@ -44,8 +44,8 @@ const VerificationCard = () => {
 
   return (
     <section className="panel" aria-labelledby="verify-h">
-      <div className="px-5 py-4 border-b border-[#efe6da] flex items-start gap-3">
-        <BadgeCheck size={26} className="text-[#2f6a8a] flex-shrink-0" aria-hidden="true" />
+      <div className="px-5 py-4 border-b border-line-soft flex items-start gap-3">
+        <BadgeCheck size={26} className="text-info flex-shrink-0" aria-hidden="true" />
         <div>
           <h2 id="verify-h" className="text-base font-bold">Verified seller</h2>
           <p className="text-[13px] text-muted">
@@ -56,7 +56,7 @@ const VerificationCard = () => {
 
       <div className="p-5 flex flex-col gap-4">
         {status === "verified" && (
-          <p className="flex items-center gap-2 text-sm font-semibold text-[#2f6a8a]">
+          <p className="flex items-center gap-2 text-sm font-semibold text-info">
             <BadgeCheck size={18} />
             You're verified
             {verification.reviewedAt && <span className="font-normal text-muted">since {format(new Date(verification.reviewedAt), "d MMM yyyy")}</span>}
@@ -65,14 +65,14 @@ const VerificationCard = () => {
 
         {status === "pending" && (
           <p className="flex items-center gap-2 text-sm">
-            <Clock size={17} className="text-amber-700" />
+            <Clock size={17} className="text-warning" />
             Your request is with an admin
             {verification.requestedAt && ` (sent ${format(new Date(verification.requestedAt), "d MMM")})`}. You'll get an alert when they decide.
           </p>
         )}
 
         {status === "rejected" && verification.reason && (
-          <p className="rounded-sm border border-red-200 bg-red-50 px-3.5 py-2.5 text-sm text-red-800">
+          <p className="rounded-sm border border-danger-line bg-danger-tint px-3.5 py-2.5 text-sm text-danger-strong">
             Your last request was declined: {verification.reason}. You can ask again once that's sorted.
           </p>
         )}
@@ -83,7 +83,7 @@ const VerificationCard = () => {
               {checks.map((c) => (
                 <li key={c.key} className="flex items-center gap-2.5">
                   {c.done ? (
-                    <CircleCheck size={17} className="text-[#3f6b4a] flex-shrink-0" aria-hidden="true" />
+                    <CircleCheck size={17} className="text-success flex-shrink-0" aria-hidden="true" />
                   ) : (
                     <Circle size={17} className="text-muted flex-shrink-0" aria-hidden="true" />
                   )}
@@ -106,9 +106,9 @@ const VerificationCard = () => {
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
                 placeholder="e.g. I run a small boutique and sell my old stock here."
-                className="rounded-sm border border-[#d9cbb9] px-3 py-2 text-sm focus:outline-none focus:border-brand"
+                className="field px-3 py-2"
               />
-              {error && <p role="alert" className="text-[13px] text-red-700">{error}</p>}
+              {error && <p role="alert" className="text-[13px] text-danger">{error}</p>}
               <button type="submit" disabled={!ready || busy} className="btn btn-dark btn-sm self-start">
                 Ask to be verified
               </button>

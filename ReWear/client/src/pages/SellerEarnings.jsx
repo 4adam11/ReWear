@@ -27,7 +27,7 @@ const inFilter = (o, f) =>
 const Tile = ({ label, value, note }) => (
   <div className="panel p-4">
     <p className="text-[13px] text-muted">{label}</p>
-    <p className="mt-1 text-2xl font-bold">{value}</p>
+    <p className="mt-1 text-2xl font-bold nums">{value}</p>
     {note && <p className="mt-0.5 text-xs text-muted">{note}</p>}
   </div>
 );
@@ -71,7 +71,7 @@ const SellerEarnings = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  if (error) return <p role="alert" className="max-w-6xl mx-auto px-4 py-10 text-sm text-red-700">{error}</p>;
+  if (error) return <p role="alert" className="max-w-6xl mx-auto px-4 py-10 text-sm text-danger">{error}</p>;
 
   if (!data) {
     return (
@@ -127,7 +127,7 @@ const SellerEarnings = () => {
             <>
               <div className="flex h-3 overflow-hidden" aria-hidden="true">
                 <span className="bg-ink" style={{ width: `${salesShare}%` }} />
-                <span className="bg-[#c0834f]" style={{ width: `${100 - salesShare}%` }} />
+                <span className="bg-caramel" style={{ width: `${100 - salesShare}%` }} />
               </div>
               <dl className="flex flex-col gap-2 text-sm">
                 <div className="flex items-center justify-between">
@@ -135,7 +135,7 @@ const SellerEarnings = () => {
                   <dd className="font-semibold">{money(totals.fromSales)} · {salesShare}%</dd>
                 </div>
                 <div className="flex items-center justify-between">
-                  <dt className="flex items-center gap-2"><span className="w-3 h-3 bg-[#c0834f]" aria-hidden="true" />Rentals</dt>
+                  <dt className="flex items-center gap-2"><span className="w-3 h-3 bg-caramel" aria-hidden="true" />Rentals</dt>
                   <dd className="font-semibold">{money(totals.fromRentals)} · {100 - salesShare}%</dd>
                 </div>
               </dl>
@@ -166,12 +166,12 @@ const SellerEarnings = () => {
         </div>
 
         {shown.length === 0 ? (
-          <div className="rounded-sm border border-dashed border-[#d9cbb9] bg-white py-12 text-center text-sm text-muted">
+          <div className="rounded-sm border border-dashed border-line-strong bg-white py-12 text-center text-sm text-muted">
             {orders.length ? "No orders in this group." : "No sales yet. Orders for your listings will show here."}
           </div>
         ) : (
           <div className="panel overflow-x-auto">
-            <table className="w-full min-w-[640px] text-sm">
+            <table className="w-full min-w-[640px] text-sm nums">
               <thead>
                 <tr className="text-left text-xs text-muted border-b border-line">
                   <th scope="col" className="px-4 py-3 font-medium">Date</th>
@@ -182,7 +182,7 @@ const SellerEarnings = () => {
                   <th scope="col" className="px-4 py-3 font-medium text-right">Amount</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#efe6da]">
+              <tbody className="divide-y divide-line-soft">
                 {shown.map((o) => (
                   <tr key={o._id}>
                     <td className="px-4 py-3 whitespace-nowrap text-muted">{format(new Date(o.createdAt), "d MMM yyyy")}</td>

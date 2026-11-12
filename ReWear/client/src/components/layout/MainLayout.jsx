@@ -18,7 +18,7 @@ const MainLayout = ({ children }) => {
       {/* Lets keyboard users jump past the header */}
       <a
         href="#main"
-        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[60] focus:px-4 focus:py-2 focus:rounded-md focus:bg-ink focus:text-paper focus:text-sm focus:font-semibold"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[60] focus:px-4 focus:py-2 focus:rounded-sm focus:bg-ink focus:text-paper focus:text-sm focus:font-semibold"
       >
         Skip to content
       </a>

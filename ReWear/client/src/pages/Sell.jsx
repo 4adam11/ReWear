@@ -24,6 +24,8 @@ import { suggestOccasion } from "../utils/suggest";
 
 import { format } from "date-fns";
 import usePageTitle from "../hooks/usePageTitle";
+import useCalendarLabels from "../hooks/useCalendarLabels";
+import { playMilestone, preloadMilestone } from "../components/ui/Milestone";
 
 const MAX_IMAGES = 6;
 
@@ -90,6 +92,15 @@ const Sell = () => {
     JSON.parse(
       localStorage.getItem("user")
     );
+
+  const calendarRef = useCalendarLabels();
+
+  // A new listing ends in the brand sweep and My listings: fetch both early
+  useEffect(() => {
+    if (editId) return;
+    preloadMilestone();
+    import("./SellerListings");
+  }, [editId]);
 
   // EDIT MODE: load the listing and fill in the form
   useEffect(() => {
@@ -278,9 +289,7 @@ const Sell = () => {
     const user = getUser();
 
     if (!user) {
-      alert("Please login first");
-
-      navigate("/login");
+      navigate("/login", { state: { from: "/sell" } });
 
       return;
     }
@@ -355,15 +364,19 @@ const Sell = () => {
         },
       };
 
+      let message;
       if (editId) {
         const { data } = await axios.put(`${API}/products/${editId}`, payload, config);
-        alert(data.message);
+        message = data.message;
       } else {
         await axios.post(`${API}/products`, payload, config);
-        alert("Listing submitted for review. You'll get a notification when an admin approves it.");
+        message = "Listing sent for review. You'll get a notification when an admin approves it.";
       }
 
-      navigate("/seller/listings");
+      // A new listing is a milestone, so it gets the brand sweep; edits just move on
+      const go = () => navigate("/seller/listings", { state: { notice: message } });
+      if (editId) go();
+      else playMilestone(go);
     } catch (err) {
       console.error(err);
 
@@ -399,7 +412,7 @@ const Sell = () => {
 
         {/* ERROR */}
         {error && (
-          <div className="mb-6 bg-red-50 border border-red-200 text-red-800 text-sm px-4 py-3 rounded-lg">
+          <div className="mb-6 bg-danger-tint border border-danger-line text-danger-strong text-sm px-4 py-3 rounded-sm">
             {error}
           </div>
         )}
@@ -413,11 +426,11 @@ const Sell = () => {
             {/* MODE */}
             <div className="bg-white border border-line rounded-sm p-5">
 
-              <p className="text-sm font-medium text-gray-700 mb-4">
+              <p className="text-sm font-medium text-ink-soft mb-4">
                 How do you want to list it?
               </p>
 
-              <div className="grid grid-cols-3 bg-[#efe6da] rounded-md p-1">
+              <div className="grid grid-cols-3 bg-line-soft rounded-sm p-1">
 
                 {[
                   "sell",
@@ -431,7 +444,7 @@ const Sell = () => {
                       setMode(m)
                     }
 
-                    className={`h-9 rounded text-sm font-semibold transition ${mode === m ? "bg-white text-ink" : "text-muted hover:text-ink"
+                    className={`h-9 rounded-sm text-sm font-semibold transition-colors ${mode === m ? "bg-white text-ink" : "text-muted hover:text-ink"
                       }`}
                   >
                     {m === "sell" ? "Sell" : m === "rent" ? "Rent" : "Sell and rent"}
@@ -459,18 +472,18 @@ const Sell = () => {
               </div>
 
               {/* DROPZONE */}
-              <label className="border-2 border-dashed border-line rounded-lg p-8 flex flex-col items-center justify-center text-center cursor-pointer hover:border-brand transition">
+              <label className="border-2 border-dashed border-line rounded-sm p-8 flex flex-col items-center justify-center text-center cursor-pointer hover:border-brand transition-colors">
 
                 <Upload
                   size={28}
-                  className="text-gray-400"
+                  className="text-faint"
                 />
 
-                <p className="mt-4 text-sm font-medium text-gray-700">
+                <p className="mt-4 text-sm font-medium text-ink-soft">
                   Click to upload images
                 </p>
 
-                <p className="mt-1 text-xs text-gray-400">
+                <p className="mt-1 text-xs text-faint">
                   Maximum 6 images · clothing photos only
                 </p>
 
@@ -494,8 +507,8 @@ const Sell = () => {
                     (img) => (
                       <div
                         key={img.id}
-                        className={`relative rounded-lg overflow-hidden border ${img.status === "rejected"
-                            ? "border-red-300"
+                        className={`relative rounded-sm overflow-hidden border ${img.status === "rejected"
+                            ? "border-danger-line"
                             : "border-line"
                           }`}
                       >
@@ -515,7 +528,7 @@ const Sell = () => {
 
                         {/* CHECK STATUS */}
                         {img.status === "checking" && (
-                          <div className="absolute inset-0 flex flex-col items-center justify-center text-xs text-gray-600">
+                          <div className="absolute inset-0 flex flex-col items-center justify-center text-xs text-muted">
                             <LoaderCircle
                               size={18}
                               className="animate-spin"
@@ -529,7 +542,7 @@ const Sell = () => {
                         {img.status === "ok" && !img.aiNote && (
                           <CircleCheck
                             size={18}
-                            className="absolute bottom-2 left-2 text-green-500 bg-white rounded-full"
+                            className="absolute bottom-2 left-2 text-success bg-white rounded-full"
                           />
                         )}
 
@@ -537,14 +550,14 @@ const Sell = () => {
                         {img.status === "ok" && img.aiNote && (
                           <div
                             title={img.aiNote}
-                            className="absolute bottom-0 inset-x-0 bg-orange-500/90 text-white text-[10px] leading-tight px-1.5 py-1 text-center"
+                            className="absolute bottom-0 inset-x-0 bg-warning/90 text-white text-[10px] leading-tight px-1.5 py-1 text-center"
                           >
                             AI flagged: an admin will check this photo
                           </div>
                         )}
 
                         {img.status === "rejected" && (
-                          <div className="absolute inset-0 flex flex-col items-center justify-center px-2 text-center text-[11px] leading-tight text-red-600 bg-white/70">
+                          <div className="absolute inset-0 flex flex-col items-center justify-center px-2 text-center text-[11px] leading-tight text-danger bg-white/70">
                             <TriangleAlert size={16} />
                             <span className="mt-1">
                               {img.message}
@@ -578,7 +591,7 @@ const Sell = () => {
 
               <div>
 
-                <label className="text-sm font-medium text-gray-700">
+                <label className="text-sm font-medium text-ink-soft">
                   Title
                 </label>
 
@@ -588,7 +601,7 @@ const Sell = () => {
 
                   value={form.title}
 
-                  className="w-full mt-2 border border-line rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand/15"
+                  className="field mt-2 px-4 py-3"
 
                   onChange={
                     handleChange
@@ -599,7 +612,7 @@ const Sell = () => {
 
               <div>
 
-                <label className="text-sm font-medium text-gray-700">
+                <label className="text-sm font-medium text-ink-soft">
                   Description
                 </label>
 
@@ -610,7 +623,7 @@ const Sell = () => {
                   placeholder="Fabric, fit, how many times it was worn, any marks or alterations…"
                   value={form.description}
                   onChange={handleChange}
-                  className="w-full mt-2 border border-line rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand/15"
+                  className="field mt-2 px-4 py-3"
                 />
 
               </div>
@@ -621,7 +634,7 @@ const Sell = () => {
                 {/* CATEGORY */}
                 <div>
 
-                  <label htmlFor="sell-occasion" className="text-sm font-medium text-gray-700">
+                  <label htmlFor="sell-occasion" className="text-sm font-medium text-ink-soft">
                     Occasion
                   </label>
 
@@ -638,7 +651,7 @@ const Sell = () => {
                       });
                     }}
 
-                    className="w-full mt-2 border border-line rounded-lg px-4 py-3 text-sm focus:outline-none"
+                    className="field mt-2 px-4"
                   >
                     {CATEGORIES.map((c) => (
                       <option key={c.value} value={c.value}>
@@ -653,11 +666,12 @@ const Sell = () => {
                 {/* SIZE */}
                 <div>
 
-                  <label className="text-sm font-medium text-gray-700">
+                  <label htmlFor="sell-size" className="text-sm font-medium text-ink-soft">
                     Size
                   </label>
 
                   <select
+                    id="sell-size"
                     name="size"
 
                     value={form.size}
@@ -666,7 +680,7 @@ const Sell = () => {
                       handleChange
                     }
 
-                    className="w-full mt-2 border border-line rounded-lg px-4 py-3 text-sm focus:outline-none"
+                    className="field mt-2 px-4"
                   >
                     {SIZES.map((s) => (
                       <option key={s} value={s}>
@@ -681,11 +695,12 @@ const Sell = () => {
                 {/* CONDITION */}
                 <div>
 
-                  <label className="text-sm font-medium text-gray-700">
+                  <label htmlFor="sell-condition" className="text-sm font-medium text-ink-soft">
                     Condition
                   </label>
 
                   <select
+                    id="sell-condition"
                     name="condition"
 
                     value={
@@ -696,7 +711,7 @@ const Sell = () => {
                       handleChange
                     }
 
-                    className="w-full mt-2 border border-line rounded-lg px-4 py-3 text-sm focus:outline-none"
+                    className="field mt-2 px-4"
                   >
                     {CONDITIONS.map((c) => (
                       <option key={c} value={c}>
@@ -730,14 +745,14 @@ const Sell = () => {
             <div className="bg-white border border-line rounded-sm p-5 space-y-4">
 
               <div>
-                <p className="text-sm font-medium text-gray-700">Fabric and measurements</p>
+                <p className="text-sm font-medium text-ink-soft">Fabric and measurements</p>
                 <p className="mt-0.5 text-xs text-muted">
                   Optional, but buyers trust listings that have them. Lay the garment flat and measure in inches.
                 </p>
               </div>
 
               <div>
-                <label htmlFor="sell-fabric" className="text-xs font-medium text-gray-700">Fabric</label>
+                <label htmlFor="sell-fabric" className="text-xs font-medium text-ink-soft">Fabric</label>
                 <input
                   id="sell-fabric"
                   name="fabric"
@@ -745,14 +760,14 @@ const Sell = () => {
                   placeholder="e.g. Banarasi silk, cotton, georgette"
                   value={form.fabric}
                   onChange={handleChange}
-                  className="w-full mt-1.5 border border-line rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand/15"
+                  className="field mt-1.5 px-4 py-2.5"
                 />
               </div>
 
               <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
                 {MEASUREMENTS.map(({ key, label }) => (
                   <div key={key}>
-                    <label htmlFor={`sell-m-${key}`} className="text-xs font-medium text-gray-700">{label}</label>
+                    <label htmlFor={`sell-m-${key}`} className="text-xs font-medium text-ink-soft">{label}</label>
                     <div className="relative mt-1.5">
                       <input
                         id={`sell-m-${key}`}
@@ -765,7 +780,7 @@ const Sell = () => {
                         onChange={(e) =>
                           setForm({ ...form, measurements: { ...form.measurements, [key]: e.target.value } })
                         }
-                        className="w-full border border-line rounded-lg pl-3 pr-8 py-2.5 text-sm focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand/15"
+                        className="field pl-3 pr-8 py-2.5"
                       />
                       <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted" aria-hidden="true">in</span>
                     </div>
@@ -781,7 +796,7 @@ const Sell = () => {
               mode === "sale") && (
                 <div className="bg-white border border-line rounded-sm p-5">
 
-                  <label className="text-sm font-medium text-gray-700">
+                  <label className="text-sm font-medium text-ink-soft">
                     Sale price (₹)
                   </label>
 
@@ -793,7 +808,7 @@ const Sell = () => {
 
                     value={form.price}
 
-                    className="w-full mt-2 border border-line rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand/15"
+                    className="field mt-2 px-4 py-3"
 
                     onChange={
                       handleChange
@@ -808,7 +823,7 @@ const Sell = () => {
               mode === "both") && (
                 <div className="bg-white border border-line rounded-sm p-5">
 
-                  <label className="text-sm font-medium text-gray-700">
+                  <label className="text-sm font-medium text-ink-soft">
                     Rent per day (₹)
                   </label>
 
@@ -820,7 +835,7 @@ const Sell = () => {
 
                     value={form.rent}
 
-                    className="w-full mt-2 mb-5 border border-line rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand/15"
+                    className="field mt-2 mb-5 px-4 py-3"
 
                     onChange={
                       handleChange
@@ -832,7 +847,7 @@ const Sell = () => {
                   <p className="mt-0.5 mb-2 text-xs text-muted">
                     Pick the dates you're happy to lend it out. Leave a single day selected to allow any dates.
                   </p>
-                  <div className="border border-line rounded-lg overflow-hidden flex justify-center">
+                  <div ref={calendarRef} className="border border-line rounded-sm overflow-hidden flex justify-center">
 
                     <DateRange
                       ranges={dateRange}
@@ -889,7 +904,7 @@ const Sell = () => {
               </div>
 
               {/* CARD */}
-              <div className="border border-line rounded-lg overflow-hidden">
+              <div className="border border-line rounded-sm overflow-hidden">
 
                 <img
                   src={
@@ -931,7 +946,7 @@ const Sell = () => {
 
                     </div>
 
-                    <div className="px-3 py-1.5 rounded-full bg-gray-100 text-xs font-medium text-gray-700">
+                    <div className="px-3 py-1.5 rounded-full bg-sand text-xs font-medium text-ink-soft">
                       {form.condition}
                     </div>
 

@@ -43,7 +43,7 @@ const ProductCard = ({ product, prefer }) => {
   return (
     <article className="group flex flex-col">
       {/* PHOTO (the heart sits on it, bottom right) */}
-      <div className="relative aspect-[3/4] bg-cream overflow-hidden">
+      <div className="photo-edge aspect-[3/4] bg-cream overflow-hidden">
         <Link to={href} tabIndex={-1} aria-hidden="true" className="block w-full h-full">
           <img
             src={cardImage(product.images?.[0], 400) || PLACEHOLDER_IMAGE}
@@ -51,7 +51,7 @@ const ProductCard = ({ product, prefer }) => {
             alt=""
             loading="lazy"
             decoding="async"
-            className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500"
+            className="w-full h-full object-cover motion-safe:group-hover:scale-[1.03] transition-transform duration-500 ease-out"
           />
         </Link>
 
@@ -70,7 +70,7 @@ const ProductCard = ({ product, prefer }) => {
           onClick={() => toggleWishlist(product)}
           aria-label={saved ? `Remove ${product.title} from wishlist` : `Save ${product.title} to wishlist`}
           aria-pressed={saved}
-          className="absolute bottom-2 right-2 w-9 h-9 rounded-full bg-white flex items-center justify-center text-ink shadow-card hover:scale-105 transition-transform"
+          className="absolute z-10 bottom-2 right-2 w-9 h-9 rounded-full bg-white flex items-center justify-center text-ink shadow-card transition-transform duration-150 ease-out active:scale-[0.96] after:absolute after:-inset-1 after:content-['']"
         >
           <Heart size={17} className={saved ? "fill-brand text-brand" : ""} />
         </button>
@@ -84,7 +84,7 @@ const ProductCard = ({ product, prefer }) => {
           </span>
         )}
         <h3 className="text-[13px] leading-snug line-clamp-2 group-hover:underline underline-offset-2">{product.title}</h3>
-        <p className="mt-0.5 text-[15px] font-bold">
+        <p className="mt-0.5 text-[15px] font-bold nums">
           {main}
           {unit && <span className="text-xs font-medium text-muted"> {unit}</span>}
         </p>

@@ -46,7 +46,7 @@ const DisputeCard = ({ dispute, onResolved }) => {
           <p className="text-sm leading-relaxed whitespace-pre-line">“{dispute.details}”</p>
 
           {order && (
-            <div className="rounded-md border border-line p-3 text-[13px]">
+            <div className="rounded-sm border border-line p-3 text-[13px]">
               <p className="font-semibold">{order.items.map((i) => i.title).join(", ")}</p>
               <p className="text-muted">
                 Order #{order._id.slice(-6).toUpperCase()} · {money(order.total)} · {order.paymentMethod?.toUpperCase()} · now {order.status}
@@ -67,9 +67,9 @@ const DisputeCard = ({ dispute, onResolved }) => {
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
                 placeholder="e.g. The courier confirmed the parcel was lost, so the buyer is refunded."
-                className="rounded-md border border-[#d9cbb9] px-3 py-2 text-sm focus:outline-none focus:border-brand"
+                className="field px-3 py-2"
               />
-              {error && <p className="text-[13px] text-red-700">{error}</p>}
+              {error && <p className="text-[13px] text-danger">{error}</p>}
               <div className="flex flex-wrap gap-2">
                 <button
                   type="button"
@@ -156,7 +156,7 @@ const AdminDisputes = () => {
       {!disputes ? (
         <div className="h-40 rounded-sm bg-white border border-line animate-pulse" />
       ) : disputes.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-[#d9cbb9] bg-white py-14 text-center text-sm text-muted">
+        <div className="rounded-sm border border-dashed border-line-strong bg-white py-14 text-center text-sm text-muted">
           {tab === "open" ? "No open reports. Nice." : "No resolved reports yet."}
         </div>
       ) : (

@@ -48,21 +48,21 @@ const OrderProgress = ({ order }) => {
           <li key={step} className="flex-1 flex flex-col items-center relative">
             {i > 0 && (
               <span
-                className={`absolute top-3 right-1/2 w-full h-0.5 ${i <= reached ? "bg-emerald-500" : "bg-gray-200"}`}
+                className={`absolute top-3 right-1/2 w-full h-0.5 ${i <= reached ? "bg-success" : "bg-line"}`}
                 aria-hidden="true"
               />
             )}
 
             <span
-              className={`relative z-10 w-6 h-6 rounded-full flex items-center justify-center border-2 ${done ? "bg-emerald-500 border-emerald-500 text-white" : "bg-white border-gray-300"}`}
+              className={`relative z-10 w-6 h-6 rounded-full flex items-center justify-center border-2 ${done ? "bg-success border-success text-white" : "bg-white border-line-strong"}`}
             >
               {done && <Check size={14} strokeWidth={3} />}
             </span>
 
-            <span className={`mt-1.5 text-[11px] sm:text-xs text-center ${done ? "text-ink font-medium" : "text-gray-400"}`}>
+            <span className={`mt-1.5 text-[11px] sm:text-xs text-center ${done ? "text-ink font-medium" : "text-faint"}`}>
               {LABELS[step]}
             </span>
-            {time && <span className="text-[10px] text-gray-400">{time}</span>}
+            {time && <span className="text-[10px] text-faint">{time}</span>}
           </li>
         );
       })}

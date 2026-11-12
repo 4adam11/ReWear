@@ -36,7 +36,7 @@ const ChatList = ({ chats, activeId }) => {
   }
 
   return (
-    <ul className="divide-y divide-[#efe6da]">
+    <ul className="divide-y divide-line-soft">
       {chats.map((c) => (
         <li key={c._id}>
           <Link
@@ -165,7 +165,7 @@ const Thread = ({ chatId, draft, onSent }) => {
 
   if (!head) {
     return error ? (
-      <p role="alert" className="m-6 text-sm text-red-700">{error}</p>
+      <p role="alert" className="m-6 text-sm text-danger">{error}</p>
     ) : (
       <div className="h-40 m-4 bg-cream animate-pulse" />
     );
@@ -208,7 +208,7 @@ const Thread = ({ chatId, draft, onSent }) => {
       </div>
 
       {/* MESSAGES */}
-      <div className="flex-1 min-h-0 overflow-y-auto px-4 py-4 bg-paper" aria-live="polite">
+      <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-4 py-4 bg-paper" aria-live="polite">
         {messages.length === 0 && (
           <p className="py-10 text-center text-sm text-muted">
             Ask {head.name.split(" ")[0]} about size, condition, fit or delivery. Keep payment on ReWear so your order is protected.
@@ -241,7 +241,7 @@ const Thread = ({ chatId, draft, onSent }) => {
 
       {/* WRITE */}
       <form onSubmit={send} className="border-t border-line p-3 bg-white">
-        {error && <p role="alert" className="mb-2 text-[13px] text-red-700">{error}</p>}
+        {error && <p role="alert" className="mb-2 text-[13px] text-danger">{error}</p>}
         <div className="flex items-end gap-2">
           <label htmlFor="chat-message" className="sr-only">
             Message to {head.name}
@@ -257,7 +257,7 @@ const Thread = ({ chatId, draft, onSent }) => {
               if (e.key === "Enter" && !e.shiftKey) send(e);
             }}
             placeholder="Write a message…"
-            className="flex-1 min-h-[44px] max-h-32 px-3.5 py-2.5 rounded-sm border border-[#d9cbb9] text-sm resize-y focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand/15"
+            className="field flex-1 min-h-[44px] max-h-32 py-2.5 resize-y"
           />
           <button type="submit" disabled={sending || !text.trim()} aria-label="Send message" className="btn btn-dark h-11 px-4">
             <Send size={17} />
@@ -327,7 +327,7 @@ const Messages = () => {
 
       <div className="bg-white border-y sm:border border-line sm:rounded-sm grid md:grid-cols-[320px_minmax(0,1fr)] h-[calc(100dvh-202px)] md:h-[calc(100dvh-270px)] min-h-[380px]">
         {/* On phones only one pane shows at a time */}
-        <aside aria-label="Your chats" className={`${showThread ? "hidden md:block" : ""} md:border-r border-line overflow-y-auto`}>
+        <aside aria-label="Your chats" className={`${showThread ? "hidden md:block" : ""} md:border-r border-line overflow-y-auto overscroll-contain`}>
           <ChatList chats={chats} activeId={chatId} />
         </aside>
 
@@ -337,7 +337,7 @@ const Messages = () => {
           ) : isNew ? (
             draftError || !productId ? (
               <div className="m-6">
-                <p role="alert" className="text-sm text-red-700">{draftError || "Choose an item first, then use “Ask the seller a question”."}</p>
+                <p role="alert" className="text-sm text-danger">{draftError || "Choose an item first, then use “Ask the seller a question”."}</p>
                 <Link to="/messages" className="mt-3 inline-block text-sm font-semibold text-brand hover:underline">
                   Back to messages
                 </Link>

@@ -7,6 +7,7 @@ import API from "../../utils/api";
 import { useAuth } from "../../context/AuthContext";
 import StatusBadge from "../../components/ui/StatusBadge";
 import usePageTitle from "../../hooks/usePageTitle";
+import { toast, confirmAction } from "../../utils/feedback";
 
 const AdminUsers = () => {
   usePageTitle("Admin · Users");
@@ -32,7 +33,12 @@ const AdminUsers = () => {
 
     if (
       blocking &&
-      !window.confirm(`Block ${u.name}? They won't be able to log in, and their live listings will be hidden.`)
+      !(await confirmAction({
+        title: `Block ${u.name}?`,
+        body: "They won't be able to log in, and their live listings will be hidden until you unblock them.",
+        confirmLabel: "Block user",
+        danger: true,
+      }))
     ) {
       return;
     }
@@ -40,8 +46,9 @@ const AdminUsers = () => {
     try {
       const { data } = await axios.patch(`${API}/admin/users/${u._id}/block`, { blocked: blocking }, authHeader);
       setUsers((list) => list.map((x) => (x._id === u._id ? { ...x, blocked: data.blocked } : x)));
+      toast.success(data.blocked ? `${u.name} is blocked.` : `${u.name} can log in again.`);
     } catch (err) {
-      alert(err.response?.data?.message || "Could not update user");
+      toast.error(err.response?.data?.message || "Couldn't update this user. Please try again.");
     }
   };
 
@@ -60,20 +67,20 @@ const AdminUsers = () => {
           }}
           className="relative md:w-72"
         >
-          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-faint" />
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search name or email"
-            className="w-full pl-9 pr-3 py-2 rounded-sm border border-line bg-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-200"
+            className="field pl-9 pr-3 py-2"
           />
         </form>
       </div>
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm text-danger">{error}</p>}
 
       <div className="bg-white border border-line rounded-sm overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="w-full text-sm nums">
           <thead>
             <tr className="text-left text-muted border-b border-line">
               <th className="px-4 py-3 font-medium">Name</th>
@@ -86,10 +93,10 @@ const AdminUsers = () => {
             </tr>
           </thead>
 
-          <tbody className="divide-y divide-gray-100">
+          <tbody className="divide-y divide-line-soft">
             {loading ? (
               <tr>
-                <td colSpan={7} className="px-4 py-10 text-center text-gray-400">Loading…</td>
+                <td colSpan={7} className="px-4 py-10 text-center text-faint">Loading…</td>
               </tr>
             ) : users.length === 0 ? (
               <tr>
@@ -97,10 +104,10 @@ const AdminUsers = () => {
               </tr>
             ) : (
               users.map((u) => (
-                <tr key={u._id} className="hover:bg-gray-50">
+                <tr key={u._id} className="hover:bg-cream">
                   <td className="px-4 py-3 font-medium text-ink">{u.name}</td>
-                  <td className="px-4 py-3 text-gray-600">{u.email}</td>
-                  <td className="px-4 py-3 text-gray-600 whitespace-nowrap">{format(new Date(u.createdAt), "d MMM yyyy")}</td>
+                  <td className="px-4 py-3 text-muted">{u.email}</td>
+                  <td className="px-4 py-3 text-muted whitespace-nowrap">{format(new Date(u.createdAt), "d MMM yyyy")}</td>
                   <td className="px-4 py-3 text-right tabular-nums">{u.listings}</td>
                   <td className="px-4 py-3 text-right tabular-nums">{u.orders}</td>
                   <td className="px-4 py-3">
@@ -113,9 +120,9 @@ const AdminUsers = () => {
                     {u.role !== "admin" && (
                       <button
                         onClick={() => toggleBlock(u)}
-                        className={`px-3 py-1.5 rounded-md text-xs font-medium border transition ${u.blocked
-                          ? "border-line text-gray-700 hover:bg-gray-50"
-                          : "border-red-200 text-red-700 hover:bg-red-50"
+                        className={`px-3 py-1.5 rounded-sm text-xs font-medium border transition-colors ${u.blocked
+                          ? "border-line text-ink-soft hover:bg-cream"
+                          : "border-danger-line text-danger hover:bg-danger-tint"
                           }`}
                       >
                         {u.blocked ? "Unblock" : "Block"}

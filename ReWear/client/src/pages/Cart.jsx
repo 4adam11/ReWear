@@ -41,7 +41,7 @@ const Cart = () => {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px] items-start">
-        <ul className="bg-white border border-line rounded-sm divide-y divide-[#efe6da]">
+        <ul className="bg-white border border-line rounded-sm divide-y divide-line-soft">
           {cartItems.map((item) => {
             const key = getCartKey(item);
             const saved = wishlist.some((p) => p._id === item._id);
@@ -52,7 +52,7 @@ const Cart = () => {
                   <img
                     src={thumb(item.image || item.images?.[0], 240) || PLACEHOLDER_IMAGE}
                     alt={item.title}
-                    className="w-20 h-[100px] sm:w-24 sm:h-[120px] rounded-md object-cover bg-cream border border-line"
+                    className="w-20 h-[100px] sm:w-24 sm:h-[120px] rounded-sm object-cover bg-cream border border-line"
                   />
                 </Link>
 
@@ -61,7 +61,7 @@ const Cart = () => {
                     <Link to={`/product/${item._id}`} className="text-[15px] font-semibold hover:text-brand line-clamp-2">
                       {item.title}
                     </Link>
-                    <p className="text-[15px] font-bold whitespace-nowrap">{money(getItemPrice(item))}</p>
+                    <p className="text-[15px] font-bold whitespace-nowrap nums">{money(getItemPrice(item))}</p>
                   </div>
 
                   <p className="mt-1 text-[13px] text-muted">
@@ -81,7 +81,7 @@ const Cart = () => {
                   </p>
 
                   <div className="mt-auto pt-3 flex flex-wrap gap-4 text-[13px] font-semibold">
-                    <button type="button" onClick={() => removeFromCart(key)} className="inline-flex items-center gap-1.5 text-muted hover:text-red-700">
+                    <button type="button" onClick={() => removeFromCart(key)} className="inline-flex items-center gap-1.5 text-muted hover:text-danger">
                       <Trash2 size={14} />
                       Remove
                     </button>
@@ -106,7 +106,7 @@ const Cart = () => {
 
         <aside className="bg-white border border-line rounded-sm p-5 lg:sticky lg:top-32 flex flex-col gap-4">
           <h2 className="text-base font-bold">Price details</h2>
-          <dl className="flex flex-col gap-2 text-sm">
+          <dl className="nums flex flex-col gap-2 text-sm">
             <div className="flex justify-between">
               <dt className="text-muted">Items ({cartItems.length})</dt>
               <dd>{money(total)}</dd>
@@ -115,7 +115,7 @@ const Cart = () => {
               <dt className="text-muted">Delivery</dt>
               <dd>Free</dd>
             </div>
-            <div className="flex justify-between text-base font-bold border-t border-[#efe6da] pt-3 mt-1">
+            <div className="flex justify-between text-base font-bold border-t border-line-soft pt-3 mt-1">
               <dt>Total</dt>
               <dd>{money(total)}</dd>
             </div>

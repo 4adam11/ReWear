@@ -38,7 +38,7 @@ const Chart = ({ caption, head, rows, current }) => (
     </thead>
     <tbody>
       {rows.map(([size, ...cells]) => (
-        <tr key={size} className={`border-b border-[#efe6da] ${size === current ? "bg-cream font-semibold" : ""}`}>
+        <tr key={size} className={`border-b border-line-soft ${size === current ? "bg-cream font-semibold" : ""}`}>
           <th scope="row" className="py-2 pr-3 pl-2 text-left">
             {size}
             {size === current && <span className="sr-only"> (this item's size)</span>}

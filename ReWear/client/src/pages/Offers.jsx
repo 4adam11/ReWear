@@ -39,8 +39,9 @@ const OfferRow = ({ offer, side, onChange }) => {
   return (
     <li className="p-4 sm:p-5 flex flex-col gap-3">
       <div className="flex gap-4">
-        <Link to={`/product/${offer.product}`} className="flex-shrink-0">
-          <img src={thumb(offer.image, 160) || PLACEHOLDER_IMAGE} alt="" className="w-14 h-[70px] rounded object-cover bg-cream border border-line" />
+        {/* Same destination as the title link, so it is skipped by keyboards and screen readers */}
+        <Link to={`/product/${offer.product}`} tabIndex={-1} aria-hidden="true" className="flex-shrink-0">
+          <img src={thumb(offer.image, 160) || PLACEHOLDER_IMAGE} alt="" className="w-14 h-[70px] rounded-sm object-cover bg-cream border border-line" />
         </Link>
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-2">
@@ -65,7 +66,7 @@ const OfferRow = ({ offer, side, onChange }) => {
         </div>
       </div>
 
-      {error && <p className="text-[13px] text-red-700">{error}</p>}
+      {error && <p className="text-[13px] text-danger">{error}</p>}
 
       {side === "received" && status === "pending" && !countering && (
         <div className="flex flex-wrap gap-2">
@@ -75,7 +76,7 @@ const OfferRow = ({ offer, side, onChange }) => {
           <button type="button" disabled={busy} onClick={() => setCountering(true)} className="btn btn-outline btn-sm">
             Counter
           </button>
-          <button type="button" disabled={busy} onClick={() => act("reject")} className={`${btn} text-red-700 hover:bg-red-50`}>
+          <button type="button" disabled={busy} onClick={() => act("reject")} className={`${btn} text-danger hover:bg-danger-tint`}>
             Decline
           </button>
         </div>
@@ -100,7 +101,7 @@ const OfferRow = ({ offer, side, onChange }) => {
             max={offer.listPrice - 1}
             value={counter}
             onChange={(e) => setCounter(e.target.value)}
-            className="h-9 w-32 px-3 rounded-md border border-[#d9cbb9] focus:outline-none focus:border-brand"
+            className="field h-9 w-32 px-3"
           />
           <button type="submit" disabled={busy || !counter} className="btn btn-dark btn-sm">
             Send counter-offer
@@ -181,14 +182,14 @@ const Offers = () => {
       {!offers ? (
         <div className="h-40 rounded-sm bg-white border border-line animate-pulse" />
       ) : offers.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-[#d9cbb9] bg-white py-14 text-center">
+        <div className="rounded-sm border border-dashed border-line-strong bg-white py-14 text-center">
           <p className="font-semibold">No offers yet</p>
           <p className="mt-1 text-sm text-muted">
             {tab === "sent" ? "Use “Make an offer” on any item for sale." : "When buyers make offers on your items, they show up here."}
           </p>
         </div>
       ) : (
-        <ul className="bg-white border border-line rounded-sm divide-y divide-[#efe6da]">
+        <ul className="bg-white border border-line rounded-sm divide-y divide-line-soft">
           {offers.map((o) => (
             <OfferRow key={o._id} offer={o} side={tab} onChange={(next) => setOffers((list) => list.map((x) => (x._id === next._id ? next : x)))} />
           ))}

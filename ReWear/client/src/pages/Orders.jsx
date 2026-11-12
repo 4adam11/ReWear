@@ -13,6 +13,7 @@ import { isRentalOrder } from "../utils/orders";
 import { money } from "../utils/format";
 import { ReviewBox, ProblemBox, DisputeBanner } from "../components/orders/OrderExtras";
 import usePageTitle from "../hooks/usePageTitle";
+import { toast, confirmAction } from "../utils/feedback";
 
 const PAYMENT = { card: "Card", upi: "UPI", cod: "Cash on delivery" };
 
@@ -38,14 +39,14 @@ const OrderCard = ({ order, onUpdate }) => {
   const status = order.status === "placed" ? "confirmed" : order.status;
 
   const act = async (action, confirmText) => {
-    if (confirmText && !window.confirm(confirmText)) return;
+    if (confirmText && !(await confirmAction(confirmText))) return;
 
     setBusy(true);
     try {
       const { data } = await axios.patch(`${API}/orders/${order._id}/${action}`, {}, authHeader);
       onUpdate({ ...order, ...data, seller: order.seller });
     } catch (err) {
-      alert(err.response?.data?.message || "Something went wrong");
+      toast.error(err.response?.data?.message || "That didn't work. Please try again.");
     } finally {
       setBusy(false);
     }
@@ -55,8 +56,8 @@ const OrderCard = ({ order, onUpdate }) => {
     <article className="bg-white border border-line rounded-sm overflow-hidden">
 
       {/* HEADER */}
-      <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-3 bg-gray-50 border-b border-line text-sm">
-        <div className="flex flex-wrap gap-x-6 gap-y-1 text-gray-600">
+      <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-3 bg-cream border-b border-line text-sm">
+        <div className="flex flex-wrap gap-x-6 gap-y-1 text-muted">
           <span>
             Ordered <span className="text-ink">{format(new Date(order.createdAt), "d MMM yyyy")}</span>
           </span>
@@ -83,7 +84,7 @@ const OrderCard = ({ order, onUpdate }) => {
         {status === "refunded" ? (
           <p className="text-sm text-muted">This order was refunded after a problem report.</p>
         ) : status === "cancelled" ? (
-          <p className="text-sm text-red-700">
+          <p className="text-sm text-danger">
             Cancelled by the {order.cancel?.by || "buyer"}
             {order.cancel?.reason ? `: ${order.cancel.reason}` : "."}
           </p>
@@ -93,14 +94,14 @@ const OrderCard = ({ order, onUpdate }) => {
 
         {/* TRACKING */}
         {order.shipping?.trackingNumber && (
-          <div className="flex items-center gap-2 text-sm text-gray-700 rounded-lg bg-gray-50 px-3 py-2">
+          <div className="flex items-center gap-2 text-sm text-ink-soft rounded-sm bg-cream px-3 py-2">
             <Truck size={16} />
             {order.shipping.courier} · Tracking <span className="font-mono">{order.shipping.trackingNumber}</span>
           </div>
         )}
 
         {/* ITEMS */}
-        <ul className="divide-y divide-gray-100">
+        <ul className="divide-y divide-line-soft">
           {order.items.map((item, idx) => (
             <li key={idx} className="py-3 first:pt-0 flex gap-4">
               <Link to={`/product/${item.product}`} className="flex-shrink-0">
@@ -108,7 +109,7 @@ const OrderCard = ({ order, onUpdate }) => {
                   src={thumb(item.image || item.images?.[0], 200) || PLACEHOLDER_IMAGE}
                   alt={item.title}
                   loading="lazy"
-                  className="w-16 h-20 rounded-lg object-cover border border-line"
+                  className="w-16 h-20 rounded-sm object-cover border border-line"
                 />
               </Link>
 
@@ -116,7 +117,7 @@ const OrderCard = ({ order, onUpdate }) => {
                 <Link to={`/product/${item.product}`} className="font-medium text-ink hover:underline">
                   {item.title || "Item"}
                 </Link>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-muted">
                   {item.mode === "rent"
                     ? `Rent ${format(new Date(item.rentStart), "d MMM")} – ${format(new Date(item.rentEnd), "d MMM")} (${item.days} day${item.days > 1 ? "s" : ""})`
                     : "Bought"}
@@ -130,7 +131,7 @@ const OrderCard = ({ order, onUpdate }) => {
 
         {/* WHAT HAPPENS NEXT */}
         {status === "delivered" && rental && (
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-muted">
             Please return the outfit to the seller by{" "}
             {format(new Date(Math.max(...order.items.map((i) => new Date(i.rentEnd || 0)))), "d MMM")}. The order completes when they confirm it's back.
           </p>
@@ -161,7 +162,13 @@ const OrderCard = ({ order, onUpdate }) => {
           {status === "delivered" && !rental && order.dispute?.status !== "open" && (
             <button
               disabled={busy}
-              onClick={() => act("complete", "Is everything as described? This completes the order.")}
+              onClick={() =>
+                act("complete", {
+                  title: "Complete this order?",
+                  body: "Check everything is as described first. Once the order is completed you can't report a problem with it, but you can leave a review.",
+                  confirmLabel: "Complete order",
+                })
+              }
               className="btn btn-dark btn-sm"
             >
               Everything's fine, complete order
@@ -171,8 +178,16 @@ const OrderCard = ({ order, onUpdate }) => {
           {["confirmed", "accepted"].includes(status) && (
             <button
               disabled={busy}
-              onClick={() => act("cancel", "Cancel this order?")}
-              className="px-4 py-2 rounded-lg border border-red-200 text-red-700 text-sm font-medium hover:bg-red-50 disabled:opacity-40"
+              onClick={() =>
+                act("cancel", {
+                  title: "Cancel this order?",
+                  body: "The seller will be told, and the item goes back on sale.",
+                  confirmLabel: "Cancel order",
+                  cancelLabel: "Keep order",
+                  danger: true,
+                })
+              }
+              className="px-4 py-2 rounded-sm border border-danger-line text-danger text-sm font-medium hover:bg-danger-tint disabled:opacity-40"
             >
               Cancel order
             </button>
@@ -186,7 +201,7 @@ const OrderCard = ({ order, onUpdate }) => {
 
           <button
             onClick={() => setOpen(!open)}
-            className="ml-auto inline-flex items-center gap-1 text-sm text-gray-600 hover:text-ink"
+            className="ml-auto inline-flex items-center gap-1 text-sm text-muted hover:text-ink"
           >
             {open ? "Hide details" : "Order details"}
             {open ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
@@ -197,12 +212,12 @@ const OrderCard = ({ order, onUpdate }) => {
           <div className="grid sm:grid-cols-2 gap-5 border-t border-line pt-4 text-sm">
             <div>
               <p className="font-medium text-ink">Delivery address</p>
-              <p className="mt-1 text-gray-600">{order.address?.name}</p>
-              <p className="text-gray-600">{order.address?.address}</p>
-              <p className="text-gray-600">{order.address?.phone}</p>
+              <p className="mt-1 text-muted">{order.address?.name}</p>
+              <p className="text-muted">{order.address?.address}</p>
+              <p className="text-muted">{order.address?.phone}</p>
 
               <p className="mt-4 font-medium text-ink">Payment</p>
-              <p className="mt-1 text-gray-600">
+              <p className="mt-1 text-muted">
                 Items {money(order.subtotal)}
                 {order.discount > 0 && ` · Discount −${money(order.discount)}`} · Total {money(order.total)}
               </p>
@@ -213,7 +228,7 @@ const OrderCard = ({ order, onUpdate }) => {
               <ol className="mt-2 space-y-2">
                 {(order.timeline || []).map((t, i) => (
                   <li key={i} className="flex gap-3">
-                    <span className="mt-1.5 w-2 h-2 rounded-full bg-gray-400 flex-shrink-0" />
+                    <span className="mt-1.5 w-2 h-2 rounded-full bg-faint flex-shrink-0" />
                     <div>
                       <p className="text-ink">{TIMELINE_LABEL[t.status] || t.status}</p>
                       <p className="text-xs text-muted">
@@ -284,7 +299,7 @@ const Orders = () => {
           ))}
         </div>
 
-        {error && <p className="text-sm text-red-600">{error}</p>}
+        {error && <p className="text-sm text-danger">{error}</p>}
 
         {loading ? (
           <div className="space-y-3">
@@ -293,10 +308,10 @@ const Orders = () => {
             ))}
           </div>
         ) : shown.length === 0 ? (
-          <div className="rounded-lg border border-dashed border-gray-300 bg-white py-16 text-center">
-            <ShoppingBag className="mx-auto text-gray-400" size={28} />
+          <div className="rounded-sm border border-dashed border-line-strong bg-white py-16 text-center">
+            <ShoppingBag className="mx-auto text-faint" size={28} />
             <p className="mt-3 text-ink font-medium">No orders here</p>
-            <Link to="/explore" className="mt-2 inline-block text-sm text-indigo-700 hover:underline">
+            <Link to="/explore" className="mt-2 inline-block text-sm text-brand hover:underline">
               Browse pre-loved fashion
             </Link>
           </div>

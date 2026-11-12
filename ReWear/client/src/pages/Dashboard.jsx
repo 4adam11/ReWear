@@ -16,14 +16,14 @@ const statusOf = (o) => (o.status === "placed" ? "confirmed" : o.status);
 const Stat = ({ label, value, to, note }) => (
   <Link to={to} className="bg-white border border-line rounded-sm p-4 hover:border-brand transition-colors">
     <p className="text-[13px] text-muted">{label}</p>
-    <p className="mt-1 text-2xl font-bold">{value}</p>
+    <p className="mt-1 text-2xl font-bold nums">{value}</p>
     {note && <p className="mt-0.5 text-xs text-muted">{note}</p>}
   </Link>
 );
 
 const Panel = ({ title, to, linkText, children }) => (
   <section className="bg-white border border-line rounded-sm">
-    <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#efe6da]">
+    <div className="flex items-center justify-between px-5 py-3.5 border-b border-line-soft">
       <h2 className="text-base font-bold">{title}</h2>
       {to && (
         <Link to={to} className="text-[13px] font-semibold text-brand hover:underline">
@@ -38,7 +38,7 @@ const Panel = ({ title, to, linkText, children }) => (
 const Row = ({ to, image, title, sub, badge }) => (
   <li>
     <Link to={to} className="flex items-center gap-3.5 px-5 py-3 hover:bg-cream">
-      <img src={thumb(image, 120) || PLACEHOLDER_IMAGE} alt="" className="w-11 h-14 rounded object-cover bg-cream border border-line flex-shrink-0" />
+      <img src={thumb(image, 120) || PLACEHOLDER_IMAGE} alt="" className="w-11 h-14 rounded-sm object-cover bg-cream border border-line flex-shrink-0" />
       <div className="flex-1 min-w-0">
         <p className="text-sm font-semibold truncate">{title}</p>
         <p className="text-xs text-muted truncate">{sub}</p>
@@ -98,7 +98,7 @@ const Dashboard = () => {
       </div>
 
       {data.failed && (
-        <p role="alert" className="rounded-md bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-800">
+        <p role="alert" className="rounded-sm bg-danger-tint border border-danger-line px-4 py-3 text-sm text-danger-strong">
           Some of your details couldn't be loaded. Please refresh the page.
         </p>
       )}
@@ -115,7 +115,7 @@ const Dashboard = () => {
           {toAct.length === 0 && rejected.length === 0 ? (
             <Empty>Nothing to do right now.</Empty>
           ) : (
-            <ul className="divide-y divide-[#efe6da]">
+            <ul className="divide-y divide-line-soft">
               {toAct.slice(0, 5).map((o) => (
                 <Row
                   key={o._id}
@@ -149,7 +149,7 @@ const Dashboard = () => {
               </Link>
             </Empty>
           ) : (
-            <ul className="divide-y divide-[#efe6da]">
+            <ul className="divide-y divide-line-soft">
               {purchases.slice(0, 5).map((o) => (
                 <Row
                   key={o._id}
@@ -174,7 +174,7 @@ const Dashboard = () => {
             </Link>
           </Empty>
         ) : (
-          <ul className="divide-y divide-[#efe6da]">
+          <ul className="divide-y divide-line-soft">
             {listings.slice(0, 5).map((p) => (
               <Row
                 key={p._id}

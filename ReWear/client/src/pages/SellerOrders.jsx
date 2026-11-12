@@ -12,6 +12,7 @@ import { isRentalOrder } from "../utils/orders";
 import { money } from "../utils/format";
 import { ProblemBox, DisputeBanner } from "../components/orders/OrderExtras";
 import usePageTitle from "../hooks/usePageTitle";
+import { confirmAction } from "../utils/feedback";
 
 const TABS = [
   { key: "confirmed", label: "New" },
@@ -59,8 +60,8 @@ const SaleCard = ({ order, onUpdate }) => {
 
   return (
     <article className="bg-white border border-line rounded-sm overflow-hidden">
-      <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-3 bg-gray-50 border-b border-line text-sm">
-        <div className="flex flex-wrap items-center gap-x-6 gap-y-1 text-gray-600">
+      <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-3 bg-cream border-b border-line text-sm">
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-1 text-muted">
           <StatusBadge status={status} />
           <span>
             {format(new Date(order.createdAt), "d MMM yyyy, HH:mm")}
@@ -80,7 +81,7 @@ const SaleCard = ({ order, onUpdate }) => {
           {status === "refunded" ? (
             <p className="text-sm text-muted">Refunded to the buyer after a problem report.</p>
           ) : status === "cancelled" ? (
-            <p className="text-sm text-red-700">
+            <p className="text-sm text-danger">
               Cancelled by the {order.cancel?.by || "buyer"}
               {order.cancel?.reason ? `: ${order.cancel.reason}` : "."}
             </p>
@@ -88,18 +89,18 @@ const SaleCard = ({ order, onUpdate }) => {
             <OrderProgress order={order} />
           )}
 
-          <ul className="divide-y divide-gray-100">
+          <ul className="divide-y divide-line-soft">
             {order.items.map((item, idx) => (
               <li key={idx} className="py-3 first:pt-0 flex gap-4">
                 <img
                   src={thumb(item.image, 200) || PLACEHOLDER_IMAGE}
                   alt={item.title}
                   loading="lazy"
-                  className="w-14 h-16 rounded-lg object-cover border border-line flex-shrink-0"
+                  className="w-14 h-16 rounded-sm object-cover border border-line flex-shrink-0"
                 />
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-ink truncate">{item.title}</p>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-muted">
                     {item.mode === "rent"
                       ? `Rental ${format(new Date(item.rentStart), "d MMM")} – ${format(new Date(item.rentEnd), "d MMM")}`
                       : "Sale"}
@@ -111,7 +112,7 @@ const SaleCard = ({ order, onUpdate }) => {
           </ul>
 
           {order.shipping?.trackingNumber && (
-            <p className="flex items-center gap-2 text-sm text-gray-700">
+            <p className="flex items-center gap-2 text-sm text-ink-soft">
               <Truck size={16} />
               {order.shipping.courier} · <span className="font-mono">{order.shipping.trackingNumber}</span>
             </p>
@@ -131,7 +132,7 @@ const SaleCard = ({ order, onUpdate }) => {
             <ProblemBox order={order} role="seller" onDone={(dispute) => onUpdate({ ...order, dispute })} />
           )}
 
-          {error && <p className="text-sm text-red-600">{error}</p>}
+          {error && <p className="text-sm text-danger">{error}</p>}
 
           {/* SHIP FORM */}
           {form === "ship" && (
@@ -186,7 +187,7 @@ const SaleCard = ({ order, onUpdate }) => {
                 <button
                   disabled={busy || reason.trim().length < 5}
                   onClick={() => act("cancel", { reason })}
-                  className="px-4 py-2 rounded-lg bg-red-600 text-white text-sm font-medium disabled:opacity-40"
+                  className="px-4 py-2 rounded-sm bg-danger text-white text-sm font-medium disabled:opacity-40"
                 >
                   Cancel order
                 </button>
@@ -200,14 +201,14 @@ const SaleCard = ({ order, onUpdate }) => {
 
         {/* ADDRESS + ACTIONS */}
         <div className="space-y-4">
-          <div className="rounded-lg bg-gray-50 p-3 text-sm">
+          <div className="rounded-sm bg-cream p-3 text-sm">
             <p className="flex items-center gap-1.5 font-medium text-ink">
               <MapPin size={14} />
               Ship to
             </p>
-            <p className="mt-1 text-gray-700">{order.address?.name}</p>
-            <p className="text-gray-600">{order.address?.address}</p>
-            <p className="text-gray-600">{order.address?.phone}</p>
+            <p className="mt-1 text-ink-soft">{order.address?.name}</p>
+            <p className="text-muted">{order.address?.address}</p>
+            <p className="text-muted">{order.address?.phone}</p>
           </div>
 
           {!form && (
@@ -216,7 +217,7 @@ const SaleCard = ({ order, onUpdate }) => {
                 <button
                   disabled={busy}
                   onClick={() => act("accept")}
-                  className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700 disabled:opacity-40"
+                  className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-sm bg-success text-white text-sm font-medium hover:bg-success-strong disabled:opacity-40"
                 >
                   <Check size={16} />
                   Accept order
@@ -246,7 +247,14 @@ const SaleCard = ({ order, onUpdate }) => {
               {status === "delivered" && rental && order.dispute?.status !== "open" && (
                 <button
                   disabled={busy}
-                  onClick={() => window.confirm("Confirm the outfit has been returned to you?") && act("return")}
+                  onClick={async () => {
+                    const back = await confirmAction({
+                      title: "Has the outfit come back?",
+                      body: "Only confirm once it's with you and in the condition you rented it out. This completes the rental.",
+                      confirmLabel: "Yes, it's back",
+                    });
+                    if (back) act("return");
+                  }}
                   className="btn btn-dark btn-sm"
                 >
                   Confirm return
@@ -256,7 +264,7 @@ const SaleCard = ({ order, onUpdate }) => {
               {["confirmed", "accepted"].includes(status) && (
                 <button
                   onClick={() => setForm("decline")}
-                  className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg border border-red-200 text-red-700 text-sm font-medium hover:bg-red-50"
+                  className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-sm border border-danger-line text-danger text-sm font-medium hover:bg-danger-tint"
                 >
                   <X size={16} />
                   {status === "confirmed" ? "Decline" : "Cancel order"}
@@ -304,7 +312,7 @@ const SellerOrders = () => {
               className={`tab ${tab === t.key ? "tab-active" : ""}`}
             >
               {t.label}
-              <span className={`ml-1.5 ${counts[t.key] && ["confirmed", "accepted"].includes(t.key) && tab !== t.key ? "text-pink-700 font-semibold" : "opacity-70"}`}>
+              <span className={`ml-1.5 ${counts[t.key] && ["confirmed", "accepted"].includes(t.key) && tab !== t.key ? "text-accent font-semibold" : "opacity-70"}`}>
                 {counts[t.key]}
               </span>
             </button>
@@ -314,7 +322,7 @@ const SellerOrders = () => {
         {loading ? (
           <div className="h-48 rounded-sm bg-white border border-line animate-pulse" />
         ) : shown.length === 0 ? (
-          <div className="rounded-lg border border-dashed border-gray-300 bg-white py-16 text-center">
+          <div className="rounded-sm border border-dashed border-line-strong bg-white py-16 text-center">
             <p className="text-ink font-medium">Nothing here</p>
             <p className="mt-1 text-sm text-muted">
               {tab === "confirmed" ? "No new orders right now." : "No orders in this stage."}

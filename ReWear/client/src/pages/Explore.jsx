@@ -174,7 +174,7 @@ const Explore = () => {
           type="button"
           onClick={() => update({ category: "" })}
           aria-pressed={categories.length === 0}
-          className={`flex-shrink-0 h-9 px-4 rounded-full border text-sm font-semibold transition ${categories.length === 0 ? "bg-ink border-ink text-paper" : "bg-white border-line text-ink hover:border-ink"}`}
+          className={`flex-shrink-0 h-9 px-4 rounded-full border text-sm font-semibold transition-colors ${categories.length === 0 ? "bg-ink border-ink text-paper" : "bg-white border-line text-ink hover:border-ink"}`}
         >
           All{counts ? ` · ${Object.values(counts).reduce((a, b) => a + b, 0)}` : ""}
         </button>
@@ -187,7 +187,7 @@ const Explore = () => {
               type="button"
               onClick={() => update({ category: on ? "" : c.value })}
               aria-pressed={on}
-              className={`flex-shrink-0 inline-flex items-center gap-2 h-9 px-4 rounded-full border text-sm font-semibold transition ${on ? "text-white" : "bg-white border-line text-ink hover:border-ink"} ${counts && !n && !on ? "opacity-50" : ""}`}
+              className={`flex-shrink-0 inline-flex items-center gap-2 h-9 px-4 rounded-full border text-sm font-semibold transition-colors ${on ? "text-white" : "bg-white border-line text-ink hover:border-ink"} ${counts && !n && !on ? "opacity-50" : ""}`}
               style={on ? { backgroundColor: c.color, borderColor: c.color } : undefined}
             >
               {!on && <span aria-hidden="true" className="w-2 h-2 rounded-full" style={{ backgroundColor: c.color }} />}
@@ -202,7 +202,7 @@ const Explore = () => {
         {/* FILTERS */}
         <aside
           aria-label="Filters"
-          className={`${showFilters ? "block" : "hidden"} lg:block w-full lg:w-60 flex-shrink-0 bg-white lg:bg-transparent border border-line lg:border-0 lg:border-r lg:pr-5 px-4 lg:px-0 rounded-lg lg:rounded-none lg:sticky lg:top-40`}
+          className={`${showFilters ? "block" : "hidden"} lg:block w-full lg:w-60 flex-shrink-0 bg-white lg:bg-transparent border border-line lg:border-0 lg:border-r lg:pr-5 px-4 lg:px-0 rounded-sm lg:rounded-none lg:sticky lg:top-40`}
         >
           <div className="flex items-center justify-between py-3 border-b border-line">
             <span className="font-display text-sm font-bold uppercase tracking-[0.14em]">Filters</span>
@@ -224,7 +224,7 @@ const Explore = () => {
                     name="mode"
                     checked={mode === m.value}
                     onChange={() => update({ mode: m.value === "all" ? "" : m.value })}
-                    className="w-4 h-4 accent-[#6b4430]"
+                    className="w-4 h-4 accent-brand"
                   />
                   {m.label}
                 </label>
@@ -240,7 +240,7 @@ const Explore = () => {
                     type="checkbox"
                     checked={categories.includes(c.value)}
                     onChange={() => toggle("category", categories, c.value)}
-                    className="w-4 h-4 accent-[#6b4430]"
+                    className="w-4 h-4 accent-brand"
                   />
                   <span className="flex-1">{c.label}</span>
                   {counts && <span className="text-xs text-muted">{counts[c.value] || 0}</span>}
@@ -259,7 +259,7 @@ const Explore = () => {
                     type="button"
                     aria-pressed={on}
                     onClick={() => toggle("sizes", sizes, s)}
-                    className={`min-w-[44px] h-9 px-2 rounded-md border text-[13px] ${on ? "bg-brand border-brand text-white font-semibold" : "bg-white border-[#d9cbb9] text-ink hover:border-brand"}`}
+                    className={`min-w-[44px] h-9 px-2 rounded-sm border text-[13px] ${on ? "bg-brand border-brand text-white font-semibold" : "bg-white border-line-strong text-ink hover:border-brand"}`}
                   >
                     {s}
                   </button>
@@ -280,7 +280,7 @@ const Explore = () => {
               step={500}
               value={price}
               onChange={(e) => setPrice(Number(e.target.value))}
-              className="w-full accent-[#6b4430]"
+              className="w-full accent-brand"
             />
             <div className="flex justify-between text-[13px] text-muted mt-1">
               <span>₹500</span>
@@ -297,7 +297,7 @@ const Explore = () => {
                 type="button"
                 onClick={() => setShowFilters(!showFilters)}
                 aria-expanded={showFilters}
-                className="lg:hidden inline-flex items-center gap-1.5 h-9 px-3 rounded-md border border-[#d9cbb9] text-[13px] font-semibold"
+                className="lg:hidden inline-flex items-center gap-1.5 h-9 px-3 rounded-sm border border-line-strong text-[13px] font-semibold"
               >
                 <SlidersHorizontal size={15} />
                 Filters
@@ -325,7 +325,7 @@ const Explore = () => {
                 id="sort"
                 value={sort}
                 onChange={(e) => update({ sort: e.target.value === "new" ? "" : e.target.value })}
-                className="h-9 px-2.5 rounded-md border border-[#d9cbb9] bg-white text-[13px]"
+                className="h-9 px-2.5 rounded-sm border border-line-strong bg-white text-[13px]"
               >
                 {SORTS.map((s) => (
                   <option key={s.value} value={s.value}>
@@ -343,7 +343,7 @@ const Explore = () => {
               ))}
             </div>
           ) : result.items.length === 0 ? (
-            <div className="rounded-lg border border-dashed border-[#d9cbb9] bg-white py-16 px-6 text-center">
+            <div className="rounded-sm border border-dashed border-line-strong bg-white py-16 px-6 text-center">
               <p className="font-semibold">Nothing matches these filters</p>
               <p className="mt-1 text-sm text-muted">Try removing a filter or searching for something else.</p>
               <button
@@ -355,11 +355,14 @@ const Explore = () => {
               </button>
             </div>
           ) : (
+            <>
+            <h2 className="sr-only">Results</h2>
             <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-x-3 gap-y-8 sm:gap-x-4">
               {result.items.map((p) => (
                 <ProductCard key={p._id} product={p} prefer={mode === "rent" ? "rent" : undefined} />
               ))}
             </div>
+            </>
           )}
 
           {result.pages > 1 && (
@@ -369,7 +372,7 @@ const Explore = () => {
                 disabled={page <= 1}
                 onClick={() => update({ page: page - 1 }, { keepPage: true })}
                 aria-label="Previous page"
-                className="w-11 h-10 rounded-md border border-line bg-white flex items-center justify-center disabled:opacity-40"
+                className="w-11 h-10 rounded-sm border border-line bg-white flex items-center justify-center disabled:opacity-40"
               >
                 <ChevronLeft size={18} />
               </button>
@@ -379,7 +382,7 @@ const Explore = () => {
                   type="button"
                   aria-current={page === i + 1 ? "page" : undefined}
                   onClick={() => update({ page: i + 1 }, { keepPage: true })}
-                  className={`min-w-[44px] h-10 rounded-md text-sm ${page === i + 1 ? "bg-ink text-paper font-semibold" : "bg-white border border-line hover:border-brand"}`}
+                  className={`min-w-[44px] h-10 rounded-sm text-sm ${page === i + 1 ? "bg-ink text-paper font-semibold" : "bg-white border border-line hover:border-brand"}`}
                 >
                   {i + 1}
                 </button>
@@ -389,7 +392,7 @@ const Explore = () => {
                 disabled={page >= result.pages}
                 onClick={() => update({ page: page + 1 }, { keepPage: true })}
                 aria-label="Next page"
-                className="w-11 h-10 rounded-md border border-line bg-white flex items-center justify-center disabled:opacity-40"
+                className="w-11 h-10 rounded-sm border border-line bg-white flex items-center justify-center disabled:opacity-40"
               >
                 <ChevronRight size={18} />
               </button>

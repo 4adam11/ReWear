@@ -19,7 +19,7 @@ const Wishlist = () => {
       </div>
 
       {wishlist.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-[#d9cbb9] bg-white py-16 px-6 text-center">
+        <div className="rounded-sm border border-dashed border-line-strong bg-white py-16 px-6 text-center">
           <Heart className="mx-auto text-muted" size={28} />
           <p className="mt-3 font-semibold">Nothing saved yet</p>
           <p className="mt-1 text-sm text-muted">Tap the heart on any item to keep it here for later.</p>

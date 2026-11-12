@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
 
 import API from "../utils/api";
+import { flash } from "../utils/feedback";
 
 const AuthContext = createContext();
 
@@ -72,11 +73,8 @@ export const AuthProvider = ({ children }) => {
         ) {
           localStorage.removeItem("user");
           setUser(null);
-          alert(
-            blocked
-              ? err.response.data.message
-              : "Your session has expired. Please log in again."
-          );
+          // Shown on the login page after the redirect
+          flash(blocked ? err.response.data.message : "Your session has expired. Please log in again.", blocked ? "danger" : "info");
           window.location.assign("/login");
         }
 

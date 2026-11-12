@@ -22,9 +22,9 @@ const DayBars = ({ title, series, field, formatValue = (v) => v, total, period =
 
       <div className="relative mt-4" style={{ height }} onMouseLeave={() => setHover(null)}>
         {/* Recessive grid: baseline and the max line */}
-        <div className="absolute inset-x-0 top-0 border-t border-dashed border-[#efe6da]" aria-hidden="true" />
+        <div className="absolute inset-x-0 top-0 border-t border-dashed border-line-soft" aria-hidden="true" />
         <span className="absolute right-0 -top-4 text-[10px] text-muted" aria-hidden="true">{formatValue(max)}</span>
-        <div className="absolute inset-x-0 bottom-0 border-t border-[#d9cbb9]" aria-hidden="true" />
+        <div className="absolute inset-x-0 bottom-0 border-t border-line-strong" aria-hidden="true" />
 
         <svg width="100%" height={height} viewBox={`0 0 100 ${height}`} preserveAspectRatio="none" aria-hidden="true" className="block">
           {series.map((d, i) => {
@@ -52,7 +52,7 @@ const DayBars = ({ title, series, field, formatValue = (v) => v, total, period =
         {hover !== null && (
           <div
             role="tooltip"
-            className="absolute -top-2 -translate-y-full -translate-x-1/2 whitespace-nowrap rounded-md bg-ink text-paper text-xs px-2.5 py-1.5 pointer-events-none"
+            className="absolute -top-2 -translate-y-full -translate-x-1/2 whitespace-nowrap rounded-sm bg-ink text-paper text-xs px-2.5 py-1.5 pointer-events-none"
             style={{ left: `${Math.min(92, Math.max(8, (hover + 0.5) * slot))}%` }}
           >
             {labelOf(series[hover].day)} · <span className="font-semibold">{formatValue(series[hover][field])}</span>

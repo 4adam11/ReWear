@@ -26,7 +26,7 @@ const OrderSuccess = () => {
   return (
     <div className="max-w-xl mx-auto px-4 py-12">
       <div className="bg-white border border-line rounded-sm p-7 sm:p-9">
-        <CircleCheck size={40} className="text-[#3f6b4a]" />
+        <CircleCheck size={40} className="text-success" />
         <h1 className="mt-4 font-display text-2xl font-bold uppercase tracking-[0.04em]">
           Order placed{user?.name ? `, ${user.name.split(" ")[0]}` : ""}
         </h1>
@@ -36,12 +36,12 @@ const OrderSuccess = () => {
           {orders.length > 1 ? ` · split into ${orders.length} orders, one per seller` : ""}
         </p>
 
-        <div className="mt-6 border-t border-[#efe6da] pt-5">
+        <div className="mt-6 border-t border-line-soft pt-5">
           <h2 className="text-sm font-bold">What happens next</h2>
           <ol className="mt-3 flex flex-col gap-2.5">
             {NEXT.map((text, i) => (
               <li key={text} className="flex gap-3 text-sm leading-relaxed">
-                <span className="flex-none w-6 h-6 rounded-full bg-[#f1e6d8] text-brand text-xs font-bold flex items-center justify-center">{i + 1}</span>
+                <span className="flex-none w-6 h-6 rounded-full bg-sand text-brand text-xs font-bold flex items-center justify-center">{i + 1}</span>
                 {text}
               </li>
             ))}

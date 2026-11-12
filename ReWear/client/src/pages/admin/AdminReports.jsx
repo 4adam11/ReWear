@@ -42,7 +42,7 @@ const ReportCard = ({ group, open, onDecided }) => {
     <article className="panel overflow-hidden">
       <div className="flex flex-wrap items-center justify-between gap-2 px-5 py-3 bg-cream border-b border-line text-sm">
         <span className="flex items-center gap-2 font-semibold">
-          <Flag size={15} className="text-red-700" />
+          <Flag size={15} className="text-danger" />
           {reports.length} report{reports.length > 1 ? "s" : ""}
         </span>
         {!open && reports[0]?.status && (
@@ -118,9 +118,9 @@ const ReportCard = ({ group, open, onDecided }) => {
               value={note}
               onChange={(e) => setNote(e.target.value)}
               placeholder="e.g. The photos are copied from a brand's website."
-              className="rounded-sm border border-[#d9cbb9] px-3 py-2 text-sm focus:outline-none focus:border-brand"
+              className="field px-3 py-2"
             />
-            {error && <p role="alert" className="text-[13px] text-red-700">{error}</p>}
+            {error && <p role="alert" className="text-[13px] text-danger">{error}</p>}
             <button type="button" disabled={busy || note.trim().length < 5} onClick={() => decide("take_down")} className="btn btn-dark btn-sm">
               Take listing down
             </button>
@@ -172,7 +172,7 @@ const AdminReports = () => {
       {!groups ? (
         <div className="h-40 panel animate-pulse" />
       ) : groups.length === 0 ? (
-        <div className="rounded-sm border border-dashed border-[#d9cbb9] bg-white py-14 text-center text-sm text-muted">
+        <div className="rounded-sm border border-dashed border-line-strong bg-white py-14 text-center text-sm text-muted">
           {tab === "open" ? "No reported listings. All clear." : "No decisions yet."}
         </div>
       ) : (

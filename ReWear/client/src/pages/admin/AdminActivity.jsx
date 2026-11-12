@@ -38,12 +38,12 @@ const AdminActivity = () => {
       {!logs ? (
         <div className="h-40 rounded-sm bg-white border border-line animate-pulse" />
       ) : logs.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-[#d9cbb9] bg-white py-14 text-center text-sm text-muted">
+        <div className="rounded-sm border border-dashed border-line-strong bg-white py-14 text-center text-sm text-muted">
           No admin actions yet.
         </div>
       ) : (
         <div className="bg-white border border-line rounded-sm overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="w-full text-sm nums">
             <thead>
               <tr className="text-left text-xs text-muted border-b border-line">
                 <th scope="col" className="px-4 py-3 font-medium">When</th>
@@ -52,7 +52,7 @@ const AdminActivity = () => {
                 <th scope="col" className="px-4 py-3 font-medium">Details</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#efe6da]">
+            <tbody className="divide-y divide-line-soft">
               {logs.map((l) => (
                 <tr key={l._id}>
                   <td className="px-4 py-3 whitespace-nowrap text-muted">{format(new Date(l.createdAt), "d MMM, HH:mm")}</td>

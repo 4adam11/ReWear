@@ -109,7 +109,7 @@ const FAQ = [
 // ---------------------------------------------------------------------------
 
 const Kicker = ({ children, light }) => (
-  <p className={`font-display text-xs font-semibold uppercase tracking-[0.2em] ${light ? "text-[#e8c39e]" : "text-accent"}`}>{children}</p>
+  <p className={`font-display text-xs font-semibold uppercase tracking-[0.2em] ${light ? "text-gold" : "text-accent"}`}>{children}</p>
 );
 
 const SectionTitle = ({ id, children, light }) => (
@@ -127,11 +127,11 @@ const Journey = ({ steps }) => (
       <li key={title} className="relative flex lg:flex-col gap-4 lg:gap-3 lg:text-center lg:items-center">
         {/* the connecting line to the next step */}
         {i < steps.length - 1 && (
-          <span aria-hidden="true" className="hidden lg:block absolute top-7 left-[calc(50%+36px)] right-[calc(-50%+36px)] h-px bg-[#d9cbb9]" />
+          <span aria-hidden="true" className="hidden lg:block absolute top-7 left-[calc(50%+36px)] right-[calc(-50%+36px)] h-px bg-line-strong" />
         )}
         <span className="relative flex-none w-14 h-14 rounded-full bg-ink text-paper flex items-center justify-center">
           <Icon size={22} strokeWidth={1.8} />
-          <span className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-[#e8c39e] text-ink text-xs font-bold flex items-center justify-center">
+          <span className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-gold text-ink text-xs font-bold flex items-center justify-center">
             {i + 1}
           </span>
         </span>
@@ -193,7 +193,7 @@ const HowItWorks = () => {
           {photos.length === 3 && (
             <div className="hidden sm:grid grid-cols-3 gap-3" aria-hidden="true">
               {photos.map((src, i) => (
-                <div key={src} className={`aspect-[3/4] overflow-hidden bg-[#3b2a1f] ${i === 1 ? "translate-y-8" : ""}`}>
+                <div key={src} className={`aspect-[3/4] overflow-hidden bg-night ${i === 1 ? "translate-y-8" : ""}`}>
                   <img src={cardImage(src, 260)} srcSet={cardSrcSet(src, 260)} alt="" className="w-full h-full object-cover" />
                 </div>
               ))}
@@ -210,7 +210,7 @@ const HowItWorks = () => {
               [Truck, "Tracked to your door", "Courier and tracking number on every shipped order"],
             ].map(([Icon, title, text], i) => (
               <div key={title} className={`flex gap-3 py-6 ${i > 0 ? "sm:pl-6 sm:border-l border-white/10" : ""} ${i < 2 ? "border-b sm:border-b-0 border-white/10" : ""}`}>
-                <Icon size={22} className="text-[#e8c39e] flex-shrink-0 mt-0.5" />
+                <Icon size={22} className="text-gold flex-shrink-0 mt-0.5" />
                 <div>
                   <p className="font-display text-sm font-bold uppercase tracking-[0.1em]">{title}</p>
                   <p className="mt-0.5 text-[13px] text-paper/70">{text}</p>
@@ -275,7 +275,7 @@ const HowItWorks = () => {
           <ol className="mt-10 grid gap-3 sm:grid-cols-5">
             {CHECKS.map(({ icon: Icon, title, text }, i) => (
               <li key={title} className="relative bg-white border border-line p-5 flex sm:flex-col gap-3">
-                <Icon size={24} className={i === CHECKS.length - 1 ? "text-[#3f6b4a]" : i === 1 ? "text-red-700" : "text-brand"} />
+                <Icon size={24} className={i === CHECKS.length - 1 ? "text-success" : i === 1 ? "text-danger" : "text-brand"} />
                 <div>
                   <p className="font-display text-sm font-bold uppercase tracking-[0.08em]">{title}</p>
                   <p className="mt-1 text-[13px] leading-relaxed text-muted">{text}</p>
@@ -305,7 +305,7 @@ const HowItWorks = () => {
               <li key={s} className="flex sm:flex-1 items-center gap-3 sm:flex-col sm:gap-2">
                 <div className="flex items-center w-full gap-0">
                   <span aria-hidden="true" className={`hidden sm:block flex-1 h-0.5 ${i === 0 ? "bg-transparent" : "bg-ink"}`} />
-                  <span className={`flex-none w-10 h-10 rounded-full flex items-center justify-center ${i === ORDER_STEPS.length - 1 ? "bg-[#3f6b4a] text-white" : "bg-ink text-paper"}`}>
+                  <span className={`flex-none w-10 h-10 rounded-full flex items-center justify-center ${i === ORDER_STEPS.length - 1 ? "bg-success text-white" : "bg-ink text-paper"}`}>
                     <CircleCheck size={18} />
                   </span>
                   <span aria-hidden="true" className={`hidden sm:block flex-1 h-0.5 ${i === ORDER_STEPS.length - 1 ? "bg-transparent" : "bg-ink"}`} />
@@ -324,7 +324,7 @@ const HowItWorks = () => {
               </div>
             </div>
             <div className="border border-line bg-white p-5 flex gap-3">
-              <TriangleAlert size={22} className="text-amber-700 flex-shrink-0" />
+              <TriangleAlert size={22} className="text-warning flex-shrink-0" />
               <div>
                 <p className="font-semibold">Something wrong?</p>
                 <p className="mt-1 text-sm text-muted">Report a problem once it's shipped. The order pauses and an admin decides, including refunds.</p>

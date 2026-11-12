@@ -8,6 +8,7 @@ import {
 import axios from "axios";
 import { useAuth } from "./AuthContext";
 import API from "../utils/api";
+import { toast } from "../utils/feedback";
 
 const WishlistContext =
   createContext();
@@ -64,10 +65,9 @@ export const WishlistProvider = ({
   ) => {
     // BLOCK IF LOGGED OUT
     if (!userId) {
-      alert(
-        "Please login to use wishlist"
-      );
-
+      // Back to this page after logging in
+      const from = window.location.pathname + window.location.search;
+      toast("Log in to save items to your wishlist.", "info", { label: "Log in", to: "/login", state: { from } });
       return;
     }
 

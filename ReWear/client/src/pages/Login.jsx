@@ -25,7 +25,7 @@ const Field = ({ id, label, hint, children }) => (
 );
 
 const inputClass =
-  "h-11 w-full px-3.5 rounded-md border border-[#d9cbb9] bg-white text-sm text-ink placeholder:text-[#a8998b] focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand/15";
+  "field";
 
 const Login = () => {
   usePageTitle("Log in or sign up");
@@ -101,15 +101,15 @@ const Login = () => {
           <h2 className="text-3xl font-bold leading-tight tracking-tight">Buy or rent pre-loved Indian fashion.</h2>
           <ul className="mt-8 flex flex-col gap-5">
             {POINTS.map(({ icon: Icon, text }) => (
-              <li key={text} className="flex gap-3 text-[15px] leading-relaxed text-[#e3d5c4]">
-                <Icon size={20} className="text-[#e8c39e] flex-shrink-0 mt-0.5" />
+              <li key={text} className="flex gap-3 text-[15px] leading-relaxed text-ondark">
+                <Icon size={20} className="text-gold flex-shrink-0 mt-0.5" />
                 {text}
               </li>
             ))}
           </ul>
         </div>
 
-        <p className="text-xs text-[#bfae9c]">Academic project · Medicaps University, Indore</p>
+        <p className="text-xs text-ondark-muted">Academic project · Medicaps University, Indore</p>
       </aside>
 
       {/* FORM */}
@@ -124,7 +124,7 @@ const Login = () => {
             {isRegister ? "Start buying, renting and selling on ReWear." : "Log in to continue to ReWear."}
           </p>
 
-          <div role="tablist" aria-label="Log in or sign up" className="mt-6 grid grid-cols-2 p-1 rounded-md bg-[#efe6da]">
+          <div role="tablist" aria-label="Log in or sign up" className="mt-6 grid grid-cols-2 p-1 rounded-sm bg-line-soft">
             {[
               [false, "Log in"],
               [true, "Create account"],
@@ -135,7 +135,7 @@ const Login = () => {
                 role="tab"
                 aria-selected={isRegister === register}
                 onClick={() => switchMode(register)}
-                className={`h-9 rounded text-sm font-semibold transition ${isRegister === register ? "bg-white text-ink shadow-sm" : "text-muted hover:text-ink"}`}
+                className={`h-9 rounded-sm text-sm font-semibold transition-colors ${isRegister === register ? "bg-white text-ink shadow-sm" : "text-muted hover:text-ink"}`}
               >
                 {label}
               </button>
@@ -185,7 +185,7 @@ const Login = () => {
             </Field>
 
             {error && (
-              <p role="alert" className="rounded-md bg-red-50 border border-red-200 px-3.5 py-2.5 text-sm text-red-800">
+              <p role="alert" className="rounded-sm bg-danger-tint border border-danger-line px-3.5 py-2.5 text-sm text-danger-strong">
                 {error}
               </p>
             )}
