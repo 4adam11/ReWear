@@ -37,6 +37,7 @@ The mark is a thrift price tag on a string, with a caramel heart for "pre-loved"
 | Mark, one colour | `client/public/brand/rewear-mark-mono.svg` | Stamps, embossing, single-colour print (uses `currentColor`) |
 | Lockup | `client/public/brand/rewear-logo.svg` | Mark plus wordmark, light backgrounds |
 | Lockup, on dark | `client/public/brand/rewear-logo-ondark.svg` | Mark plus wordmark, Ink or Night backgrounds |
+| Link preview | `client/public/og-image.png` (1200 × 630) | Shown when a ReWear link is shared. Set `VITE_SITE_URL` when deploying so the address is absolute |
 | App icons | `client/public/apple-touch-icon.png`, `icon-192.png`, `icon-512.png`, `icon-maskable-512.png` | Home-screen icons, listed in `manifest.webmanifest` |
 
 - **Clear space:** keep a gap of a quarter of the mark's width on every side.

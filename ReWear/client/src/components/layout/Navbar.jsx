@@ -28,12 +28,12 @@ import API from "../../utils/api";
 import axios from "axios";
 
 // Round icon button on the dark header bar (the name is read out to screen readers)
-export const HeaderIcon = ({ icon: Icon, label, count, as: Tag = Link, ...props }) => (
+export const HeaderIcon = ({ icon: Icon, label, count, as: Tag = Link, className = "", ...props }) => (
   <Tag
     aria-label={label}
     title={label}
     {...props}
-    className="relative flex items-center justify-center w-11 h-11 rounded-full text-paper hover:bg-white/10 transition-colors"
+    className={`relative items-center justify-center w-11 h-11 rounded-full text-paper hover:bg-white/10 transition-colors ${className || "flex"}`}
   >
     <Icon size={21} strokeWidth={1.8} />
     {count > 0 && (
@@ -236,11 +236,12 @@ const Navbar = () => {
         <SearchBar />
 
         <nav aria-label="Account" className="flex items-center gap-0.5 ml-auto md:ml-0">
-          <HeaderIcon icon={Plus} label="Sell" to="/sell" />
-          <HeaderIcon icon={Heart} label="Wishlist" to="/wishlist" count={wishlist.length} />
+          {/* On phones these three live in the bottom tab bar instead */}
+          <HeaderIcon icon={Plus} label="Sell" to="/sell" className="hidden md:flex" />
+          <HeaderIcon icon={Heart} label="Wishlist" to="/wishlist" count={wishlist.length} className="hidden md:flex" />
           <MessagesIcon />
           <NotificationBell />
-          <HeaderIcon icon={ShoppingBag} label="Bag" to="/cart" count={cartItems.length} />
+          <HeaderIcon icon={ShoppingBag} label="Bag" to="/cart" count={cartItems.length} className="hidden md:flex" />
           <AccountMenu />
         </nav>
       </div>

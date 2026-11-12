@@ -325,7 +325,7 @@ const Messages = () => {
     <div className="max-w-6xl mx-auto px-0 sm:px-6 py-0 sm:py-6">
       <h1 className={`page-title px-4 sm:px-0 pt-5 sm:pt-0 mb-5 ${showThread ? "hidden md:block" : ""}`}>Messages</h1>
 
-      <div className="bg-white border-y sm:border border-line sm:rounded-sm grid md:grid-cols-[320px_minmax(0,1fr)] h-[calc(100dvh-202px)] md:h-[calc(100dvh-270px)] min-h-[380px]">
+      <div className="bg-white border-y sm:border border-line sm:rounded-sm grid md:grid-cols-[320px_minmax(0,1fr)] h-[calc(100dvh-240px)] md:h-[calc(100dvh-270px)] min-h-[380px]">
         {/* On phones only one pane shows at a time */}
         <aside aria-label="Your chats" className={`${showThread ? "hidden md:block" : ""} md:border-r border-line overflow-y-auto overscroll-contain`}>
           <ChatList chats={chats} activeId={chatId} />

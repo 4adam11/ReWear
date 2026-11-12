@@ -23,7 +23,8 @@ const meta = (attr, key) => {
 };
 
 // Sets the browser tab title, e.g. "Your bag · ReWear", and optionally the page's
-// description, which search results and link previews (WhatsApp, Instagram) show.
+// description. Google reads these after the page runs; apps like WhatsApp read only
+// the fixed tags in index.html, which is why the preview image lives there.
 const usePageTitle = (title, description) => {
   useEffect(() => {
     const full = title ? `${title} · ReWear` : SITE;

@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 
 // The libraries every page needs go in their own file. They rarely change, so a
@@ -7,15 +7,27 @@ import react from '@vitejs/plugin-react'
 const VENDOR = /[\\/]node_modules[\\/](react|react-dom|scheduler|react-router|react-router-dom|axios)[\\/]/
 
 // https://vite.dev/config/
-export default defineConfig({
-  plugins: [react()],
-  build: {
-    rollupOptions: {
-      output: {
-        manualChunks(id) {
-          if (VENDOR.test(id)) return 'vendor'
+export default defineConfig(({ mode }) => {
+  // Link previews (WhatsApp, Instagram, LinkedIn) need full addresses, so index.html
+  // uses %SITE_URL%. Set VITE_SITE_URL in client/.env to the public address when deploying.
+  const siteUrl = (loadEnv(mode, process.cwd(), 'VITE_').VITE_SITE_URL || 'http://localhost:5173').replace(/\/$/, '')
+
+  return {
+    plugins: [
+      react(),
+      {
+        name: 'site-url',
+        transformIndexHtml: (html) => html.replaceAll('%SITE_URL%', siteUrl),
+      },
+    ],
+    build: {
+      rollupOptions: {
+        output: {
+          manualChunks(id) {
+            if (VENDOR.test(id)) return 'vendor'
+          },
         },
       },
     },
-  },
+  }
 })

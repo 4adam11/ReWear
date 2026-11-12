@@ -2,6 +2,8 @@ import { useLocation } from "react-router-dom";
 
 import Navbar from "./Navbar";
 import Footer from "./Footer";
+import MobileTabBar from "./MobileTabBar";
+import { showsTabBar } from "../../utils/layout";
 
 const MainLayout = ({ children }) => {
 
@@ -13,7 +15,8 @@ const MainLayout = ({ children }) => {
 
   return (
 
-    <div className="min-h-screen flex flex-col">
+    // Room at the bottom on phones so the tab bar never covers the footer
+    <div className={`min-h-screen flex flex-col ${showsTabBar(location.pathname) ? "pb-[calc(56px+env(safe-area-inset-bottom))] md:pb-0" : ""}`}>
 
       {/* Lets keyboard users jump past the header */}
       <a
@@ -33,6 +36,8 @@ const MainLayout = ({ children }) => {
 
       {/* FOOTER */}
       {!hideLayout && <Footer />}
+
+      <MobileTabBar />
 
     </div>
   );

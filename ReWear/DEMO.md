@@ -79,6 +79,12 @@
 - Footer → **Brand kit** (`/brand`): logo files to download, the colour palette (click a swatch to copy it, with its contrast rating), type, components, motion (press **Play it** to see the milestone sweep), photography, icons and voice.
 - The same rules are written down in `DESIGN.md` for anyone building the site; the colours on the page are read straight from the Tailwind config, so the two can't drift apart.
 
+## 11. On a phone
+
+- Open the site at phone width (browser dev tools, or a real phone on the same Wi-Fi): Home, Shop, Sell, Saved and Bag sit in a tab bar at the bottom, with live counts.
+- Share a ReWear link in WhatsApp: the preview shows the ReWear card (`og-image.png`). This needs the site on a public address with `VITE_SITE_URL` set.
+- In a production build (`npm run build && npm run preview`), turn off Wi-Fi and open a page: a ReWear "You're offline" page appears instead of the browser error, and it reloads by itself when the connection is back.
+
 ## What's not in this version
 
 - Online payment (UPI and card show "Coming soon"; Razorpay test mode is the next step).

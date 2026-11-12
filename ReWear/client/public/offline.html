@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#2b1d14" />
+    <title>You're offline · ReWear</title>
+    <!-- Shown by sw.js when a page can't load. Everything is inline so it works with no connection. -->
+    <style>
+      :root {
+        --ink: #2b1d14;
+        --paper: #faf6ef;
+        --muted: #6e5d50;
+        --line: #e7ddd0;
+        --brand: #6b4430;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        min-height: 100dvh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 20px;
+        padding: 24px 16px;
+        background: var(--paper);
+        color: var(--ink);
+        font-family: "Jost", "Century Gothic", system-ui, -apple-system, "Segoe UI", sans-serif;
+        text-align: center;
+      }
+      h1 {
+        margin: 8px 0 0;
+        font-size: 26px;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        text-wrap: balance;
+      }
+      p {
+        margin: 0;
+        max-width: 34ch;
+        color: var(--muted);
+        font-family: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+        font-size: 15px;
+        line-height: 1.6;
+      }
+      button {
+        height: 44px;
+        padding: 0 24px;
+        border: 0;
+        border-radius: 2px;
+        background: var(--ink);
+        color: var(--paper);
+        font-family: inherit;
+        font-size: 13px;
+        font-weight: 600;
+        line-height: 1;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: background-color 150ms cubic-bezier(0.2, 0, 0, 1), scale 150ms cubic-bezier(0.2, 0, 0, 1);
+      }
+      button:hover { background: var(--brand); }
+      button:active { scale: 0.96; }
+      button:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+      .status { font-size: 13px; min-height: 1.6em; }
+      @media (prefers-reduced-motion: reduce) {
+        button { transition: none; }
+        button:active { scale: none; }
+      }
+    </style>
+  </head>
+  <body>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" aria-hidden="true">
+      <rect width="64" height="64" rx="18" fill="#6b4430" />
+      <path d="M16 11.5 C8.5 19 11 32 21.1 39.3" fill="none" stroke="#f6ead8" stroke-width="2.4" stroke-linecap="round" />
+      <g transform="rotate(-24 33 34)">
+        <path d="M22.5 22 h22 a4.5 4.5 0 0 1 4.5 4.5 v15 a4.5 4.5 0 0 1 -4.5 4.5 h-22 l-10 -12 z" fill="#f6ead8" />
+        <circle cx="20" cy="34" r="2.6" fill="#8b5e3c" />
+        <path d="M35.5 40.5 l-6.2 -6 a3.7 3.7 0 1 1 6.2 -4.2 a3.7 3.7 0 1 1 6.2 4.2 z" fill="#c0834f" />
+      </g>
+    </svg>
+    <h1>You're offline</h1>
+    <p>ReWear needs a connection to show listings. Your bag and wishlist are safe on this phone, so nothing is lost.</p>
+    <button type="button" id="retry">Try again</button>
+    <p class="status" id="status" role="status"></p>
+    <script>
+      const status = document.getElementById("status");
+      const retry = () => {
+        status.textContent = navigator.onLine ? "Loading…" : "Still offline. We'll reload when you're back.";
+        if (navigator.onLine) location.reload();
+      };
+      document.getElementById("retry").addEventListener("click", retry);
+      // Come back by itself as soon as the connection returns
+      window.addEventListener("online", () => location.reload());
+    </script>
+  </body>
+</html>

@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { CircleCheck, CircleAlert, Info, X } from "lucide-react";
 
 import Modal from "./Modal";
 import { subscribe, takeFlash } from "../../utils/feedback";
+import { showsTabBar } from "../../utils/layout";
 
 const ICONS = { success: CircleCheck, danger: CircleAlert, info: Info };
 const ICON_COLOUR = { success: "text-success-ondark", danger: "text-danger-ondark", info: "text-gold" };
@@ -60,6 +61,7 @@ const ConfirmDialog = ({ c, onDone }) => {
 
 // Mounted once, inside the router, so toast actions can be links
 const FeedbackHost = () => {
+  const { pathname } = useLocation();
   const [toasts, setToasts] = useState(() => {
     const f = takeFlash();
     return f ? [{ id: 0, ...f }] : [];
@@ -88,7 +90,7 @@ const FeedbackHost = () => {
   return (
     <>
       {/* Polite for notes, assertive for errors, so screen readers hear them too */}
-      <div className="pointer-events-none fixed inset-x-0 bottom-0 z-[80] flex flex-col items-center sm:items-end gap-2 p-4 sm:p-6">
+      <div className={`pointer-events-none fixed inset-x-0 ${showsTabBar(pathname) ? "bottom-[calc(56px+env(safe-area-inset-bottom))] md:bottom-0" : "bottom-0"} z-[80] flex flex-col items-center sm:items-end gap-2 p-4 sm:p-6`}>
         <div role="status" aria-live="polite" className="flex flex-col items-center sm:items-end gap-2 w-full">
           {toasts.filter((t) => t.tone !== "danger").map((t) => (
             <Toast key={t.id} t={t} onDismiss={dismiss} />
